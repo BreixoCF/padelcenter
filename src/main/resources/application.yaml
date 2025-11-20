@@ -1,3 +1,5 @@
 spring:
   application:
     name: padelcenter
+  profiles:
+    active: local

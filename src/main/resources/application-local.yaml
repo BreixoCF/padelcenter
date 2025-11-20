@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/padelcenterdb}
+    username: ${SPRING_DATASOURCE_USERNAME:padeluser}
+    password: ${SPRING_DATASOURCE_PASSWORD:padelpassword}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true

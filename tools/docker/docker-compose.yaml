@@ -1,0 +1,46 @@
+services:
+  postgres-padelcenter:
+    container_name: postgres-padelcenter
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_DB: padelcenterdb
+      POSTGRES_USER: padeluser
+      POSTGRES_PASSWORD: padelpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_padelcenter:/var/lib/postgresql
+    networks:
+      - padelcenter-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U padeluser -d padelcenterdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  padelcenter:
+    container_name: padelcenter
+    image: padelcenter:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-padelcenter:5432/padelcenterdb
+      SPRING_DATASOURCE_USERNAME: padeluser
+      SPRING_DATASOURCE_PASSWORD: padelpassword
+    depends_on:
+      postgres-padelcenter:
+        condition: service_healthy
+    networks:
+      - padelcenter-network
+
+volumes:
+  pgdata_padelcenter:
+    driver: local
+
+networks:
+  padelcenter-network:
