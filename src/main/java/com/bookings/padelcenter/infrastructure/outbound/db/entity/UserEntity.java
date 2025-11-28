@@ -1,11 +1,11 @@
 package com.bookings.padelcenter.infrastructure.outbound.db.entity;
 
-import com.bookings.padelcenter.domain.model.Auditable;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class UserEntity extends Auditable<UUID> {
+public class UserEntity extends AuditableEntity<UUID> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -26,5 +26,5 @@ public class UserEntity extends Auditable<UUID> {
 	private String phoneNumber;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<CenterRoleEntity> centerMemberships;
+	private Set<CenterRoleEntity> centerRoles = new HashSet<>();
 }

@@ -6,9 +6,9 @@ import java.util.Arrays;
 
 @Getter
 public enum Role {
-	ADMIN("Admin"),
-	MANAGER("Center Manager"),
-	USER("User");
+	ADMIN("ADMIN"),
+	MANAGER("MANAGER"),
+	USER("USER");
 
 	private final String description;
 

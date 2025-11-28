@@ -1,6 +1,5 @@
 package com.bookings.padelcenter.infrastructure.outbound.db.entity;
 
-import com.bookings.padelcenter.domain.model.Auditable;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +12,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "bookings")
-public class BookingEntity extends Auditable<UUID> {
+public class BookingEntity extends AuditableEntity<UUID> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +26,7 @@ public class BookingEntity extends Auditable<UUID> {
 	@JoinColumn(name = "field_id", nullable = false)
 	private FieldEntity field;
 
-	private String status;
+	private Integer status;
 	private Instant startTime;
 	private Instant endTime;
 

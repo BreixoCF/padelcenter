@@ -1,6 +1,5 @@
 package com.bookings.padelcenter.domain.model;
 
-import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
@@ -12,12 +11,7 @@ public record User(
 	String passwordHash,
 	String phoneNumber,
 	Set<CenterRole> centerRoles,
-	String createdBy,
-	Instant createdAt,
-	String lastModifiedBy,
-	Instant lastModifiedAt,
-	String deletedBy,
-	Instant deletedAt
+	Auditable audit
 ) {
 	public Role getRoleInCenter(UUID centerId) {
 		return centerRoles.stream()

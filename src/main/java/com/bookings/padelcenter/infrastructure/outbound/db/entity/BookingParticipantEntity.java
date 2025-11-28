@@ -1,6 +1,5 @@
 package com.bookings.padelcenter.infrastructure.outbound.db.entity;
 
-import com.bookings.padelcenter.domain.model.Auditable;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +9,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "booking_participants")
-public class BookingParticipantEntity extends Auditable<UUID> {
+public class BookingParticipantEntity extends AuditableEntity<UUID> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

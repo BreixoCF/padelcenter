@@ -2,6 +2,7 @@ package com.bookings.padelcenter.infrastructure.inbound.mapper;
 
 import com.bookings.padelcenter.application.command.CreateUserCommand;
 import com.bookings.padelcenter.domain.model.User;
+import com.bookings.padelcenter.infrastructure.inbound.dto.AuditableResponse;
 import com.bookings.padelcenter.infrastructure.inbound.dto.UserRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.UserResponse;
 import org.springframework.stereotype.Component;
@@ -20,12 +21,21 @@ public class UserApiMapper {
 	}
 
 	public UserResponse toResponse(User user) {
+		var audit = new AuditableResponse(
+				user.audit().createdBy(),
+				user.audit().createdAt(),
+				user.audit().modifiedBy(),
+				user.audit().modifiedAt(),
+				user.audit().deletedBy(),
+				user.audit().deletedAt()
+		);
 		return new UserResponse(
 				user.id(),
 				user.firstName(),
 				user.lastName(),
 				user.email(),
-				user.phoneNumber()
+				user.phoneNumber(),
+				audit
 		);
 	}
 }

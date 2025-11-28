@@ -4,7 +4,7 @@ import com.bookings.padelcenter.domain.model.User;
 import com.bookings.padelcenter.domain.repository.UserRepository;
 import com.bookings.padelcenter.infrastructure.outbound.db.entity.UserEntity;
 import com.bookings.padelcenter.infrastructure.outbound.db.repository.UserJpaRepository;
-import com.bookings.padelcenter.infrastructure.outbound.mapper.UserPersistenceMapper;
+import com.bookings.padelcenter.infrastructure.outbound.db.mapper.UserPersistenceMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

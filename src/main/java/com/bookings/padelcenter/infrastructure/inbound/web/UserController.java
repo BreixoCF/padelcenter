@@ -1,21 +1,16 @@
 package com.bookings.padelcenter.infrastructure.inbound.web;
 
-import com.bookings.padelcenter.application.command.CreateUserCommand;
 import com.bookings.padelcenter.application.create.CreateUserUseCase;
 import com.bookings.padelcenter.application.delete.DeleteUserUseCase;
 import com.bookings.padelcenter.application.query.GetAllUsersQuery;
 import com.bookings.padelcenter.application.read.GetAllUsersUseCase;
 import com.bookings.padelcenter.application.update.UpdateUserUseCase;
-import com.bookings.padelcenter.domain.model.User;
 import com.bookings.padelcenter.infrastructure.inbound.dto.UserRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.UserResponse;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.UserApiMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -32,7 +27,7 @@ public class UserController {
 	private final UserApiMapper mapper;
 
 	@PostMapping
-	public ResponseEntity<UserResponse> createUser(UserRequest request) {
+	public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest request) {
 		var command = mapper.toCommand(request);
 		var createdUser = createUserUseCase.execute(command);
 		var response = mapper.toResponse(createdUser);

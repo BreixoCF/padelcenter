@@ -12,10 +12,5 @@ public record Booking(
 	BigDecimal totalPrice,
 	Instant bookedAt,
 	BookingStatus status,
-	String createdBy,
-	Instant createdAt,
-	String lastModifiedBy,
-	Instant lastModifiedAt,
-	String deletedBy,
-	Instant deletedAt
+	Auditable audit
 ) {}
