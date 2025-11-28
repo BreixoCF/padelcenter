@@ -9,6 +9,7 @@ import com.bookings.padelcenter.infrastructure.inbound.dto.UserRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.UserResponse;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.UserApiMapper;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,7 @@ public class UserController {
 	private final UserApiMapper mapper;
 
 	@PostMapping
-	public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest request) {
+	public ResponseEntity<@NonNull UserResponse> createUser(@RequestBody UserRequest request) {
 		var command = mapper.toCommand(request);
 		var createdUser = createUserUseCase.execute(command);
 		var response = mapper.toResponse(createdUser);
@@ -35,7 +36,7 @@ public class UserController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<UserResponse>> getAllUsers() {
+	public ResponseEntity<@NonNull List<UserResponse>> getAllUsers() {
 		var query = new GetAllUsersQuery();
 		var users = getAllUsersUseCase.execute(query);
 		var response = users.stream()
