@@ -15,7 +15,7 @@ public class UserPersistenceMapper {
 	private final CenterRolePersistenceMapper centerRolePersistenceMapper;
 
 	public UserEntity toEntity(User user) {
-		UserEntity entity = new UserEntity();
+		var entity = new UserEntity();
 		if (user.id() != null) {
 			entity.setUserId(user.id());
 		}

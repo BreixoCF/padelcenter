@@ -1,6 +1,6 @@
 package com.bookings.padelcenter.infrastructure.inbound.dto;
 
-public record UserRequest(
+public record CreateUserRequest(
 	String firstName,
 	String lastName,
 	String email,

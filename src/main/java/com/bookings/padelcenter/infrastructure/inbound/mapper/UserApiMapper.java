@@ -3,14 +3,14 @@ package com.bookings.padelcenter.infrastructure.inbound.mapper;
 import com.bookings.padelcenter.application.command.CreateUserCommand;
 import com.bookings.padelcenter.domain.model.User;
 import com.bookings.padelcenter.infrastructure.inbound.dto.AuditableResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.UserRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.UserResponse;
+import com.bookings.padelcenter.infrastructure.inbound.dto.CreateUserRequest;
+import com.bookings.padelcenter.infrastructure.inbound.dto.CreateUserResponse;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserApiMapper {
 
-	public CreateUserCommand toCommand(UserRequest request) {
+	public CreateUserCommand toCommand(CreateUserRequest request) {
 		return new CreateUserCommand(
 				request.firstName(),
 				request.lastName(),
@@ -20,7 +20,7 @@ public class UserApiMapper {
 		);
 	}
 
-	public UserResponse toResponse(User user) {
+	public CreateUserResponse toResponse(User user) {
 		var audit = new AuditableResponse(
 				user.audit().createdBy(),
 				user.audit().createdAt(),
@@ -29,7 +29,7 @@ public class UserApiMapper {
 				user.audit().deletedBy(),
 				user.audit().deletedAt()
 		);
-		return new UserResponse(
+		return new CreateUserResponse(
 				user.id(),
 				user.firstName(),
 				user.lastName(),

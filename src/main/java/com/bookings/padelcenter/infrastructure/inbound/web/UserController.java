@@ -5,8 +5,8 @@ import com.bookings.padelcenter.application.delete.DeleteUserUseCase;
 import com.bookings.padelcenter.application.query.GetAllUsersQuery;
 import com.bookings.padelcenter.application.read.GetAllUsersUseCase;
 import com.bookings.padelcenter.application.update.UpdateUserUseCase;
-import com.bookings.padelcenter.infrastructure.inbound.dto.UserRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.UserResponse;
+import com.bookings.padelcenter.infrastructure.inbound.dto.CreateUserRequest;
+import com.bookings.padelcenter.infrastructure.inbound.dto.CreateUserResponse;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.UserApiMapper;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -28,7 +28,7 @@ public class UserController {
 	private final UserApiMapper mapper;
 
 	@PostMapping
-	public ResponseEntity<@NonNull UserResponse> createUser(@RequestBody UserRequest request) {
+	public ResponseEntity<@NonNull CreateUserResponse> createUser(@RequestBody CreateUserRequest request) {
 		var command = mapper.toCommand(request);
 		var createdUser = createUserUseCase.execute(command);
 		var response = mapper.toResponse(createdUser);
@@ -36,7 +36,7 @@ public class UserController {
 	}
 
 	@GetMapping
-	public ResponseEntity<@NonNull List<UserResponse>> getAllUsers() {
+	public ResponseEntity<@NonNull List<CreateUserResponse>> getAllUsers() {
 		var query = new GetAllUsersQuery();
 		var users = getAllUsersUseCase.execute(query);
 		var response = users.stream()

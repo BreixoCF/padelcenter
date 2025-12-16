@@ -6,13 +6,12 @@ import com.bookings.padelcenter.domain.model.User;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.UUID;
 
 @Component
 public class UserCommandMapper {
 
 	public User toDomain(CreateUserCommand command) {
-		Auditable auditable = Auditable.newAudit();
+		var auditable = Auditable.newAudit();
 		return new User(
 				null,
 				command.firstName(),
