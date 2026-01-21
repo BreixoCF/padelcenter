@@ -15,13 +15,13 @@ public class FieldEntity extends AuditableEntity<UUID> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
-	private UUID id;
+	private UUID fieldId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "center_id", referencedColumnName = "centerId", nullable = false)
 	private CenterEntity center;
 
-	private String number;
+	private String name;
 	private String type;
 
 	@Column(precision = 10, scale = 2)

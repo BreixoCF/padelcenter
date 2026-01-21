@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS fields
 (
     field_id       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     center_id      UUID           NOT NULL REFERENCES centers (center_id) ON DELETE CASCADE,
-    field_number   VARCHAR(50)    NOT NULL,
+    name   VARCHAR(50)    NOT NULL,
     type           VARCHAR(50),
     price_per_hour NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
     is_available   BOOLEAN                 DEFAULT TRUE,
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS fields
     modified_by    UUID,
     deleted_at     TIMESTAMP WITH TIME ZONE,
     deleted_by     UUID,
-    UNIQUE (center_id, field_number)
+    UNIQUE (center_id, name)
 );
 
 CREATE TABLE IF NOT EXISTS bookings

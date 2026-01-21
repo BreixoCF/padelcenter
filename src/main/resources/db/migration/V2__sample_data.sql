@@ -68,7 +68,7 @@ SELECT
 FROM centers_data;
 
 -- 5. INSERCIÓN DE CANCHAS (FIELDS) (4 por centro, Total: 40)
-INSERT INTO fields (field_id, center_id, field_number, type, price_per_hour, created_by)
+INSERT INTO fields (field_id, center_id, name, type, price_per_hour, created_by)
 SELECT
     gen_random_uuid(),
     c.center_id,

@@ -2,9 +2,9 @@ package com.bookings.padelcenter.infrastructure.inbound.mapper;
 
 import com.bookings.padelcenter.application.command.CreateUserCommand;
 import com.bookings.padelcenter.domain.model.User;
-import com.bookings.padelcenter.infrastructure.inbound.dto.AuditableResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.CreateUserRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.CreateUserResponse;
+import com.bookings.padelcenter.infrastructure.inbound.dto.response.AuditableResponse;
+import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateUserRequest;
+import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateUserResponse;
 import org.springframework.stereotype.Component;
 
 @Component

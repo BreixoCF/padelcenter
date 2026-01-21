@@ -1,14 +1,12 @@
-package com.bookings.padelcenter.domain.model;
+package com.bookings.padelcenter.application.command;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public record Field(
-	UUID id,
+public record CreateFieldCommand(
 	String name,
 	String type,
 	BigDecimal pricePerHour,
 	Boolean isAvailable,
-	Center center,
-	Auditable audit
+	UUID centerId
 ) {}

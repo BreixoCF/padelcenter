@@ -2,9 +2,10 @@ package com.bookings.padelcenter.infrastructure.inbound.mapper;
 
 import com.bookings.padelcenter.application.command.CreateCenterCommand;
 import com.bookings.padelcenter.domain.model.Center;
-import com.bookings.padelcenter.infrastructure.inbound.dto.AuditableResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.CreateCenterRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.CreateCenterResponse;
+import com.bookings.padelcenter.infrastructure.inbound.dto.response.AuditableResponse;
+import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateCenterRequest;
+import com.bookings.padelcenter.infrastructure.inbound.dto.response.CenterSummaryResponse;
+import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateCenterResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -37,6 +38,14 @@ public class CenterApiMapper {
 				center.phoneNumber(),
 				center.email(),
 				audit
+		);
+	}
+
+	public CenterSummaryResponse toSummaryResponse(Center center) {
+		return new CenterSummaryResponse(
+				center.name(),
+				center.address(),
+				center.city()
 		);
 	}
 }

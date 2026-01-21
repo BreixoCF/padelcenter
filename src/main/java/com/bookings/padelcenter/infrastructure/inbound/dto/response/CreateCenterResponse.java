@@ -1,4 +1,4 @@
-package com.bookings.padelcenter.infrastructure.inbound.dto;
+package com.bookings.padelcenter.infrastructure.inbound.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

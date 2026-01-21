@@ -33,7 +33,8 @@ public class CenterRepositoryImpl implements CenterRepository {
 
 	@Override
 	public Optional<Center> findById(UUID id) {
-		return Optional.empty();
+		return centerJpaRepository.findById(id)
+				.map(mapper::toDomain);
 	}
 
 	@Override

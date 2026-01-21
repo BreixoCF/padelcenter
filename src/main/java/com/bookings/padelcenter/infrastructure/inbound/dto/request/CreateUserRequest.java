@@ -1,4 +1,4 @@
-package com.bookings.padelcenter.infrastructure.inbound.dto;
+package com.bookings.padelcenter.infrastructure.inbound.dto.request;
 
 public record CreateUserRequest(
 	String firstName,
