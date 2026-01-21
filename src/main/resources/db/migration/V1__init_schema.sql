@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS centers
     city         VARCHAR(100) NOT NULL,
     phone_number VARCHAR(20),
     email        VARCHAR(255) UNIQUE,
+    manager_id   UUID REFERENCES users (user_id) ON DELETE SET NULL,
     created_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by   UUID,
     modified_at  TIMESTAMP WITH TIME ZONE,

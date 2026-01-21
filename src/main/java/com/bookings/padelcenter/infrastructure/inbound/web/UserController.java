@@ -44,4 +44,12 @@ public class UserController {
 				.toList();
 		return ResponseEntity.ok(response);
 	}
+
+	//@PutMapping("/{id}")
+	//public ResponseEntity<UpdateUserResponse> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
+	//	var command = mapper.toCommand(id, request);
+	//	var updatedUser = updateUserUseCase.execute(command);
+	//	var response = mapper.toResponse(updatedUser);
+	//	return ResponseEntity.ok(response);
+	//}
 }

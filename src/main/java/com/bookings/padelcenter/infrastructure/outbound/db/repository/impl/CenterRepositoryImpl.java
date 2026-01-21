@@ -1,0 +1,48 @@
+package com.bookings.padelcenter.infrastructure.outbound.db.repository.impl;
+
+import com.bookings.padelcenter.domain.model.Center;
+import com.bookings.padelcenter.domain.repository.CenterRepository;
+import com.bookings.padelcenter.infrastructure.outbound.db.entity.CenterEntity;
+import com.bookings.padelcenter.infrastructure.outbound.db.mapper.CenterPersistenceMapper;
+import com.bookings.padelcenter.infrastructure.outbound.db.repository.CenterJpaRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Repository
+@RequiredArgsConstructor
+public class CenterRepositoryImpl implements CenterRepository {
+
+	private final CenterJpaRepository centerJpaRepository;
+	private final CenterPersistenceMapper mapper;
+
+	@Override
+	public List<Center> findAll() {
+		return List.of();
+	}
+
+	@Override
+	public Center save(Center center) {
+		CenterEntity entity = mapper.toEntity(center);
+		CenterEntity saved = centerJpaRepository.save(entity);
+		return mapper.toDomain(saved);
+	}
+
+	@Override
+	public Optional<Center> findById(UUID id) {
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<Center> findByName(String name) {
+		return Optional.empty();
+	}
+
+	@Override
+	public boolean existsByName(String name) {
+		return false;
+	}
+}

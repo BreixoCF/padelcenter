@@ -1,0 +1,9 @@
+package com.bookings.padelcenter.infrastructure.inbound.dto;
+
+public record CreateCenterRequest(
+	String name,
+	String address,
+	String city,
+	String phoneNumber,
+	String email
+) {}
