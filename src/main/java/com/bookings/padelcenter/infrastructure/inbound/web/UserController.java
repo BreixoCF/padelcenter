@@ -4,7 +4,9 @@ import com.bookings.padelcenter.application.create.CreateUserUseCase;
 import com.bookings.padelcenter.application.delete.DeleteUserUseCase;
 import com.bookings.padelcenter.application.query.GetAllUsersQuery;
 import com.bookings.padelcenter.application.read.GetAllUsersUseCase;
+import com.bookings.padelcenter.application.update.UpdateUserRolesUseCase;
 import com.bookings.padelcenter.application.update.UpdateUserUseCase;
+import com.bookings.padelcenter.infrastructure.inbound.dto.request.CenterRoleRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateUserRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdateUserRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateUserResponse;
@@ -17,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -27,6 +30,7 @@ public class UserController {
 	private final CreateUserUseCase createUserUseCase;
 	private final GetAllUsersUseCase getAllUsersUseCase;
 	private final UpdateUserUseCase updateUserUseCase;
+	private final UpdateUserRolesUseCase updateUserRolesUseCase;
 	private final DeleteUserUseCase deleteUserUseCase;
 
 	private final UserApiMapper mapper;
@@ -43,6 +47,14 @@ public class UserController {
 	public ResponseEntity<UpdateUserResponse> updateUser(@PathVariable UUID id, @Valid @RequestBody UpdateUserRequest request) {
 		var command = mapper.toCommand(id, request);
 		var updatedUser = updateUserUseCase.execute(command);
+		var response = mapper.toUpdateUserResponse(updatedUser);
+		return ResponseEntity.ok(response);
+	}
+
+	@PatchMapping("/{id}/roles")
+	public ResponseEntity<UpdateUserResponse> updateUserRoles(@PathVariable UUID id, @RequestBody Set<CenterRoleRequest> rolesRequest) {
+		var command = mapper.toUpdateUserRolesCommand(id, rolesRequest);
+		var updatedUser = updateUserRolesUseCase.execute(command);
 		var response = mapper.toUpdateUserResponse(updatedUser);
 		return ResponseEntity.ok(response);
 	}

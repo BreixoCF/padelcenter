@@ -15,25 +15,26 @@ import static java.util.Optional.ofNullable;
 public class UserPersistenceMapper {
 
 	private final CenterRolePersistenceMapper centerRolePersistenceMapper;
+	private final AuditablePersistenceMapper auditablePersistenceMapper;
 
 	public UserEntity toEntity(User user) {
 		var entity = new UserEntity();
 		if (user.id() != null) {
 			entity.setUserId(user.id());
 		}
+
 		entity.setFirstName(user.firstName());
 		entity.setLastName(user.lastName());
 		entity.setEmail(user.email());
 		entity.setPasswordHash(user.passwordHash());
 		entity.setPhoneNumber(user.phoneNumber());
-		if (user.audit() != null) {
-			entity.setCreatedBy(user.audit().createdBy());
-			entity.setCreatedAt(user.audit().createdAt());
-			entity.setModifiedBy(user.audit().modifiedBy());
-			entity.setModifiedAt(user.audit().modifiedAt());
-			entity.setDeletedBy(user.audit().deletedBy());
-			entity.setDeletedAt(user.audit().deletedAt());
+		if (user.centerRoles() != null) {
+			var roles = user.centerRoles().stream()
+					.map(role -> centerRolePersistenceMapper.toEntity(role, entity))
+					.collect(Collectors.toSet());
+			entity.setCenterRoles(roles);
 		}
+		auditablePersistenceMapper.mapToEntity(user.audit(), entity);
 		return entity;
 	}
 

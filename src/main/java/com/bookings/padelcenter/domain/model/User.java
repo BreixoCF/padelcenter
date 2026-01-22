@@ -20,4 +20,17 @@ public record User(
 			.findFirst()
 			.orElse(Role.USER);
 	}
+
+	public User updateRoles(Set<CenterRole> newRoles, UUID modifiedBy) {
+		return new User(
+			this.id,
+			this.firstName,
+			this.lastName,
+			this.email,
+			this.passwordHash,
+			this.phoneNumber,
+			newRoles,
+			this.audit.update(modifiedBy)
+		);
+	}
 }

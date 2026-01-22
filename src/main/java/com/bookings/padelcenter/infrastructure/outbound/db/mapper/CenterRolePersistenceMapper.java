@@ -12,10 +12,17 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CenterRolePersistenceMapper {
 
-	public CenterRoleEntity toEntity(CenterRole centerRole, UserEntity userEntity, CenterEntity centerEntity) {
+	private final AuditablePersistenceMapper auditablePersistenceMapper;
+
+	public CenterRoleEntity toEntity(CenterRole centerRole, UserEntity userEntity) {
 		var entity = new CenterRoleEntity();
 		entity.setUser(userEntity);
-		entity.setCenter(centerEntity);
+		if (centerRole.centerId() != null) {
+			var centerEntity = new CenterEntity();
+			centerEntity.setCenterId(centerRole.centerId());
+			entity.setCenter(centerEntity);
+		}
+		auditablePersistenceMapper.mapToEntity(centerRole.audit(), entity);
 		entity.setRole(centerRole.role());
 		return entity;
 	}
