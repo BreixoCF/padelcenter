@@ -13,8 +13,17 @@ public record Auditable(
 ) {
 	public static Auditable newAudit() {
 		return new Auditable(
-				null, Instant.now(),null,
-				null, null,null
+				null, Instant.now(),
+				null, Instant.now(),
+				null,null
+		);
+	}
+
+	public Auditable update(UUID modifiedBy) {
+		return new Auditable(
+				this.createdBy, this.createdAt,
+				modifiedBy, Instant.now(),
+				this.deletedBy, this.deletedAt
 		);
 	}
 }

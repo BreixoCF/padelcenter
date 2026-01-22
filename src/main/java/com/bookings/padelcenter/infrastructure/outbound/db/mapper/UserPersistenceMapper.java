@@ -26,6 +26,14 @@ public class UserPersistenceMapper {
 		entity.setEmail(user.email());
 		entity.setPasswordHash(user.passwordHash());
 		entity.setPhoneNumber(user.phoneNumber());
+		if (user.audit() != null) {
+			entity.setCreatedBy(user.audit().createdBy());
+			entity.setCreatedAt(user.audit().createdAt());
+			entity.setModifiedBy(user.audit().modifiedBy());
+			entity.setModifiedAt(user.audit().modifiedAt());
+			entity.setDeletedBy(user.audit().deletedBy());
+			entity.setDeletedAt(user.audit().deletedAt());
+		}
 		return entity;
 	}
 

@@ -20,15 +20,15 @@ import java.time.Instant;
 public abstract class AuditableEntity<U> {
 
 	@CreatedBy
+	@Column(name = "created_by", updatable = false)
 	private U createdBy;
 
 	@CreatedDate
+	@Column(name = "created_at", updatable = false, nullable = false)
 	private Instant createdAt;
 
-	@LastModifiedBy
 	private U modifiedBy;
 
-	@LastModifiedDate
 	private Instant modifiedAt;
 
 	@Column(name = "deleted_by")
@@ -36,5 +36,4 @@ public abstract class AuditableEntity<U> {
 
 	@Column(name = "deleted_at")
 	private Instant deletedAt;
-
 }
