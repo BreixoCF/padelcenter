@@ -31,6 +31,12 @@ public class FieldRepositoryImpl implements FieldRepository {
 	}
 
 	@Override
+	public Optional<Field> findById(UUID id) {
+		return fieldJpaRepository.findById(id)
+			.map(mapper::toDomain);
+	}
+
+	@Override
 	public List<Field> findByCenterId(UUID centerId) {
 		return List.of();
 	}
