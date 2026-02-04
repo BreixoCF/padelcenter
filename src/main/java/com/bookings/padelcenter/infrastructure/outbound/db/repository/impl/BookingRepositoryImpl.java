@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Repository
@@ -35,6 +36,13 @@ public class BookingRepositoryImpl implements BookingRepository {
 	@Override
 	public List<Booking> findAll() {
 		return bookingJpaRepository.findAll().stream()
+			.map(mapper::toDomain)
+			.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<Booking> findByUserId(UUID userId) {
+		return bookingJpaRepository.findByUser_UserId(userId).stream()
 			.map(mapper::toDomain)
 			.collect(Collectors.toList());
 	}
