@@ -1,6 +1,7 @@
 package com.bookings.padelcenter.infrastructure.inbound.web.exception;
 
 import com.bookings.padelcenter.domain.exception.BookingAlreadyCancelledException;
+import com.bookings.padelcenter.domain.exception.InvalidPasswordException;
 import com.bookings.padelcenter.domain.exception.ResourceNotFoundException;
 import org.jspecify.annotations.NonNull;
 import org.postgresql.util.PSQLException;
@@ -52,6 +53,16 @@ public class GlobalExceptionHandler {
 				request.getDescription(false)
 		);
 		return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
+	}
+
+	@ExceptionHandler(InvalidPasswordException.class)
+	public ResponseEntity<@NonNull ApiErrorDetails> handleInvalidPasswordException(InvalidPasswordException ex, WebRequest request) {
+		ApiErrorDetails errorDetails = new ApiErrorDetails(
+				Instant.now(),
+				ex.getMessage(),
+				request.getDescription(false)
+		);
+		return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
 	}
 
 	@ExceptionHandler(Exception.class)

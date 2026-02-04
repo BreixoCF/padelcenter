@@ -2,16 +2,19 @@ package com.bookings.padelcenter.infrastructure.inbound.mapper;
 
 import com.bookings.padelcenter.application.command.CreateUserCommand;
 import com.bookings.padelcenter.application.command.DeleteUserCommand;
+import com.bookings.padelcenter.application.command.UpdatePasswordCommand;
 import com.bookings.padelcenter.application.command.UpdateUserCommand;
 import com.bookings.padelcenter.application.command.UpdateUserRolesCommand;
 import com.bookings.padelcenter.domain.model.Auditable;
 import com.bookings.padelcenter.domain.model.CenterRole;
 import com.bookings.padelcenter.domain.model.User;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.CenterRoleRequest;
+import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdatePasswordRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdateUserRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.AuditableResponse;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateUserRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateUserResponse;
+import com.bookings.padelcenter.infrastructure.inbound.dto.response.UpdatePasswordResponse;
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.UpdateUserResponse;
 import org.springframework.stereotype.Component;
 
@@ -92,6 +95,23 @@ public class UserApiMapper {
 	public DeleteUserCommand toDeleteUserCommand(UUID id) {
 		//TODO: In a real application, this should be the authenticated user
 		return new DeleteUserCommand(id, null);
+	}
+
+	public UpdatePasswordCommand toUpdatePasswordCommand(UUID userId, UpdatePasswordRequest request) {
+		//TODO: In a real application, modifiedBy should be the authenticated user
+		return new UpdatePasswordCommand(
+			userId,
+			request.currentPassword(),
+			request.newPassword(),
+			null
+		);
+	}
+
+	public UpdatePasswordResponse toUpdatePasswordResponse(User user) {
+		return new UpdatePasswordResponse(
+			user.id(),
+			"Password updated successfully"
+		);
 	}
 
 	private CenterRole toCenterRoleDomain(CenterRoleRequest request) {

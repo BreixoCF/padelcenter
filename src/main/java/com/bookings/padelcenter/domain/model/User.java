@@ -50,4 +50,17 @@ public record User(
 			this.audit.delete(deletedBy)
 		);
 	}
+
+	public User updatePassword(String newPasswordHash, UUID modifiedBy) {
+		return new User(
+			this.id,
+			this.firstName,
+			this.lastName,
+			this.email,
+			newPasswordHash,
+			this.phoneNumber,
+			this.centerRoles,
+			this.audit.update(modifiedBy)
+		);
+	}
 }

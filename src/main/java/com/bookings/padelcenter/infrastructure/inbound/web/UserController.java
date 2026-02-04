@@ -4,12 +4,15 @@ import com.bookings.padelcenter.application.create.CreateUserUseCase;
 import com.bookings.padelcenter.application.delete.DeleteUserUseCase;
 import com.bookings.padelcenter.application.query.GetAllUsersQuery;
 import com.bookings.padelcenter.application.read.GetAllUsersUseCase;
+import com.bookings.padelcenter.application.update.UpdatePasswordUseCase;
 import com.bookings.padelcenter.application.update.UpdateUserRolesUseCase;
 import com.bookings.padelcenter.application.update.UpdateUserUseCase;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.CenterRoleRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateUserRequest;
+import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdatePasswordRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdateUserRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateUserResponse;
+import com.bookings.padelcenter.infrastructure.inbound.dto.response.UpdatePasswordResponse;
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.UpdateUserResponse;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.UserApiMapper;
 import jakarta.validation.Valid;
@@ -31,6 +34,7 @@ public class UserController {
 	private final GetAllUsersUseCase getAllUsersUseCase;
 	private final UpdateUserUseCase updateUserUseCase;
 	private final UpdateUserRolesUseCase updateUserRolesUseCase;
+	private final UpdatePasswordUseCase updatePasswordUseCase;
 	private final DeleteUserUseCase deleteUserUseCase;
 
 	private final UserApiMapper mapper;
@@ -66,6 +70,16 @@ public class UserController {
 		var response = users.stream()
 				.map(mapper::toResponse)
 				.toList();
+		return ResponseEntity.ok(response);
+	}
+
+	@PatchMapping("/{id}/password")
+	public ResponseEntity<UpdatePasswordResponse> updatePassword(
+			@PathVariable UUID id,
+			@Valid @RequestBody UpdatePasswordRequest request) {
+		var command = mapper.toUpdatePasswordCommand(id, request);
+		var updatedUser = updatePasswordUseCase.execute(command);
+		var response = mapper.toUpdatePasswordResponse(updatedUser);
 		return ResponseEntity.ok(response);
 	}
 
