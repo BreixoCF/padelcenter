@@ -1,5 +1,6 @@
 package com.bookings.padelcenter.infrastructure.inbound.web.exception;
 
+import com.bookings.padelcenter.domain.exception.BookingAlreadyCancelledException;
 import com.bookings.padelcenter.domain.exception.ResourceNotFoundException;
 import org.jspecify.annotations.NonNull;
 import org.postgresql.util.PSQLException;
@@ -41,6 +42,16 @@ public class GlobalExceptionHandler {
 		Map<String, String> errors = new HashMap<>();
 		ex.getBindingResult().getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 		return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(BookingAlreadyCancelledException.class)
+	public ResponseEntity<@NonNull ApiErrorDetails> handleBookingAlreadyCancelledException(BookingAlreadyCancelledException ex, WebRequest request) {
+		ApiErrorDetails errorDetails = new ApiErrorDetails(
+				Instant.now(),
+				ex.getMessage(),
+				request.getDescription(false)
+		);
+		return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
 	}
 
 	@ExceptionHandler(Exception.class)

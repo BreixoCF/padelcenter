@@ -2,9 +2,14 @@ package com.bookings.padelcenter.infrastructure.inbound.web;
 
 import com.bookings.padelcenter.application.create.CreateBookingUseCase;
 import com.bookings.padelcenter.application.read.GetBookingHistoryUseCase;
+import com.bookings.padelcenter.application.update.CancelBookingUseCase;
+import com.bookings.padelcenter.application.update.UpdateBookingUseCase;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateBookingRequest;
+import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdateBookingRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.BookingHistoryResponse;
+import com.bookings.padelcenter.infrastructure.inbound.dto.response.CancelBookingResponse;
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateBookingResponse;
+import com.bookings.padelcenter.infrastructure.inbound.dto.response.UpdateBookingResponse;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.BookingApiMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +27,8 @@ public class BookingController {
 
 	private final CreateBookingUseCase createBookingUseCase;
 	private final GetBookingHistoryUseCase getBookingHistoryUseCase;
+	private final UpdateBookingUseCase updateBookingUseCase;
+	private final CancelBookingUseCase cancelBookingUseCase;
 	private final BookingApiMapper bookingApiMapper;
 
 	@PostMapping
@@ -37,6 +44,24 @@ public class BookingController {
 		var query = bookingApiMapper.toQuery(userId);
 		var bookings = getBookingHistoryUseCase.execute(query);
 		var response = bookingApiMapper.toBookingHistoryResponse(bookings);
+		return ResponseEntity.ok(response);
+	}
+
+	@PutMapping("/{bookingId}")
+	public ResponseEntity<UpdateBookingResponse> updateBooking(
+			@PathVariable Long bookingId,
+			@Valid @RequestBody UpdateBookingRequest request) {
+		var command = bookingApiMapper.toUpdateCommand(bookingId, request);
+		var booking = updateBookingUseCase.execute(command);
+		var response = bookingApiMapper.toUpdateResponse(booking);
+		return ResponseEntity.ok(response);
+	}
+
+	@PatchMapping("/{bookingId}/cancel")
+	public ResponseEntity<CancelBookingResponse> cancelBooking(@PathVariable Long bookingId) {
+		var command = bookingApiMapper.toCancelCommand(bookingId);
+		var booking = cancelBookingUseCase.execute(command);
+		var response = bookingApiMapper.toCancelResponse(booking);
 		return ResponseEntity.ok(response);
 	}
 }

@@ -1,14 +1,19 @@
 package com.bookings.padelcenter.infrastructure.inbound.mapper;
 
+import com.bookings.padelcenter.application.command.CancelBookingCommand;
 import com.bookings.padelcenter.application.command.CreateBookingCommand;
+import com.bookings.padelcenter.application.command.UpdateBookingCommand;
 import com.bookings.padelcenter.application.query.GetBookingHistoryQuery;
 import com.bookings.padelcenter.domain.model.Booking;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateBookingRequest;
+import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdateBookingRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.AuditableResponse;
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.BookingHistoryResponse;
+import com.bookings.padelcenter.infrastructure.inbound.dto.response.CancelBookingResponse;
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.CenterSummaryResponse;
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateBookingResponse;
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.FieldSummaryResponse;
+import com.bookings.padelcenter.infrastructure.inbound.dto.response.UpdateBookingResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -83,6 +88,53 @@ public class BookingApiMapper {
 			booking.totalPrice(),
 			booking.bookedAt(),
 			booking.status().name()
+		);
+	}
+
+	public UpdateBookingCommand toUpdateCommand(Long bookingId, UpdateBookingRequest request) {
+		// TODO: In a real application, modifiedBy should be the authenticated user
+		return new UpdateBookingCommand(
+			bookingId,
+			request.startTime(),
+			request.endTime(),
+			request.totalPrice(),
+			null
+		);
+	}
+
+	public UpdateBookingResponse toUpdateResponse(Booking booking) {
+		var audit = new AuditableResponse(
+			booking.audit().createdBy(),
+			booking.audit().createdAt(),
+			booking.audit().modifiedBy(),
+			booking.audit().modifiedAt(),
+			booking.audit().deletedBy(),
+			booking.audit().deletedAt()
+		);
+
+		return new UpdateBookingResponse(
+			booking.id(),
+			booking.user().id(),
+			booking.field().id(),
+			booking.startTime(),
+			booking.endTime(),
+			booking.totalPrice(),
+			booking.bookedAt(),
+			booking.status().name(),
+			audit
+		);
+	}
+
+	public CancelBookingCommand toCancelCommand(Long bookingId) {
+		// TODO: In a real application, modifiedBy should be the authenticated user
+		return new CancelBookingCommand(bookingId, null);
+	}
+
+	public CancelBookingResponse toCancelResponse(Booking booking) {
+		return new CancelBookingResponse(
+			booking.id(),
+			booking.status().name(),
+			"Booking has been successfully cancelled"
 		);
 	}
 }
