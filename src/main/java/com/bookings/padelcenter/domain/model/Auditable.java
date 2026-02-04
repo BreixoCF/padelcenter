@@ -26,4 +26,12 @@ public record Auditable(
 				this.deletedBy, this.deletedAt
 		);
 	}
+
+	public Auditable delete(UUID deletedBy) {
+		return new Auditable(
+				this.createdBy, this.createdAt,
+				this.modifiedBy, this.modifiedAt,
+				deletedBy, Instant.now()
+		);
+	}
 }

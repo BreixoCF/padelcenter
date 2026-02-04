@@ -68,4 +68,11 @@ public class UserController {
 				.toList();
 		return ResponseEntity.ok(response);
 	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
+		var command = mapper.toDeleteUserCommand(id);
+		deleteUserUseCase.execute(command);
+		return ResponseEntity.noContent().build();
+	}
 }

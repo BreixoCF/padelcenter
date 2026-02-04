@@ -33,4 +33,21 @@ public record User(
 			this.audit.update(modifiedBy)
 		);
 	}
+
+	public User delete(UUID deletedBy) {
+		Set<CenterRole> deletedCenterRoles = this.centerRoles.stream()
+			.map(centerRole -> centerRole.delete(deletedBy))
+			.collect(java.util.stream.Collectors.toSet());
+
+		return new User(
+			this.id,
+			this.firstName,
+			this.lastName,
+			this.email,
+			this.passwordHash,
+			this.phoneNumber,
+			deletedCenterRoles,
+			this.audit.delete(deletedBy)
+		);
+	}
 }

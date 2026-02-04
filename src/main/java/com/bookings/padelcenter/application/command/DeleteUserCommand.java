@@ -1,4 +1,8 @@
 package com.bookings.padelcenter.application.command;
 
-public record DeleteUserCommand() {
-}
+import java.util.UUID;
+
+public record DeleteUserCommand(
+	UUID userId,
+	UUID deletedBy
+) {}

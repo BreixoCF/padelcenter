@@ -1,6 +1,7 @@
 package com.bookings.padelcenter.infrastructure.inbound.mapper;
 
 import com.bookings.padelcenter.application.command.CreateUserCommand;
+import com.bookings.padelcenter.application.command.DeleteUserCommand;
 import com.bookings.padelcenter.application.command.UpdateUserCommand;
 import com.bookings.padelcenter.application.command.UpdateUserRolesCommand;
 import com.bookings.padelcenter.domain.model.Auditable;
@@ -85,7 +86,12 @@ public class UserApiMapper {
 				.map(this::toCenterRoleDomain)
 				.collect(Collectors.toSet());
 		//TODO: In a real application, this should be the authenticated user
-		return new UpdateUserRolesCommand(id, newRoles, UUID.randomUUID());
+		return new UpdateUserRolesCommand(id, newRoles, null);
+	}
+
+	public DeleteUserCommand toDeleteUserCommand(UUID id) {
+		//TODO: In a real application, this should be the authenticated user
+		return new DeleteUserCommand(id, null);
 	}
 
 	private CenterRole toCenterRoleDomain(CenterRoleRequest request) {
