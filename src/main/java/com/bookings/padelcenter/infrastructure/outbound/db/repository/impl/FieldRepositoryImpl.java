@@ -7,6 +7,7 @@ import com.bookings.padelcenter.infrastructure.outbound.db.mapper.FieldPersisten
 import com.bookings.padelcenter.infrastructure.outbound.db.repository.FieldJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ public class FieldRepositoryImpl implements FieldRepository {
 	private final FieldPersistenceMapper mapper;
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Field> findAll() {
 		return List.of();
 	}
@@ -32,12 +34,14 @@ public class FieldRepositoryImpl implements FieldRepository {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<Field> findById(UUID id) {
 		return fieldJpaRepository.findById(id)
 			.map(mapper::toDomain);
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Field> findByCenterId(UUID centerId) {
 		return List.of();
 	}

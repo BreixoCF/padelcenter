@@ -7,6 +7,7 @@ import com.bookings.padelcenter.infrastructure.outbound.db.repository.UserJpaRep
 import com.bookings.padelcenter.infrastructure.outbound.db.mapper.UserPersistenceMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ public class UserRepositoryImpl implements UserRepository {
 	private final UserPersistenceMapper mapper;
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<User> findAll() {
 		var entities = userJpaRepository.findAll();
 		return entities.stream().map(mapper::toDomain).toList();
@@ -33,18 +35,20 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<User> findById(UUID id) {
 		return userJpaRepository.findById(id).map(mapper::toDomain);
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<User> findByEmail(String email) {
 		return userJpaRepository.findByEmail(email).map(mapper::toDomain);
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public boolean existsByEmail(String email) {
 		return userJpaRepository.existsByEmail(email);
 	}
-
 }

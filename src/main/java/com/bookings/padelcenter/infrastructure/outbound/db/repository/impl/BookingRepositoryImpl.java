@@ -7,6 +7,7 @@ import com.bookings.padelcenter.infrastructure.outbound.db.mapper.BookingPersist
 import com.bookings.padelcenter.infrastructure.outbound.db.repository.BookingJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,12 +29,14 @@ public class BookingRepositoryImpl implements BookingRepository {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<Booking> findById(Long id) {
 		return bookingJpaRepository.findById(id)
 			.map(mapper::toDomain);
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Booking> findAll() {
 		return bookingJpaRepository.findAll().stream()
 			.map(mapper::toDomain)
@@ -41,6 +44,7 @@ public class BookingRepositoryImpl implements BookingRepository {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Booking> findByUserId(UUID userId) {
 		return bookingJpaRepository.findByUser_UserId(userId).stream()
 			.map(mapper::toDomain)

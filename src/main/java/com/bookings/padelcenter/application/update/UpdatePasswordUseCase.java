@@ -9,8 +9,10 @@ import com.bookings.padelcenter.domain.port.out.PasswordHasher;
 import com.bookings.padelcenter.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UpdatePasswordUseCase implements CommandUseCase<UpdatePasswordCommand, User> {
 

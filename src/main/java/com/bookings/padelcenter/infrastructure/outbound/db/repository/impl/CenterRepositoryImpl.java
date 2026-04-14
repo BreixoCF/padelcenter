@@ -7,6 +7,7 @@ import com.bookings.padelcenter.infrastructure.outbound.db.mapper.CenterPersiste
 import com.bookings.padelcenter.infrastructure.outbound.db.repository.CenterJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ public class CenterRepositoryImpl implements CenterRepository {
 	private final CenterPersistenceMapper mapper;
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Center> findAll() {
 		return List.of();
 	}
@@ -32,17 +34,20 @@ public class CenterRepositoryImpl implements CenterRepository {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<Center> findById(UUID id) {
 		return centerJpaRepository.findById(id)
 				.map(mapper::toDomain);
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<Center> findByName(String name) {
 		return Optional.empty();
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public boolean existsByName(String name) {
 		return false;
 	}
