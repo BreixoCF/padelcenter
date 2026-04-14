@@ -1,10 +1,7 @@
 package com.bookings.padelcenter.domain.model;
 
-import lombok.Getter;
-
 import java.util.Arrays;
 
-@Getter
 public enum Role {
 	ADMIN("ADMIN"),
 	MANAGER("MANAGER"),
@@ -14,6 +11,10 @@ public enum Role {
 
 	Role(String description) {
 		this.description = description;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 	public static Role fromDescription(String description) {
