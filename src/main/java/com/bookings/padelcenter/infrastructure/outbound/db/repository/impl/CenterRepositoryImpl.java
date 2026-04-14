@@ -23,7 +23,10 @@ public class CenterRepositoryImpl implements CenterRepository {
 	@Override
 	@Transactional(readOnly = true)
 	public List<Center> findAll() {
-		return List.of();
+		return centerJpaRepository.findAll()
+				.stream()
+				.map(mapper::toDomain)
+				.toList();
 	}
 
 	@Override
@@ -43,12 +46,13 @@ public class CenterRepositoryImpl implements CenterRepository {
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<Center> findByName(String name) {
-		return Optional.empty();
+		return centerJpaRepository.findByName(name)
+				.map(mapper::toDomain);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public boolean existsByName(String name) {
-		return false;
+		return centerJpaRepository.existsByName(name);
 	}
 }

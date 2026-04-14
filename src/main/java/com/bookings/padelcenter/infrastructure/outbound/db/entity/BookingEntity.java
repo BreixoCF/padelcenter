@@ -30,6 +30,9 @@ public class BookingEntity extends AuditableEntity<UUID> {
 	private Instant startTime;
 	private Instant endTime;
 
+	@Version
+	private Long version;
+
 	@Column(precision = 10, scale = 2)
 	private BigDecimal totalPrice;
 

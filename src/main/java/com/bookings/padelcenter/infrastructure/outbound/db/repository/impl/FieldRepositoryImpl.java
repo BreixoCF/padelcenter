@@ -23,7 +23,10 @@ public class FieldRepositoryImpl implements FieldRepository {
 	@Override
 	@Transactional(readOnly = true)
 	public List<Field> findAll() {
-		return List.of();
+		return fieldJpaRepository.findAll()
+				.stream()
+				.map(mapper::toDomain)
+				.toList();
 	}
 
 	@Override
@@ -43,6 +46,9 @@ public class FieldRepositoryImpl implements FieldRepository {
 	@Override
 	@Transactional(readOnly = true)
 	public List<Field> findByCenterId(UUID centerId) {
-		return List.of();
+		return fieldJpaRepository.findByCenterCenterId(centerId)
+				.stream()
+				.map(mapper::toDomain)
+				.toList();
 	}
 }
