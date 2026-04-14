@@ -1,89 +1,97 @@
 package com.bookings.padelcenter.infrastructure.inbound.web.exception;
 
 import com.bookings.padelcenter.domain.exception.BookingAlreadyCancelledException;
+import com.bookings.padelcenter.domain.exception.EmailAlreadyExistsException;
 import com.bookings.padelcenter.domain.exception.InvalidPasswordException;
 import com.bookings.padelcenter.domain.exception.ResourceNotFoundException;
-import org.jspecify.annotations.NonNull;
 import org.postgresql.util.PSQLException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
 
+import java.net.URI;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-	public record ApiErrorDetails(
-			Instant timestamp,
-			String message,
-			String details
-	) {
-	}
-
 	@ExceptionHandler(ResourceNotFoundException.class)
-	public ResponseEntity<@NonNull ApiErrorDetails> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
-		ApiErrorDetails errorDetails = new ApiErrorDetails(
-				Instant.now(),
-				ex.getMessage(),
-				request.getDescription(false)
-		);
-		return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+	public ProblemDetail handleResourceNotFoundException(ResourceNotFoundException ex) {
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+		problem.setTitle("Resource Not Found");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<@NonNull Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-		Map<String, String> errors = new HashMap<>();
-		ex.getBindingResult().getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-		return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+	public ProblemDetail handleValidationExceptions(MethodArgumentNotValidException ex) {
+		var fieldErrors = ex.getBindingResult().getFieldErrors().stream()
+				.collect(Collectors.toMap(
+						error -> error.getField(),
+						error -> error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value",
+						(existing, replacement) -> existing
+				));
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
+		problem.setTitle("Bad Request");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		problem.setProperty("errors", fieldErrors);
+		return problem;
+	}
+
+	@ExceptionHandler(EmailAlreadyExistsException.class)
+	public ProblemDetail handleEmailAlreadyExistsException(EmailAlreadyExistsException ex) {
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+		problem.setTitle("Email Already Exists");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
 	}
 
 	@ExceptionHandler(BookingAlreadyCancelledException.class)
-	public ResponseEntity<@NonNull ApiErrorDetails> handleBookingAlreadyCancelledException(BookingAlreadyCancelledException ex, WebRequest request) {
-		ApiErrorDetails errorDetails = new ApiErrorDetails(
-				Instant.now(),
-				ex.getMessage(),
-				request.getDescription(false)
-		);
-		return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
+	public ProblemDetail handleBookingAlreadyCancelledException(BookingAlreadyCancelledException ex) {
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+		problem.setTitle("Booking Already Cancelled");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
 	}
 
 	@ExceptionHandler(InvalidPasswordException.class)
-	public ResponseEntity<@NonNull ApiErrorDetails> handleInvalidPasswordException(InvalidPasswordException ex, WebRequest request) {
-		ApiErrorDetails errorDetails = new ApiErrorDetails(
-				Instant.now(),
-				ex.getMessage(),
-				request.getDescription(false)
-		);
-		return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
-	}
-
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<@NonNull ApiErrorDetails> handleGlobalException(Exception ex, WebRequest request) {
-		ApiErrorDetails errorDetails = new ApiErrorDetails(
-				Instant.now(),
-				"An internal server error occurred. Please try again later.",
-				request.getDescription(false) + ". Cause: " + ex.getMessage()
-		);
-		return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+	public ProblemDetail handleInvalidPasswordException(InvalidPasswordException ex) {
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+		problem.setTitle("Invalid Password");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
 	}
 
 	@ExceptionHandler(DataIntegrityViolationException.class)
-	public ResponseEntity<@NonNull ApiErrorDetails> handleDataIntegrityViolationException(DataIntegrityViolationException ex, WebRequest request) {
+	public ProblemDetail handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
 		String detailedMessage = extractPostgresDetail(ex);
-		ApiErrorDetails errorDetails = new ApiErrorDetails(
-				Instant.now(),
-				"Data Integrity Violation: " + detailedMessage,
-				request.getDescription(false)
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, detailedMessage);
+		problem.setTitle("Data Integrity Violation");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
+	}
+
+	@ExceptionHandler(Exception.class)
+	public ProblemDetail handleGlobalException(Exception ex) {
+		var problem = ProblemDetail.forStatusAndDetail(
+				HttpStatus.INTERNAL_SERVER_ERROR,
+				"An internal server error occurred. Please try again later."
 		);
-		return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
+		problem.setTitle("Internal Server Error");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
 	}
 
 	private String extractPostgresDetail(DataIntegrityViolationException ex) {

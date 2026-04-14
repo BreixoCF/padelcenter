@@ -11,8 +11,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.*;
 public record AuditableResponse(
 	UUID createdBy,
 	Instant createdAt,
-	UUID lastModifiedBy,
-	Instant lastModifiedAt,
+	UUID modifiedBy,
+	Instant modifiedAt,
 	UUID deletedBy,
 	Instant deletedAt
 ) {}
