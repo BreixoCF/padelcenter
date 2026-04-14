@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Component
 @RequiredArgsConstructor
@@ -25,8 +26,8 @@ public class BookingPersistenceMapper {
 		}
 		entity.setUser(userPersistenceMapper.toEntity(booking.user()));
 		entity.setField(fieldPersistenceMapper.toEntity(booking.field()));
-		entity.setStartTime(parseToInstant(booking.startTime()));
-		entity.setEndTime(parseToInstant(booking.endTime()));
+		entity.setStartTime(toInstant(booking.startTime()));
+		entity.setEndTime(toInstant(booking.endTime()));
 		entity.setTotalPrice(booking.totalPrice());
 		entity.setBookedAt(booking.bookedAt());
 		entity.setStatus(booking.status().getId());
@@ -49,8 +50,8 @@ public class BookingPersistenceMapper {
 			entity.getId(),
 			user,
 			field,
-			formatToString(entity.getStartTime()),
-			formatToString(entity.getEndTime()),
+			toLocalDateTime(entity.getStartTime()),
+			toLocalDateTime(entity.getEndTime()),
 			entity.getTotalPrice(),
 			entity.getBookedAt(),
 			BookingStatus.fromId(entity.getStatus()),
@@ -58,17 +59,17 @@ public class BookingPersistenceMapper {
 		);
 	}
 
-	private Instant parseToInstant(String dateTimeString) {
-		if (dateTimeString == null) {
+	private Instant toInstant(LocalDateTime localDateTime) {
+		if (localDateTime == null) {
 			return null;
 		}
-		return Instant.parse(dateTimeString);
+		return localDateTime.toInstant(ZoneOffset.UTC);
 	}
 
-	private String formatToString(Instant instant) {
+	private LocalDateTime toLocalDateTime(Instant instant) {
 		if (instant == null) {
 			return null;
 		}
-		return DateTimeFormatter.ISO_INSTANT.format(instant);
+		return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
 	}
 }

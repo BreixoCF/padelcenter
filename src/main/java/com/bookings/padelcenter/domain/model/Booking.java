@@ -2,20 +2,21 @@ package com.bookings.padelcenter.domain.model;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record Booking(
 	Long id,
 	User user,
 	Field field,
-	String startTime,
-	String endTime,
+	LocalDateTime startTime,
+	LocalDateTime endTime,
 	BigDecimal totalPrice,
 	Instant bookedAt,
 	BookingStatus status,
 	Auditable audit
 ) {
-	public Booking updateDetails(String startTime, String endTime, BigDecimal totalPrice, UUID modifiedBy) {
+	public Booking updateDetails(LocalDateTime startTime, LocalDateTime endTime, BigDecimal totalPrice, UUID modifiedBy) {
 		return new Booking(
 			this.id,
 			this.user,
