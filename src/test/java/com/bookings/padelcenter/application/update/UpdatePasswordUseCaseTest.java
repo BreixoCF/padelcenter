@@ -2,10 +2,10 @@ package com.bookings.padelcenter.application.update;
 
 import com.bookings.padelcenter.application.command.UpdatePasswordCommand;
 import com.bookings.padelcenter.domain.exception.InvalidPasswordException;
-import com.bookings.padelcenter.domain.port.out.PasswordHasher;
 import com.bookings.padelcenter.domain.exception.UserNotFoundException;
 import com.bookings.padelcenter.domain.model.Auditable;
 import com.bookings.padelcenter.domain.model.User;
+import com.bookings.padelcenter.domain.port.out.PasswordHasher;
 import com.bookings.padelcenter.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -87,8 +87,8 @@ class UpdatePasswordUseCaseTest {
 		assertThat(result.passwordHash()).isEqualTo(newPasswordHash);
 
 		verify(userRepository, times(1)).findById(userId);
-		verify(passwordHasher, times(1)).verifyPassword("currentPassword123", existingUser.passwordHash());
-		verify(passwordHasher, times(1)).hashPassword("newPassword456");
+		verify(passwordHasher, times(1)).matches("currentPassword123", existingUser.passwordHash());
+		verify(passwordHasher, times(1)).hash("newPassword456");
 		verify(userRepository, times(1)).save(any(User.class));
 	}
 
@@ -104,8 +104,8 @@ class UpdatePasswordUseCaseTest {
 			.hasMessageContaining(userId.toString());
 
 		verify(userRepository, times(1)).findById(userId);
-		verify(passwordHasher, never()).verifyPassword(anyString(), anyString());
-		verify(passwordHasher, never()).hashPassword(anyString());
+		verify(passwordHasher, never()).matches(anyString(), anyString());
+		verify(passwordHasher, never()).hash(anyString());
 		verify(userRepository, never()).save(any(User.class));
 	}
 
@@ -122,8 +122,8 @@ class UpdatePasswordUseCaseTest {
 			.hasMessage("The current password provided is incorrect");
 
 		verify(userRepository, times(1)).findById(userId);
-		verify(passwordHasher, times(1)).verifyPassword("currentPassword123", existingUser.passwordHash());
-		verify(passwordHasher, never()).hashPassword(anyString());
+		verify(passwordHasher, times(1)).matches("currentPassword123", existingUser.passwordHash());
+		verify(passwordHasher, never()).hash(anyString());
 		verify(userRepository, never()).save(any(User.class));
 	}
 
@@ -144,7 +144,7 @@ class UpdatePasswordUseCaseTest {
 		updatePasswordUseCase.execute(command);
 
 		// Then
-		verify(passwordService).hashPassword("newPassword456");
+		verify(passwordHasher).hash("newPassword456");
 		verify(userRepository).save(userCaptor.capture());
 		User capturedUser = userCaptor.getValue();
 
@@ -232,8 +232,8 @@ class UpdatePasswordUseCaseTest {
 		assertThatThrownBy(() -> updatePasswordUseCase.execute(command))
 			.isInstanceOf(InvalidPasswordException.class);
 
-		verify(passwordService).verifyPassword("currentPassword123", existingUser.passwordHash());
-		verify(passwordHasher, never()).hashPassword(anyString());
+		verify(passwordHasher).matches("currentPassword123", existingUser.passwordHash());
+		verify(passwordHasher, never()).hash(anyString());
 	}
 
 	@Test
@@ -287,8 +287,8 @@ class UpdatePasswordUseCaseTest {
 	}
 
 	@Test
-	@DisplayName("Should call password service methods in correct order")
-	void shouldCallPasswordServiceMethodsInCorrectOrder() {
+	@DisplayName("Should call password hasher methods in correct order")
+	void shouldCallPasswordHasherMethodsInCorrectOrder() {
 		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
 		when(passwordHasher.matches(anyString(), anyString())).thenReturn(true);
@@ -300,8 +300,8 @@ class UpdatePasswordUseCaseTest {
 
 		// Then
 		var inOrder = inOrder(passwordHasher);
-		inOrder.verify(passwordHasher).verifyPassword("currentPassword123", existingUser.passwordHash());
-		inOrder.verify(passwordService).hashPassword("newPassword456");
+		inOrder.verify(passwordHasher).matches("currentPassword123", existingUser.passwordHash());
+		inOrder.verify(passwordHasher).hash("newPassword456");
 	}
 
 	@Test

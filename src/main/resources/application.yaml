@@ -3,3 +3,8 @@ spring:
     name: padelcenter
   profiles:
     active: local
+  jpa:
+    open-in-view: false
+  threads:
+    virtual:
+      enabled: true
