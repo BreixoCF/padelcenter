@@ -1,16 +1,18 @@
 package com.bookings.padelcenter.infrastructure.inbound.web;
 
-import com.bookings.padelcenter.domain.exception.FieldNotFoundException;
-import com.bookings.padelcenter.domain.repository.FieldRepository;
+import com.bookings.padelcenter.application.query.GetAllFieldsQuery;
+import com.bookings.padelcenter.application.query.GetFieldByIdQuery;
+import com.bookings.padelcenter.application.read.GetAllFieldsUseCase;
+import com.bookings.padelcenter.application.read.GetFieldByIdUseCase;
+import com.bookings.padelcenter.domain.model.PageResult;
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateFieldResponse;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.FieldApiMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
@@ -20,20 +22,27 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FieldController {
 
-	private final FieldRepository fieldRepository;
+	private final GetAllFieldsUseCase getAllFieldsUseCase;
+	private final GetFieldByIdUseCase getFieldByIdUseCase;
 	private final FieldApiMapper fieldApiMapper;
 
 	@GetMapping
-	public ResponseEntity<Page<CreateFieldResponse>> getAllFields(Pageable pageable) {
-		var fields = fieldRepository.findAll(pageable)
-				.map(fieldApiMapper::toResponse);
-		return ResponseEntity.ok(fields);
+	public ResponseEntity<PageResult<CreateFieldResponse>> getAllFields(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "20") int size) {
+		var query = new GetAllFieldsQuery(page, size);
+		var fields = getAllFieldsUseCase.execute(query);
+		var content = fields.content().stream()
+				.map(fieldApiMapper::toResponse)
+				.toList();
+		var response = new PageResult<>(content, fields.page(), fields.size(), fields.totalElements(), fields.totalPages());
+		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<CreateFieldResponse> getFieldById(@PathVariable UUID id) {
-		var field = fieldRepository.findById(id)
-				.orElseThrow(() -> new FieldNotFoundException(id));
+		var query = new GetFieldByIdQuery(id);
+		var field = getFieldByIdUseCase.execute(query);
 		var response = fieldApiMapper.toResponse(field);
 		return ResponseEntity.ok(response);
 	}
