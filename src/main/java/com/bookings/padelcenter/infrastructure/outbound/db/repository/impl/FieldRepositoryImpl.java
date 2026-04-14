@@ -6,6 +6,8 @@ import com.bookings.padelcenter.infrastructure.outbound.db.entity.FieldEntity;
 import com.bookings.padelcenter.infrastructure.outbound.db.mapper.FieldPersistenceMapper;
 import com.bookings.padelcenter.infrastructure.outbound.db.repository.FieldJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,13 @@ public class FieldRepositoryImpl implements FieldRepository {
 				.stream()
 				.map(mapper::toDomain)
 				.toList();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Page<Field> findAll(Pageable pageable) {
+		return fieldJpaRepository.findAll(pageable)
+				.map(mapper::toDomain);
 	}
 
 	@Override

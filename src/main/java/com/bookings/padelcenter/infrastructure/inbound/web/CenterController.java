@@ -8,6 +8,7 @@ import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateFieldRe
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateFieldResponse;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.CenterApiMapper;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.FieldApiMapper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/centers")
+@RequestMapping("/api/v1/centers")
 @RequiredArgsConstructor
 public class CenterController {
 
@@ -26,7 +27,7 @@ public class CenterController {
 	private final FieldApiMapper fieldApiMapper;
 
 	@PostMapping
-	public ResponseEntity<@NonNull CreateCenterResponse> createCenter(@RequestBody CreateCenterRequest request) {
+	public ResponseEntity<@NonNull CreateCenterResponse> createCenter(@Valid @RequestBody CreateCenterRequest request) {
 		var command = centerApiMapper.toCommand(request);
 		var createdCenter = createCenterUseCase.execute(command);
 		var response = centerApiMapper.toResponse(createdCenter);
@@ -35,7 +36,7 @@ public class CenterController {
 
 	@PostMapping("/{centerId}/fields")
 	public ResponseEntity<@NonNull CreateFieldResponse> createField(@PathVariable UUID centerId,
-	                                                                @RequestBody CreateFieldRequest request) {
+	                                                                @Valid @RequestBody CreateFieldRequest request) {
 		var command = fieldApiMapper.toCommand(centerId, request);
 		var createdField = createFieldUseCase.execute(command);
 		var response = fieldApiMapper.toResponse(createdField);
