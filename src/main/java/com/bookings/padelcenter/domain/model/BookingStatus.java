@@ -1,10 +1,7 @@
 package com.bookings.padelcenter.domain.model;
 
-import lombok.Getter;
-
 import java.util.Arrays;
 
-@Getter
 public enum BookingStatus {
 	PENDING(1),
 	CONFIRMED(2),
@@ -15,6 +12,10 @@ public enum BookingStatus {
 
 	BookingStatus(int id) {
 		this.id = id;
+	}
+
+	public int getId() {
+		return id;
 	}
 
 	public static BookingStatus fromId(int id) {
