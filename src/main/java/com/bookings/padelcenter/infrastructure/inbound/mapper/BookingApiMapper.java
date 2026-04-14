@@ -68,7 +68,7 @@ public class BookingApiMapper {
 
 	private BookingHistoryResponse toBookingHistoryItem(Booking booking) {
 		var centerSummary = new CenterSummaryResponse(
-			booking.field().center().id(),
+			booking.field().center().id().toString(),
 			booking.field().center().name(),
 			booking.field().center().city()
 		);
@@ -92,7 +92,6 @@ public class BookingApiMapper {
 	}
 
 	public UpdateBookingCommand toUpdateCommand(Long bookingId, UpdateBookingRequest request) {
-		// TODO: In a real application, modifiedBy should be the authenticated user
 		return new UpdateBookingCommand(
 			bookingId,
 			request.startTime(),
