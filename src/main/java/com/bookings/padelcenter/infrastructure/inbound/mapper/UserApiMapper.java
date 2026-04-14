@@ -71,7 +71,6 @@ public class UserApiMapper {
 			user.firstName(),
 			user.lastName(),
 			user.email(),
-			user.passwordHash(),
 			user.phoneNumber(),
 			new AuditableResponse(
 				user.audit().createdBy(),

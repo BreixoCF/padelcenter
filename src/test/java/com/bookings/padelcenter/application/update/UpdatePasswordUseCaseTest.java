@@ -1,8 +1,8 @@
 package com.bookings.padelcenter.application.update;
 
 import com.bookings.padelcenter.application.command.UpdatePasswordCommand;
-import com.bookings.padelcenter.application.service.PasswordService;
 import com.bookings.padelcenter.domain.exception.InvalidPasswordException;
+import com.bookings.padelcenter.domain.port.out.PasswordHasher;
 import com.bookings.padelcenter.domain.exception.UserNotFoundException;
 import com.bookings.padelcenter.domain.model.Auditable;
 import com.bookings.padelcenter.domain.model.User;
@@ -33,7 +33,7 @@ class UpdatePasswordUseCaseTest {
 	private UserRepository userRepository;
 
 	@Mock
-	private PasswordService passwordService;
+	private PasswordHasher passwordHasher;
 
 	@InjectMocks
 	private UpdatePasswordUseCase updatePasswordUseCase;
@@ -75,8 +75,8 @@ class UpdatePasswordUseCaseTest {
 		User updatedUser = existingUser.updatePassword(newPasswordHash, modifiedBy);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-		when(passwordService.verifyPassword("currentPassword123", existingUser.passwordHash())).thenReturn(true);
-		when(passwordService.hashPassword("newPassword456")).thenReturn(newPasswordHash);
+		when(passwordHasher.matches("currentPassword123", existingUser.passwordHash())).thenReturn(true);
+		when(passwordHasher.hash("newPassword456")).thenReturn(newPasswordHash);
 		when(userRepository.save(any(User.class))).thenReturn(updatedUser);
 
 		// When
@@ -87,8 +87,8 @@ class UpdatePasswordUseCaseTest {
 		assertThat(result.passwordHash()).isEqualTo(newPasswordHash);
 
 		verify(userRepository, times(1)).findById(userId);
-		verify(passwordService, times(1)).verifyPassword("currentPassword123", existingUser.passwordHash());
-		verify(passwordService, times(1)).hashPassword("newPassword456");
+		verify(passwordHasher, times(1)).verifyPassword("currentPassword123", existingUser.passwordHash());
+		verify(passwordHasher, times(1)).hashPassword("newPassword456");
 		verify(userRepository, times(1)).save(any(User.class));
 	}
 
@@ -104,8 +104,8 @@ class UpdatePasswordUseCaseTest {
 			.hasMessageContaining(userId.toString());
 
 		verify(userRepository, times(1)).findById(userId);
-		verify(passwordService, never()).verifyPassword(anyString(), anyString());
-		verify(passwordService, never()).hashPassword(anyString());
+		verify(passwordHasher, never()).verifyPassword(anyString(), anyString());
+		verify(passwordHasher, never()).hashPassword(anyString());
 		verify(userRepository, never()).save(any(User.class));
 	}
 
@@ -114,7 +114,7 @@ class UpdatePasswordUseCaseTest {
 	void shouldThrowExceptionWhenCurrentPasswordIsIncorrect() {
 		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-		when(passwordService.verifyPassword("currentPassword123", existingUser.passwordHash())).thenReturn(false);
+		when(passwordHasher.matches("currentPassword123", existingUser.passwordHash())).thenReturn(false);
 
 		// When & Then
 		assertThatThrownBy(() -> updatePasswordUseCase.execute(command))
@@ -122,8 +122,8 @@ class UpdatePasswordUseCaseTest {
 			.hasMessage("The current password provided is incorrect");
 
 		verify(userRepository, times(1)).findById(userId);
-		verify(passwordService, times(1)).verifyPassword("currentPassword123", existingUser.passwordHash());
-		verify(passwordService, never()).hashPassword(anyString());
+		verify(passwordHasher, times(1)).verifyPassword("currentPassword123", existingUser.passwordHash());
+		verify(passwordHasher, never()).hashPassword(anyString());
 		verify(userRepository, never()).save(any(User.class));
 	}
 
@@ -134,8 +134,8 @@ class UpdatePasswordUseCaseTest {
 		String newPasswordHash = "hashed_newPassword456";
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-		when(passwordService.verifyPassword("currentPassword123", existingUser.passwordHash())).thenReturn(true);
-		when(passwordService.hashPassword("newPassword456")).thenReturn(newPasswordHash);
+		when(passwordHasher.matches("currentPassword123", existingUser.passwordHash())).thenReturn(true);
+		when(passwordHasher.hash("newPassword456")).thenReturn(newPasswordHash);
 		when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 		ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -156,8 +156,8 @@ class UpdatePasswordUseCaseTest {
 	void shouldUpdateModifiedByField() {
 		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-		when(passwordService.verifyPassword(anyString(), anyString())).thenReturn(true);
-		when(passwordService.hashPassword(anyString())).thenReturn("hashed_newPassword456");
+		when(passwordHasher.matches(anyString(), anyString())).thenReturn(true);
+		when(passwordHasher.hash(anyString())).thenReturn("hashed_newPassword456");
 		when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 		ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -178,8 +178,8 @@ class UpdatePasswordUseCaseTest {
 	void shouldPreserveUserDetails() {
 		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-		when(passwordService.verifyPassword(anyString(), anyString())).thenReturn(true);
-		when(passwordService.hashPassword(anyString())).thenReturn("hashed_newPassword456");
+		when(passwordHasher.matches(anyString(), anyString())).thenReturn(true);
+		when(passwordHasher.hash(anyString())).thenReturn("hashed_newPassword456");
 		when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 		ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -204,8 +204,8 @@ class UpdatePasswordUseCaseTest {
 	void shouldPreserveAuditCreationFields() {
 		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-		when(passwordService.verifyPassword(anyString(), anyString())).thenReturn(true);
-		when(passwordService.hashPassword(anyString())).thenReturn("hashed_newPassword456");
+		when(passwordHasher.matches(anyString(), anyString())).thenReturn(true);
+		when(passwordHasher.hash(anyString())).thenReturn("hashed_newPassword456");
 		when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 		ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -226,14 +226,14 @@ class UpdatePasswordUseCaseTest {
 	void shouldVerifyPasswordBeforeHashing() {
 		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-		when(passwordService.verifyPassword("currentPassword123", existingUser.passwordHash())).thenReturn(false);
+		when(passwordHasher.matches("currentPassword123", existingUser.passwordHash())).thenReturn(false);
 
 		// When & Then
 		assertThatThrownBy(() -> updatePasswordUseCase.execute(command))
 			.isInstanceOf(InvalidPasswordException.class);
 
 		verify(passwordService).verifyPassword("currentPassword123", existingUser.passwordHash());
-		verify(passwordService, never()).hashPassword(anyString());
+		verify(passwordHasher, never()).hashPassword(anyString());
 	}
 
 	@Test
@@ -244,8 +244,8 @@ class UpdatePasswordUseCaseTest {
 		User updatedUser = existingUser.updatePassword(newPasswordHash, modifiedBy);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-		when(passwordService.verifyPassword(anyString(), anyString())).thenReturn(true);
-		when(passwordService.hashPassword("newPassword456")).thenReturn(newPasswordHash);
+		when(passwordHasher.matches(anyString(), anyString())).thenReturn(true);
+		when(passwordHasher.hash("newPassword456")).thenReturn(newPasswordHash);
 		when(userRepository.save(any(User.class))).thenReturn(updatedUser);
 
 		// When
@@ -270,8 +270,8 @@ class UpdatePasswordUseCaseTest {
 		String differentPasswordHash = "hashed_differentNewPassword789";
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-		when(passwordService.verifyPassword("currentPassword123", existingUser.passwordHash())).thenReturn(true);
-		when(passwordService.hashPassword("differentNewPassword789")).thenReturn(differentPasswordHash);
+		when(passwordHasher.matches("currentPassword123", existingUser.passwordHash())).thenReturn(true);
+		when(passwordHasher.hash("differentNewPassword789")).thenReturn(differentPasswordHash);
 		when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 		ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -291,16 +291,16 @@ class UpdatePasswordUseCaseTest {
 	void shouldCallPasswordServiceMethodsInCorrectOrder() {
 		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-		when(passwordService.verifyPassword(anyString(), anyString())).thenReturn(true);
-		when(passwordService.hashPassword(anyString())).thenReturn("hashed_newPassword456");
+		when(passwordHasher.matches(anyString(), anyString())).thenReturn(true);
+		when(passwordHasher.hash(anyString())).thenReturn("hashed_newPassword456");
 		when(userRepository.save(any(User.class))).thenReturn(existingUser);
 
 		// When
 		updatePasswordUseCase.execute(command);
 
 		// Then
-		var inOrder = inOrder(passwordService);
-		inOrder.verify(passwordService).verifyPassword("currentPassword123", existingUser.passwordHash());
+		var inOrder = inOrder(passwordHasher);
+		inOrder.verify(passwordHasher).verifyPassword("currentPassword123", existingUser.passwordHash());
 		inOrder.verify(passwordService).hashPassword("newPassword456");
 	}
 
@@ -309,7 +309,7 @@ class UpdatePasswordUseCaseTest {
 	void shouldNotSaveWhenVerificationFails() {
 		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-		when(passwordService.verifyPassword(anyString(), anyString())).thenReturn(false);
+		when(passwordHasher.matches(anyString(), anyString())).thenReturn(false);
 
 		// When & Then
 		assertThatThrownBy(() -> updatePasswordUseCase.execute(command))

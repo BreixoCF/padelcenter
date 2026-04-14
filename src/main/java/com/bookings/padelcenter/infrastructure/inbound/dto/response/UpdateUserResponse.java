@@ -12,7 +12,6 @@ public record UpdateUserResponse(
 	String firstName,
 	String lastName,
 	String email,
-	String password,
 	String phoneNumber,
 	AuditableResponse audit
 ) {}
