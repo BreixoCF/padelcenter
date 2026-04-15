@@ -1,16 +1,11 @@
 package com.bookings.padelcenter;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
-@ActiveProfiles("test")
-class PadelCenterApplicationTests {
+class PadelCenterApplicationTests extends AbstractIntegrationTest {
 
 	@Test
 	void contextLoads() {
-		// No content
+		// Verifies that the Spring context starts with Testcontainers PostgreSQL and Flyway migrations.
 	}
-
 }

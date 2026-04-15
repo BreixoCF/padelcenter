@@ -1,20 +1,18 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    # URL / username / password injected by AbstractIntegrationTest via @DynamicPropertySource
+    driver-class-name: org.postgresql.Driver
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     show-sql: false
   flyway:
-    enabled: false
+    enabled: true
+    locations: classpath:db/migration
   security:
     oauth2:
       resourceserver:
         jwt:
-          # Use jwk-set-uri in tests to avoid OIDC discovery calls at startup.
-          # The endpoint is never contacted in unit/integration tests that don't issue HTTP requests.
+          # jwk-set-uri skips OIDC discovery at startup; keys fetched lazily (never during tests)
           jwk-set-uri: http://localhost:9999/.well-known/jwks.json
