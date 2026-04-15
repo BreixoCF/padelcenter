@@ -1,18 +1,19 @@
 package com.bookings.padelcenter.infrastructure.outbound.db.repository.impl;
 
 import com.bookings.padelcenter.domain.model.Booking;
+import com.bookings.padelcenter.domain.model.PageResult;
 import com.bookings.padelcenter.domain.repository.BookingRepository;
 import com.bookings.padelcenter.infrastructure.outbound.db.entity.BookingEntity;
 import com.bookings.padelcenter.infrastructure.outbound.db.mapper.BookingPersistenceMapper;
 import com.bookings.padelcenter.infrastructure.outbound.db.repository.BookingJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -40,14 +41,22 @@ public class BookingRepositoryImpl implements BookingRepository {
 	public List<Booking> findAll() {
 		return bookingJpaRepository.findAll().stream()
 			.map(mapper::toDomain)
-			.collect(Collectors.toList());
+			.toList();
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Booking> findByUserId(UUID userId) {
-		return bookingJpaRepository.findByUser_UserId(userId).stream()
+	public PageResult<Booking> findByUserId(UUID userId, int page, int size) {
+		var springPage = bookingJpaRepository.findByUser_UserId(userId, PageRequest.of(page, size));
+		var content = springPage.getContent().stream()
 			.map(mapper::toDomain)
-			.collect(Collectors.toList());
+			.toList();
+		return new PageResult<>(
+			content,
+			springPage.getNumber(),
+			springPage.getSize(),
+			springPage.getTotalElements(),
+			springPage.getTotalPages()
+		);
 	}
 }

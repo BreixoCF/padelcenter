@@ -16,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -44,7 +43,11 @@ class GetBookingHistoryUseCaseTest {
 	private User user;
 	private Center center;
 	private Field field;
-	private List<Booking> bookings;
+	private List<Booking> bookingList;
+	private PageResult<Booking> bookingPage;
+
+	private static final int PAGE = 0;
+	private static final int SIZE = 10;
 
 	private static final LocalDateTime START_1 = LocalDateTime.of(2024, 12, 25, 10, 0);
 	private static final LocalDateTime END_1   = LocalDateTime.of(2024, 12, 25, 11, 0);
@@ -56,7 +59,7 @@ class GetBookingHistoryUseCaseTest {
 	@BeforeEach
 	void setUp() {
 		userId = UUID.randomUUID();
-		query = new GetBookingHistoryQuery(userId);
+		query = new GetBookingHistoryQuery(userId, PAGE, SIZE);
 
 		user = new User(
 			userId,
@@ -92,7 +95,7 @@ class GetBookingHistoryUseCaseTest {
 			Auditable.newAudit()
 		);
 
-		bookings = List.of(
+		bookingList = List.of(
 			new Booking(
 				1L, user, field, START_1, END_1,
 				new BigDecimal("25.00"), Instant.now().minusSeconds(86400),
@@ -109,104 +112,93 @@ class GetBookingHistoryUseCaseTest {
 				BookingStatus.PENDING, Auditable.newAudit()
 			)
 		);
+
+		bookingPage = new PageResult<>(bookingList, PAGE, SIZE, 3L, 1);
 	}
 
 	@Test
 	@DisplayName("Should return booking history for existing user")
 	void shouldReturnBookingHistoryForExistingUser() {
-		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(bookingRepository.findByUserId(userId)).thenReturn(bookings);
+		when(bookingRepository.findByUserId(userId, PAGE, SIZE)).thenReturn(bookingPage);
 
-		// When
-		List<Booking> result = getBookingHistoryUseCase.execute(query);
+		PageResult<Booking> result = getBookingHistoryUseCase.execute(query);
 
-		// Then
 		assertThat(result).isNotNull();
-		assertThat(result).hasSize(3);
-		assertThat(result).isEqualTo(bookings);
+		assertThat(result.content()).hasSize(3);
+		assertThat(result.content()).isEqualTo(bookingList);
+		assertThat(result.totalElements()).isEqualTo(3L);
 
 		verify(userRepository, times(1)).findById(userId);
-		verify(bookingRepository, times(1)).findByUserId(userId);
+		verify(bookingRepository, times(1)).findByUserId(userId, PAGE, SIZE);
 	}
 
 	@Test
 	@DisplayName("Should throw UserNotFoundException when user does not exist")
 	void shouldThrowExceptionWhenUserNotFound() {
-		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-		// When & Then
 		assertThatThrownBy(() -> getBookingHistoryUseCase.execute(query))
 			.isInstanceOf(UserNotFoundException.class)
 			.hasMessageContaining(userId.toString());
 
 		verify(userRepository, times(1)).findById(userId);
-		verify(bookingRepository, never()).findByUserId(any());
+		verify(bookingRepository, never()).findByUserId(any(), anyInt(), anyInt());
 	}
 
 	@Test
-	@DisplayName("Should return empty list when user has no bookings")
-	void shouldReturnEmptyListWhenNoBookings() {
-		// Given
+	@DisplayName("Should return empty page when user has no bookings")
+	void shouldReturnEmptyPageWhenNoBookings() {
+		var emptyPage = new PageResult<Booking>(List.of(), PAGE, SIZE, 0L, 0);
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(bookingRepository.findByUserId(userId)).thenReturn(new ArrayList<>());
+		when(bookingRepository.findByUserId(userId, PAGE, SIZE)).thenReturn(emptyPage);
 
-		// When
-		List<Booking> result = getBookingHistoryUseCase.execute(query);
+		PageResult<Booking> result = getBookingHistoryUseCase.execute(query);
 
-		// Then
 		assertThat(result).isNotNull();
-		assertThat(result).isEmpty();
+		assertThat(result.content()).isEmpty();
+		assertThat(result.totalElements()).isEqualTo(0L);
 
 		verify(userRepository, times(1)).findById(userId);
-		verify(bookingRepository, times(1)).findByUserId(userId);
+		verify(bookingRepository, times(1)).findByUserId(userId, PAGE, SIZE);
 	}
 
 	@Test
 	@DisplayName("Should verify user existence before fetching bookings")
 	void shouldVerifyUserExistenceFirst() {
-		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-		// When & Then
 		assertThatThrownBy(() -> getBookingHistoryUseCase.execute(query))
 			.isInstanceOf(UserNotFoundException.class);
 
 		verify(userRepository).findById(userId);
-		verify(bookingRepository, never()).findByUserId(any());
+		verify(bookingRepository, never()).findByUserId(any(), anyInt(), anyInt());
 	}
 
 	@Test
 	@DisplayName("Should return bookings with different statuses")
 	void shouldReturnBookingsWithDifferentStatuses() {
-		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(bookingRepository.findByUserId(userId)).thenReturn(bookings);
+		when(bookingRepository.findByUserId(userId, PAGE, SIZE)).thenReturn(bookingPage);
 
-		// When
-		List<Booking> result = getBookingHistoryUseCase.execute(query);
+		PageResult<Booking> result = getBookingHistoryUseCase.execute(query);
 
-		// Then
-		assertThat(result).hasSize(3);
-		assertThat(result.get(0).status()).isEqualTo(BookingStatus.COMPLETED);
-		assertThat(result.get(1).status()).isEqualTo(BookingStatus.CONFIRMED);
-		assertThat(result.get(2).status()).isEqualTo(BookingStatus.PENDING);
+		assertThat(result.content()).hasSize(3);
+		assertThat(result.content().get(0).status()).isEqualTo(BookingStatus.COMPLETED);
+		assertThat(result.content().get(1).status()).isEqualTo(BookingStatus.CONFIRMED);
+		assertThat(result.content().get(2).status()).isEqualTo(BookingStatus.PENDING);
 	}
 
 	@Test
 	@DisplayName("Should return bookings with complete details")
 	void shouldReturnBookingsWithCompleteDetails() {
-		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(bookingRepository.findByUserId(userId)).thenReturn(bookings);
+		when(bookingRepository.findByUserId(userId, PAGE, SIZE)).thenReturn(bookingPage);
 
-		// When
-		List<Booking> result = getBookingHistoryUseCase.execute(query);
+		PageResult<Booking> result = getBookingHistoryUseCase.execute(query);
 
-		// Then
-		assertThat(result).isNotEmpty();
-		Booking firstBooking = result.get(0);
+		assertThat(result.content()).isNotEmpty();
+		Booking firstBooking = result.content().get(0);
 		assertThat(firstBooking.id()).isNotNull();
 		assertThat(firstBooking.user()).isNotNull();
 		assertThat(firstBooking.field()).isNotNull();
@@ -220,47 +212,39 @@ class GetBookingHistoryUseCaseTest {
 	@Test
 	@DisplayName("Should return only bookings for specified user")
 	void shouldReturnOnlyBookingsForSpecifiedUser() {
-		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(bookingRepository.findByUserId(userId)).thenReturn(bookings);
+		when(bookingRepository.findByUserId(userId, PAGE, SIZE)).thenReturn(bookingPage);
 
-		// When
-		List<Booking> result = getBookingHistoryUseCase.execute(query);
+		PageResult<Booking> result = getBookingHistoryUseCase.execute(query);
 
-		// Then
-		assertThat(result).allMatch(booking -> booking.user().id().equals(userId));
-		verify(bookingRepository).findByUserId(userId);
+		assertThat(result.content()).allMatch(booking -> booking.user().id().equals(userId));
+		verify(bookingRepository).findByUserId(userId, PAGE, SIZE);
 	}
 
 	@Test
 	@DisplayName("Should return single booking when user has only one")
 	void shouldReturnSingleBooking() {
-		// Given
-		List<Booking> singleBooking = List.of(bookings.get(0));
+		List<Booking> singleBooking = List.of(bookingList.get(0));
+		var singlePage = new PageResult<>(singleBooking, PAGE, SIZE, 1L, 1);
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(bookingRepository.findByUserId(userId)).thenReturn(singleBooking);
+		when(bookingRepository.findByUserId(userId, PAGE, SIZE)).thenReturn(singlePage);
 
-		// When
-		List<Booking> result = getBookingHistoryUseCase.execute(query);
+		PageResult<Booking> result = getBookingHistoryUseCase.execute(query);
 
-		// Then
-		assertThat(result).hasSize(1);
-		assertThat(result.get(0).id()).isEqualTo(1L);
+		assertThat(result.content()).hasSize(1);
+		assertThat(result.content().get(0).id()).isEqualTo(1L);
 	}
 
 	@Test
 	@DisplayName("Should include field and center information in bookings")
 	void shouldIncludeFieldAndCenterInformation() {
-		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(bookingRepository.findByUserId(userId)).thenReturn(bookings);
+		when(bookingRepository.findByUserId(userId, PAGE, SIZE)).thenReturn(bookingPage);
 
-		// When
-		List<Booking> result = getBookingHistoryUseCase.execute(query);
+		PageResult<Booking> result = getBookingHistoryUseCase.execute(query);
 
-		// Then
-		assertThat(result).isNotEmpty();
-		Booking firstBooking = result.get(0);
+		assertThat(result.content()).isNotEmpty();
+		Booking firstBooking = result.content().get(0);
 		assertThat(firstBooking.field().name()).isEqualTo("Court 1");
 		assertThat(firstBooking.field().center().name()).isEqualTo("Padel Center Barcelona");
 		assertThat(firstBooking.field().center().city()).isEqualTo("Barcelona");
@@ -269,33 +253,27 @@ class GetBookingHistoryUseCaseTest {
 	@Test
 	@DisplayName("Should preserve booking timestamps")
 	void shouldPreserveBookingTimestamps() {
-		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(bookingRepository.findByUserId(userId)).thenReturn(bookings);
+		when(bookingRepository.findByUserId(userId, PAGE, SIZE)).thenReturn(bookingPage);
 
-		// When
-		List<Booking> result = getBookingHistoryUseCase.execute(query);
+		PageResult<Booking> result = getBookingHistoryUseCase.execute(query);
 
-		// Then
-		assertThat(result).hasSize(3);
-		assertThat(result.get(0).startTime()).isEqualTo(START_1);
-		assertThat(result.get(0).endTime()).isEqualTo(END_1);
-		assertThat(result.get(1).startTime()).isEqualTo(START_2);
-		assertThat(result.get(2).startTime()).isEqualTo(START_3);
+		assertThat(result.content()).hasSize(3);
+		assertThat(result.content().get(0).startTime()).isEqualTo(START_1);
+		assertThat(result.content().get(0).endTime()).isEqualTo(END_1);
+		assertThat(result.content().get(1).startTime()).isEqualTo(START_2);
+		assertThat(result.content().get(2).startTime()).isEqualTo(START_3);
 	}
 
 	@Test
 	@DisplayName("Should preserve booking prices")
 	void shouldPreserveBookingPrices() {
-		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(bookingRepository.findByUserId(userId)).thenReturn(bookings);
+		when(bookingRepository.findByUserId(userId, PAGE, SIZE)).thenReturn(bookingPage);
 
-		// When
-		List<Booking> result = getBookingHistoryUseCase.execute(query);
+		PageResult<Booking> result = getBookingHistoryUseCase.execute(query);
 
-		// Then
-		assertThat(result).allMatch(booking ->
+		assertThat(result.content()).allMatch(booking ->
 			booking.totalPrice().compareTo(new BigDecimal("25.00")) == 0
 		);
 	}
@@ -303,15 +281,12 @@ class GetBookingHistoryUseCaseTest {
 	@Test
 	@DisplayName("Should call repository findByUserId exactly once")
 	void shouldCallRepositoryOnce() {
-		// Given
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(bookingRepository.findByUserId(userId)).thenReturn(bookings);
+		when(bookingRepository.findByUserId(userId, PAGE, SIZE)).thenReturn(bookingPage);
 
-		// When
 		getBookingHistoryUseCase.execute(query);
 
-		// Then
-		verify(bookingRepository, times(1)).findByUserId(userId);
+		verify(bookingRepository, times(1)).findByUserId(userId, PAGE, SIZE);
 		verifyNoMoreInteractions(bookingRepository);
 	}
 }

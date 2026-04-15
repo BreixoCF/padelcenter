@@ -3,9 +3,9 @@ package com.bookings.padelcenter.infrastructure.inbound.mapper;
 import com.bookings.padelcenter.application.command.CancelBookingCommand;
 import com.bookings.padelcenter.application.command.CreateBookingCommand;
 import com.bookings.padelcenter.application.command.UpdateBookingCommand;
-import com.bookings.padelcenter.application.query.GetBookingHistoryQuery;
 import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.domain.model.Booking;
+import com.bookings.padelcenter.domain.model.PageResult;
 import com.padelcenter.infrastructure.web.generated.model.AuditableResponse;
 import com.padelcenter.infrastructure.web.generated.model.BookingRequest;
 import com.padelcenter.infrastructure.web.generated.model.BookingResponse;
@@ -16,8 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -33,10 +31,6 @@ public class BookingApiMapper {
 				request.getEndTime().toLocalDateTime(),
 				BigDecimal.valueOf(request.getTotalPrice())
 		);
-	}
-
-	public GetBookingHistoryQuery toQuery(UUID userId) {
-		return new GetBookingHistoryQuery(userId);
 	}
 
 	public BookingResponse toResponse(Booking booking) {
@@ -55,16 +49,14 @@ public class BookingApiMapper {
 		return response;
 	}
 
-	public GetUserBookings200Response toPagedBookingHistory(List<Booking> bookings, int page, int size) {
-		var content = bookings.stream().map(this::toResponse).toList();
-		int totalElements = content.size();
-		int totalPages = size > 0 ? (int) Math.ceil((double) totalElements / size) : 0;
+	public GetUserBookings200Response toPagedBookingHistory(PageResult<Booking> pageResult) {
+		var content = pageResult.content().stream().map(this::toResponse).toList();
 		return new GetUserBookings200Response(
 				content,
-				(long) totalElements,
-				totalPages == 0 ? 1 : totalPages,
-				page,
-				size
+				pageResult.totalElements(),
+				pageResult.totalPages(),
+				pageResult.page(),
+				pageResult.size()
 		);
 	}
 

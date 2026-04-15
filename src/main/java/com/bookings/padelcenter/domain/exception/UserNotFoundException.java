@@ -2,7 +2,7 @@ package com.bookings.padelcenter.domain.exception;
 
 import java.util.UUID;
 
-public class UserNotFoundException extends RuntimeException {
+public class UserNotFoundException extends ResourceNotFoundException {
 	public UserNotFoundException(UUID userId) {
 		super("User with ID " + userId + " not found");
 	}

@@ -110,8 +110,8 @@ public class UserController implements UsersApi {
 	@Override
 	public ResponseEntity<GetUserBookings200Response> getUserBookings(UUID userId, Integer page, Integer size,
 	                                                                    String sort) {
-		var bookings = getBookingHistoryUseCase.execute(new GetBookingHistoryQuery(userId));
-		return ResponseEntity.ok(bookingMapper.toPagedBookingHistory(bookings, page, size));
+		var pageResult = getBookingHistoryUseCase.execute(new GetBookingHistoryQuery(userId, page, size));
+		return ResponseEntity.ok(bookingMapper.toPagedBookingHistory(pageResult));
 	}
 
 	private AuthenticatedUser currentUser() {

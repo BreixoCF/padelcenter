@@ -1,6 +1,7 @@
 package com.bookings.padelcenter.domain.repository;
 
 import com.bookings.padelcenter.domain.model.Booking;
+import com.bookings.padelcenter.domain.model.PageResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,5 +12,5 @@ public interface BookingRepository {
 	Booking save(Booking booking);
 	Optional<Booking> findById(Long id);
 	List<Booking> findAll();
-	List<Booking> findByUserId(UUID userId);
+	PageResult<Booking> findByUserId(UUID userId, int page, int size);
 }
