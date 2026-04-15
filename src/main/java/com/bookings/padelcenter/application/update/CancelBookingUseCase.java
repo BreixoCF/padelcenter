@@ -26,7 +26,7 @@ public class CancelBookingUseCase implements CommandUseCase<CancelBookingCommand
 			throw new BookingAlreadyCancelledException(command.bookingId());
 		}
 
-		var cancelledBooking = booking.cancel(command.modifiedBy());
+		var cancelledBooking = booking.cancel(command.authenticatedUser().userId());
 		return bookingRepository.save(cancelledBooking);
 	}
 }

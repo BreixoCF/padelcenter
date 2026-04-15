@@ -1,6 +1,7 @@
 package com.bookings.padelcenter.application.update;
 
 import com.bookings.padelcenter.application.command.UpdatePasswordCommand;
+import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.domain.exception.InvalidPasswordException;
 import com.bookings.padelcenter.domain.exception.UserNotFoundException;
 import com.bookings.padelcenter.domain.model.Auditable;
@@ -52,7 +53,7 @@ class UpdatePasswordUseCaseTest {
 			userId,
 			"currentPassword123",
 			"newPassword456",
-			modifiedBy
+			new AuthenticatedUser(modifiedBy)
 		);
 
 		existingUser = new User(
@@ -264,7 +265,7 @@ class UpdatePasswordUseCaseTest {
 			userId,
 			"currentPassword123",
 			"differentNewPassword789",
-			modifiedBy
+			new AuthenticatedUser(modifiedBy)
 		);
 
 		String differentPasswordHash = "hashed_differentNewPassword789";

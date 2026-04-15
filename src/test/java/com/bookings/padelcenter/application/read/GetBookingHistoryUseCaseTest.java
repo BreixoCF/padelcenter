@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +45,13 @@ class GetBookingHistoryUseCaseTest {
 	private Center center;
 	private Field field;
 	private List<Booking> bookings;
+
+	private static final LocalDateTime START_1 = LocalDateTime.of(2024, 12, 25, 10, 0);
+	private static final LocalDateTime END_1   = LocalDateTime.of(2024, 12, 25, 11, 0);
+	private static final LocalDateTime START_2 = LocalDateTime.of(2024, 12, 26, 10, 0);
+	private static final LocalDateTime END_2   = LocalDateTime.of(2024, 12, 26, 11, 0);
+	private static final LocalDateTime START_3 = LocalDateTime.of(2024, 12, 27, 10, 0);
+	private static final LocalDateTime END_3   = LocalDateTime.of(2024, 12, 27, 11, 0);
 
 	@BeforeEach
 	void setUp() {
@@ -86,37 +94,19 @@ class GetBookingHistoryUseCaseTest {
 
 		bookings = List.of(
 			new Booking(
-				1L,
-				user,
-				field,
-				"2024-12-25T10:00:00Z",
-				"2024-12-25T11:00:00Z",
-				new BigDecimal("25.00"),
-				Instant.now().minusSeconds(86400),
-				BookingStatus.COMPLETED,
-				Auditable.newAudit()
+				1L, user, field, START_1, END_1,
+				new BigDecimal("25.00"), Instant.now().minusSeconds(86400),
+				BookingStatus.COMPLETED, Auditable.newAudit()
 			),
 			new Booking(
-				2L,
-				user,
-				field,
-				"2024-12-26T10:00:00Z",
-				"2024-12-26T11:00:00Z",
-				new BigDecimal("25.00"),
-				Instant.now().minusSeconds(43200),
-				BookingStatus.CONFIRMED,
-				Auditable.newAudit()
+				2L, user, field, START_2, END_2,
+				new BigDecimal("25.00"), Instant.now().minusSeconds(43200),
+				BookingStatus.CONFIRMED, Auditable.newAudit()
 			),
 			new Booking(
-				3L,
-				user,
-				field,
-				"2024-12-27T10:00:00Z",
-				"2024-12-27T11:00:00Z",
-				new BigDecimal("25.00"),
-				Instant.now(),
-				BookingStatus.PENDING,
-				Auditable.newAudit()
+				3L, user, field, START_3, END_3,
+				new BigDecimal("25.00"), Instant.now(),
+				BookingStatus.PENDING, Auditable.newAudit()
 			)
 		);
 	}
@@ -288,10 +278,10 @@ class GetBookingHistoryUseCaseTest {
 
 		// Then
 		assertThat(result).hasSize(3);
-		assertThat(result.get(0).startTime()).isEqualTo("2024-12-25T10:00:00Z");
-		assertThat(result.get(0).endTime()).isEqualTo("2024-12-25T11:00:00Z");
-		assertThat(result.get(1).startTime()).isEqualTo("2024-12-26T10:00:00Z");
-		assertThat(result.get(2).startTime()).isEqualTo("2024-12-27T10:00:00Z");
+		assertThat(result.get(0).startTime()).isEqualTo(START_1);
+		assertThat(result.get(0).endTime()).isEqualTo(END_1);
+		assertThat(result.get(1).startTime()).isEqualTo(START_2);
+		assertThat(result.get(2).startTime()).isEqualTo(START_3);
 	}
 
 	@Test

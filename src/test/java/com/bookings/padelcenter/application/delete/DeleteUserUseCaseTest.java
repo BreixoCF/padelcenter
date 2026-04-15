@@ -1,6 +1,7 @@
 package com.bookings.padelcenter.application.delete;
 
 import com.bookings.padelcenter.application.command.DeleteUserCommand;
+import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.domain.exception.UserNotFoundException;
 import com.bookings.padelcenter.domain.model.Auditable;
 import com.bookings.padelcenter.domain.model.CenterRole;
@@ -46,7 +47,7 @@ class DeleteUserUseCaseTest {
 		userId = UUID.randomUUID();
 		deletedBy = UUID.randomUUID();
 
-		command = new DeleteUserCommand(userId, deletedBy);
+		command = new DeleteUserCommand(userId, new AuthenticatedUser(deletedBy));
 
 		existingUser = new User(
 			userId,
@@ -253,14 +254,8 @@ class DeleteUserUseCaseTest {
 		);
 
 		User userWithRoles = new User(
-			userId,
-			"John",
-			"Doe",
-			"john.doe@example.com",
-			"hashedPassword",
-			"600123456",
-			roles,
-			existingUser.audit()
+			userId, "John", "Doe", "john.doe@example.com",
+			"hashedPassword", "600123456", roles, existingUser.audit()
 		);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userWithRoles));
@@ -292,14 +287,8 @@ class DeleteUserUseCaseTest {
 		);
 
 		User userWithRoles = new User(
-			userId,
-			"John",
-			"Doe",
-			"john.doe@example.com",
-			"hashedPassword",
-			"600123456",
-			roles,
-			existingUser.audit()
+			userId, "John", "Doe", "john.doe@example.com",
+			"hashedPassword", "600123456", roles, existingUser.audit()
 		);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userWithRoles));
@@ -331,14 +320,8 @@ class DeleteUserUseCaseTest {
 		Set<CenterRole> roles = Set.of(originalRole);
 
 		User userWithRoles = new User(
-			userId,
-			"John",
-			"Doe",
-			"john.doe@example.com",
-			"hashedPassword",
-			"600123456",
-			roles,
-			existingUser.audit()
+			userId, "John", "Doe", "john.doe@example.com",
+			"hashedPassword", "600123456", roles, existingUser.audit()
 		);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userWithRoles));
@@ -364,14 +347,8 @@ class DeleteUserUseCaseTest {
 	void shouldHandleUserWithNoCenterRoles() {
 		// Given
 		User userWithoutRoles = new User(
-			userId,
-			"John",
-			"Doe",
-			"john.doe@example.com",
-			"hashedPassword",
-			"600123456",
-			Set.of(),
-			existingUser.audit()
+			userId, "John", "Doe", "john.doe@example.com",
+			"hashedPassword", "600123456", Set.of(), existingUser.audit()
 		);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userWithoutRoles));

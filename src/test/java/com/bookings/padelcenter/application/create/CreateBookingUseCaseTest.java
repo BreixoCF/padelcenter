@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -55,6 +56,9 @@ class CreateBookingUseCaseTest {
 	private Center center;
 	private Booking expectedBooking;
 
+	private static final LocalDateTime START = LocalDateTime.of(2024, 12, 25, 10, 0);
+	private static final LocalDateTime END   = LocalDateTime.of(2024, 12, 25, 11, 0);
+
 	@BeforeEach
 	void setUp() {
 		userId = UUID.randomUUID();
@@ -64,8 +68,8 @@ class CreateBookingUseCaseTest {
 		command = new CreateBookingCommand(
 			userId,
 			fieldId,
-			"2024-12-25T10:00:00Z",
-			"2024-12-25T11:00:00Z",
+			START,
+			END,
 			new BigDecimal("25.00")
 		);
 
@@ -105,8 +109,8 @@ class CreateBookingUseCaseTest {
 			null,
 			user,
 			field,
-			"2024-12-25T10:00:00Z",
-			"2024-12-25T11:00:00Z",
+			START,
+			END,
 			new BigDecimal("25.00"),
 			Instant.now(),
 			BookingStatus.PENDING,
@@ -122,8 +126,8 @@ class CreateBookingUseCaseTest {
 			1L,
 			user,
 			field,
-			"2024-12-25T10:00:00Z",
-			"2024-12-25T11:00:00Z",
+			START,
+			END,
 			new BigDecimal("25.00"),
 			Instant.now(),
 			BookingStatus.PENDING,
@@ -143,8 +147,8 @@ class CreateBookingUseCaseTest {
 		assertThat(result.id()).isEqualTo(1L);
 		assertThat(result.user()).isEqualTo(user);
 		assertThat(result.field()).isEqualTo(field);
-		assertThat(result.startTime()).isEqualTo("2024-12-25T10:00:00Z");
-		assertThat(result.endTime()).isEqualTo("2024-12-25T11:00:00Z");
+		assertThat(result.startTime()).isEqualTo(START);
+		assertThat(result.endTime()).isEqualTo(END);
 		assertThat(result.totalPrice()).isEqualByComparingTo(new BigDecimal("25.00"));
 		assertThat(result.status()).isEqualTo(BookingStatus.PENDING);
 
@@ -229,8 +233,8 @@ class CreateBookingUseCaseTest {
 			1L,
 			user,
 			field,
-			"2024-12-25T10:00:00Z",
-			"2024-12-25T11:00:00Z",
+			START,
+			END,
 			new BigDecimal("25.00"),
 			Instant.now(),
 			BookingStatus.PENDING,
@@ -273,8 +277,8 @@ class CreateBookingUseCaseTest {
 			1L,
 			user,
 			field,
-			"2024-12-25T10:00:00Z",
-			"2024-12-25T11:00:00Z",
+			START,
+			END,
 			new BigDecimal("25.00"),
 			Instant.now(),
 			BookingStatus.PENDING,
@@ -301,8 +305,8 @@ class CreateBookingUseCaseTest {
 			1L,
 			user,
 			field,
-			"2024-12-25T10:00:00Z",
-			"2024-12-25T11:00:00Z",
+			START,
+			END,
 			new BigDecimal("25.00"),
 			Instant.now(),
 			BookingStatus.PENDING,
@@ -330,8 +334,8 @@ class CreateBookingUseCaseTest {
 			1L,
 			user,
 			field,
-			"2024-12-25T10:00:00Z",
-			"2024-12-25T11:00:00Z",
+			START,
+			END,
 			new BigDecimal("25.00"),
 			Instant.now(),
 			BookingStatus.PENDING,
@@ -347,8 +351,8 @@ class CreateBookingUseCaseTest {
 		Booking result = createBookingUseCase.execute(command);
 
 		// Then
-		assertThat(result.startTime()).isEqualTo("2024-12-25T10:00:00Z");
-		assertThat(result.endTime()).isEqualTo("2024-12-25T11:00:00Z");
+		assertThat(result.startTime()).isEqualTo(START);
+		assertThat(result.endTime()).isEqualTo(END);
 		assertThat(result.totalPrice()).isEqualByComparingTo(new BigDecimal("25.00"));
 	}
 
@@ -361,8 +365,8 @@ class CreateBookingUseCaseTest {
 			1L,
 			user,
 			field,
-			"2024-12-25T10:00:00Z",
-			"2024-12-25T11:00:00Z",
+			START,
+			END,
 			new BigDecimal("25.00"),
 			bookedAt,
 			BookingStatus.PENDING,

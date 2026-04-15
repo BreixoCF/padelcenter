@@ -2,6 +2,7 @@ package com.bookings.padelcenter.application.update;
 
 import com.bookings.padelcenter.application.command.UpdateUserRolesCommand;
 import com.bookings.padelcenter.application.mapper.UserCommandMapper;
+import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.domain.exception.UserNotFoundException;
 import com.bookings.padelcenter.domain.model.Auditable;
 import com.bookings.padelcenter.domain.model.CenterRole;
@@ -57,7 +58,7 @@ class UpdateUserRolesUseCaseTest {
 			new CenterRole(UUID.randomUUID(), Role.MANAGER, Auditable.newAudit())
 		);
 
-		command = new UpdateUserRolesCommand(userId, newRoles, modifiedBy);
+		command = new UpdateUserRolesCommand(userId, newRoles, new AuthenticatedUser(modifiedBy));
 
 		existingUser = new User(
 			userId,
@@ -176,9 +177,7 @@ class UpdateUserRolesUseCaseTest {
 		// Given
 		Set<CenterRole> emptyRoles = Set.of();
 		UpdateUserRolesCommand commandWithEmptyRoles = new UpdateUserRolesCommand(
-			userId,
-			emptyRoles,
-			modifiedBy
+			userId, emptyRoles, new AuthenticatedUser(modifiedBy)
 		);
 
 		User updatedUser = existingUser.updateRoles(emptyRoles, modifiedBy);
@@ -247,9 +246,7 @@ class UpdateUserRolesUseCaseTest {
 		);
 
 		UpdateUserRolesCommand multiRoleCommand = new UpdateUserRolesCommand(
-			userId,
-			multipleRoles,
-			modifiedBy
+			userId, multipleRoles, new AuthenticatedUser(modifiedBy)
 		);
 
 		User updatedUser = existingUser.updateRoles(multipleRoles, modifiedBy);

@@ -25,7 +25,7 @@ public class UpdateBookingUseCase implements CommandUseCase<UpdateBookingCommand
 			command.startTime(),
 			command.endTime(),
 			command.totalPrice(),
-			command.modifiedBy()
+			command.authenticatedUser().userId()
 		);
 
 		return bookingRepository.save(updatedBooking);

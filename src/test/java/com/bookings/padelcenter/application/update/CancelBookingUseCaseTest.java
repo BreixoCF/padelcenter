@@ -1,6 +1,7 @@
 package com.bookings.padelcenter.application.update;
 
 import com.bookings.padelcenter.application.command.CancelBookingCommand;
+import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.domain.exception.BookingAlreadyCancelledException;
 import com.bookings.padelcenter.domain.exception.BookingNotFoundException;
 import com.bookings.padelcenter.domain.model.*;
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -43,12 +45,15 @@ class CancelBookingUseCaseTest {
 	private Field field;
 	private Center center;
 
+	private static final LocalDateTime START_TIME = LocalDateTime.of(2024, 12, 25, 10, 0);
+	private static final LocalDateTime END_TIME   = LocalDateTime.of(2024, 12, 25, 11, 0);
+
 	@BeforeEach
 	void setUp() {
 		bookingId = 1L;
 		modifiedBy = UUID.randomUUID();
 
-		command = new CancelBookingCommand(bookingId, modifiedBy);
+		command = new CancelBookingCommand(bookingId, new AuthenticatedUser(modifiedBy));
 
 		UUID userId = UUID.randomUUID();
 		user = new User(
@@ -89,8 +94,8 @@ class CancelBookingUseCaseTest {
 			bookingId,
 			user,
 			field,
-			"2024-12-25T10:00:00Z",
-			"2024-12-25T11:00:00Z",
+			START_TIME,
+			END_TIME,
 			new BigDecimal("25.00"),
 			Instant.now(),
 			BookingStatus.PENDING,
@@ -269,15 +274,8 @@ class CancelBookingUseCaseTest {
 	void shouldCancelConfirmedBooking() {
 		// Given
 		Booking confirmedBooking = new Booking(
-			bookingId,
-			user,
-			field,
-			"2024-12-25T10:00:00Z",
-			"2024-12-25T11:00:00Z",
-			new BigDecimal("25.00"),
-			Instant.now(),
-			BookingStatus.CONFIRMED,
-			Auditable.newAudit()
+			bookingId, user, field, START_TIME, END_TIME,
+			new BigDecimal("25.00"), Instant.now(), BookingStatus.CONFIRMED, Auditable.newAudit()
 		);
 
 		when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(confirmedBooking));
@@ -296,15 +294,8 @@ class CancelBookingUseCaseTest {
 	void shouldVerifyBookingIsNotCancelled() {
 		// Given
 		Booking alreadyCancelledBooking = new Booking(
-			bookingId,
-			user,
-			field,
-			"2024-12-25T10:00:00Z",
-			"2024-12-25T11:00:00Z",
-			new BigDecimal("25.00"),
-			Instant.now(),
-			BookingStatus.CANCELLED,
-			Auditable.newAudit()
+			bookingId, user, field, START_TIME, END_TIME,
+			new BigDecimal("25.00"), Instant.now(), BookingStatus.CANCELLED, Auditable.newAudit()
 		);
 
 		when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(alreadyCancelledBooking));

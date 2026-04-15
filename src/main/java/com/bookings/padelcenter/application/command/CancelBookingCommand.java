@@ -1,8 +1,8 @@
 package com.bookings.padelcenter.application.command;
 
-import java.util.UUID;
+import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 
 public record CancelBookingCommand(
 	Long bookingId,
-	UUID modifiedBy
+	AuthenticatedUser authenticatedUser
 ) {}

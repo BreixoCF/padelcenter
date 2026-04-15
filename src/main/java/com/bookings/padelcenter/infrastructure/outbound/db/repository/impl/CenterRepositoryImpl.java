@@ -1,15 +1,16 @@
 package com.bookings.padelcenter.infrastructure.outbound.db.repository.impl;
 
 import com.bookings.padelcenter.domain.model.Center;
+import com.bookings.padelcenter.domain.model.PageResult;
 import com.bookings.padelcenter.domain.repository.CenterRepository;
 import com.bookings.padelcenter.infrastructure.outbound.db.entity.CenterEntity;
 import com.bookings.padelcenter.infrastructure.outbound.db.mapper.CenterPersistenceMapper;
 import com.bookings.padelcenter.infrastructure.outbound.db.repository.CenterJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,11 +23,19 @@ public class CenterRepositoryImpl implements CenterRepository {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Center> findAll() {
-		return centerJpaRepository.findAll()
+	public PageResult<Center> findAll(int page, int size) {
+		var springPage = centerJpaRepository.findAll(PageRequest.of(page, size));
+		var content = springPage.getContent()
 				.stream()
 				.map(mapper::toDomain)
 				.toList();
+		return new PageResult<>(
+				content,
+				springPage.getNumber(),
+				springPage.getSize(),
+				springPage.getTotalElements(),
+				springPage.getTotalPages()
+		);
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import com.bookings.padelcenter.application.command.CancelBookingCommand;
 import com.bookings.padelcenter.application.command.CreateBookingCommand;
 import com.bookings.padelcenter.application.command.UpdateBookingCommand;
 import com.bookings.padelcenter.application.query.GetBookingHistoryQuery;
+import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.domain.model.Booking;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateBookingRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdateBookingRequest;
@@ -16,6 +17,7 @@ import com.bookings.padelcenter.infrastructure.inbound.dto.response.FieldSummary
 import com.bookings.padelcenter.infrastructure.inbound.dto.response.UpdateBookingResponse;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,8 +29,9 @@ public class BookingApiMapper {
 		return new CreateBookingCommand(
 			request.userId(),
 			request.fieldId(),
-			request.startTime(),
-			request.endTime(),
+			// TODO(web-phase): replace with a proper DateTimeFormatter once request DTOs use LocalDateTime
+			LocalDateTime.parse(request.startTime()),
+			LocalDateTime.parse(request.endTime()),
 			request.totalPrice()
 		);
 	}
@@ -47,8 +50,9 @@ public class BookingApiMapper {
 			booking.id(),
 			booking.user().id(),
 			booking.field().id(),
-			booking.startTime(),
-			booking.endTime(),
+			// TODO(web-phase): replace with a proper DateTimeFormatter once response DTOs use LocalDateTime
+			booking.startTime().toString(),
+			booking.endTime().toString(),
 			booking.totalPrice(),
 			booking.bookedAt(),
 			booking.status().name(),
@@ -83,8 +87,9 @@ public class BookingApiMapper {
 		return new BookingHistoryResponse(
 			booking.id(),
 			fieldSummary,
-			booking.startTime(),
-			booking.endTime(),
+			// TODO(web-phase): replace with a proper DateTimeFormatter once response DTOs use LocalDateTime
+			booking.startTime().toString(),
+			booking.endTime().toString(),
 			booking.totalPrice(),
 			booking.bookedAt(),
 			booking.status().name()
@@ -94,10 +99,12 @@ public class BookingApiMapper {
 	public UpdateBookingCommand toUpdateCommand(Long bookingId, UpdateBookingRequest request) {
 		return new UpdateBookingCommand(
 			bookingId,
-			request.startTime(),
-			request.endTime(),
+			// TODO(web-phase): replace with a proper DateTimeFormatter once request DTOs use LocalDateTime
+			LocalDateTime.parse(request.startTime()),
+			LocalDateTime.parse(request.endTime()),
 			request.totalPrice(),
-			null
+			// TODO(phase-8): extract authenticated user from SecurityContext
+			new AuthenticatedUser(null)
 		);
 	}
 
@@ -115,8 +122,9 @@ public class BookingApiMapper {
 			booking.id(),
 			booking.user().id(),
 			booking.field().id(),
-			booking.startTime(),
-			booking.endTime(),
+			// TODO(web-phase): replace with a proper DateTimeFormatter once response DTOs use LocalDateTime
+			booking.startTime().toString(),
+			booking.endTime().toString(),
 			booking.totalPrice(),
 			booking.bookedAt(),
 			booking.status().name(),
@@ -125,8 +133,8 @@ public class BookingApiMapper {
 	}
 
 	public CancelBookingCommand toCancelCommand(Long bookingId) {
-		// TODO: In a real application, modifiedBy should be the authenticated user
-		return new CancelBookingCommand(bookingId, null);
+		// TODO(phase-8): extract authenticated user from SecurityContext
+		return new CancelBookingCommand(bookingId, new AuthenticatedUser(null));
 	}
 
 	public CancelBookingResponse toCancelResponse(Booking booking) {

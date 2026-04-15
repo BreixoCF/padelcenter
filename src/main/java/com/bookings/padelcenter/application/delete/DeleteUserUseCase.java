@@ -20,7 +20,7 @@ public class DeleteUserUseCase implements CommandUseCase<DeleteUserCommand, User
 	public User execute(DeleteUserCommand command) {
 		var user = userRepository.findById(command.userId())
 				.orElseThrow(() -> new UserNotFoundException(command.userId()));
-		var deletedUser = user.delete(command.deletedBy());
+		var deletedUser = user.delete(command.authenticatedUser().userId());
 		return userRepository.save(deletedUser);
 	}
 }

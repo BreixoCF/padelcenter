@@ -29,7 +29,7 @@ public class UpdatePasswordUseCase implements CommandUseCase<UpdatePasswordComma
 		}
 
 		var newPasswordHash = passwordHasher.hash(command.newPassword());
-		var updatedUser = user.updatePassword(newPasswordHash, command.modifiedBy());
+		var updatedUser = user.updatePassword(newPasswordHash, command.authenticatedUser().userId());
 		return userRepository.save(updatedUser);
 	}
 }

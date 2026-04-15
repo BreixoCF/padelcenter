@@ -1,15 +1,15 @@
 package com.bookings.padelcenter.infrastructure.outbound.db.repository.impl;
 
+import com.bookings.padelcenter.domain.model.PageResult;
 import com.bookings.padelcenter.domain.model.User;
 import com.bookings.padelcenter.domain.repository.UserRepository;
-import com.bookings.padelcenter.infrastructure.outbound.db.entity.UserEntity;
 import com.bookings.padelcenter.infrastructure.outbound.db.repository.UserJpaRepository;
 import com.bookings.padelcenter.infrastructure.outbound.db.mapper.UserPersistenceMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,9 +22,19 @@ public class UserRepositoryImpl implements UserRepository {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<User> findAll() {
-		var entities = userJpaRepository.findAll();
-		return entities.stream().map(mapper::toDomain).toList();
+	public PageResult<User> findAll(int page, int size) {
+		var springPage = userJpaRepository.findAll(PageRequest.of(page, size));
+		var content = springPage.getContent()
+				.stream()
+				.map(mapper::toDomain)
+				.toList();
+		return new PageResult<>(
+				content,
+				springPage.getNumber(),
+				springPage.getSize(),
+				springPage.getTotalElements(),
+				springPage.getTotalPages()
+		);
 	}
 
 	@Override

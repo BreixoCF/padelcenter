@@ -22,7 +22,7 @@ public class UpdateUserRolesUseCase implements CommandUseCase<UpdateUserRolesCom
 	public User execute(UpdateUserRolesCommand command) {
 		var user = userRepository.findById(command.userId())
 				.orElseThrow(() -> new UserNotFoundException(command.userId()));
-		var updatedUser = user.updateRoles(command.newRoles(), command.modifiedBy());
+		var updatedUser = user.updateRoles(command.newRoles(), command.authenticatedUser().userId());
 		return userRepository.save(updatedUser);
 	}
 }

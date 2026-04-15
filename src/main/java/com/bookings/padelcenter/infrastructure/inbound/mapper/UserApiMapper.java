@@ -5,6 +5,7 @@ import com.bookings.padelcenter.application.command.DeleteUserCommand;
 import com.bookings.padelcenter.application.command.UpdatePasswordCommand;
 import com.bookings.padelcenter.application.command.UpdateUserCommand;
 import com.bookings.padelcenter.application.command.UpdateUserRolesCommand;
+import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.domain.model.Auditable;
 import com.bookings.padelcenter.domain.model.CenterRole;
 import com.bookings.padelcenter.domain.model.User;
@@ -87,22 +88,22 @@ public class UserApiMapper {
 		var newRoles = rolesRequest.stream()
 				.map(this::toCenterRoleDomain)
 				.collect(Collectors.toSet());
-		//TODO: In a real application, this should be the authenticated user
-		return new UpdateUserRolesCommand(id, newRoles, null);
+		// TODO(phase-8): extract authenticated user from SecurityContext
+		return new UpdateUserRolesCommand(id, newRoles, new AuthenticatedUser(null));
 	}
 
 	public DeleteUserCommand toDeleteUserCommand(UUID id) {
-		//TODO: In a real application, this should be the authenticated user
-		return new DeleteUserCommand(id, null);
+		// TODO(phase-8): extract authenticated user from SecurityContext
+		return new DeleteUserCommand(id, new AuthenticatedUser(null));
 	}
 
 	public UpdatePasswordCommand toUpdatePasswordCommand(UUID userId, UpdatePasswordRequest request) {
-		//TODO: In a real application, modifiedBy should be the authenticated user
+		// TODO(phase-8): extract authenticated user from SecurityContext
 		return new UpdatePasswordCommand(
 			userId,
 			request.currentPassword(),
 			request.newPassword(),
-			null
+			new AuthenticatedUser(null)
 		);
 	}
 

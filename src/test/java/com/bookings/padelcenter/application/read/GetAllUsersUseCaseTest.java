@@ -2,6 +2,7 @@ package com.bookings.padelcenter.application.read;
 
 import com.bookings.padelcenter.application.query.GetAllUsersQuery;
 import com.bookings.padelcenter.domain.model.Auditable;
+import com.bookings.padelcenter.domain.model.PageResult;
 import com.bookings.padelcenter.domain.model.User;
 import com.bookings.padelcenter.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -31,109 +31,98 @@ class GetAllUsersUseCaseTest {
 	private GetAllUsersUseCase getAllUsersUseCase;
 
 	private GetAllUsersQuery query;
-	private List<User> expectedUsers;
+	private List<User> users;
 
 	@BeforeEach
 	void setUp() {
-		query = new GetAllUsersQuery();
+		query = new GetAllUsersQuery(0, 20);
 
-		expectedUsers = List.of(
+		users = List.of(
 			new User(
-				UUID.randomUUID(),
-				"John",
-				"Doe",
-				"john.doe@example.com",
-				"hashedPassword1",
-				"600123456",
-				Set.of(),
-				Auditable.newAudit()
+				UUID.randomUUID(), "John", "Doe", "john.doe@example.com",
+				"hashedPassword1", "600123456", Set.of(), Auditable.newAudit()
 			),
 			new User(
-				UUID.randomUUID(),
-				"Jane",
-				"Smith",
-				"jane.smith@example.com",
-				"hashedPassword2",
-				"600654321",
-				Set.of(),
-				Auditable.newAudit()
+				UUID.randomUUID(), "Jane", "Smith", "jane.smith@example.com",
+				"hashedPassword2", "600654321", Set.of(), Auditable.newAudit()
 			),
 			new User(
-				UUID.randomUUID(),
-				"Bob",
-				"Johnson",
-				"bob.johnson@example.com",
-				"hashedPassword3",
-				"600987654",
-				Set.of(),
-				Auditable.newAudit()
+				UUID.randomUUID(), "Bob", "Johnson", "bob.johnson@example.com",
+				"hashedPassword3", "600987654", Set.of(), Auditable.newAudit()
 			)
 		);
 	}
 
 	@Test
-	@DisplayName("Should return all users from repository")
+	@DisplayName("Should return paginated users from repository")
 	void shouldReturnAllUsers() {
 		// Given
-		when(userRepository.findAll()).thenReturn(expectedUsers);
+		var pageResult = new PageResult<>(users, 0, 20, 3L, 1);
+		when(userRepository.findAll(0, 20)).thenReturn(pageResult);
 
 		// When
-		List<User> result = getAllUsersUseCase.execute(query);
+		PageResult<User> result = getAllUsersUseCase.execute(query);
 
 		// Then
 		assertThat(result).isNotNull();
-		assertThat(result).hasSize(3);
-		assertThat(result).isEqualTo(expectedUsers);
+		assertThat(result.content()).hasSize(3);
+		assertThat(result.content()).isEqualTo(users);
+		assertThat(result.totalElements()).isEqualTo(3L);
+		assertThat(result.totalPages()).isEqualTo(1);
 
-		verify(userRepository, times(1)).findAll();
+		verify(userRepository, times(1)).findAll(0, 20);
 	}
 
 	@Test
-	@DisplayName("Should return empty list when no users exist")
-	void shouldReturnEmptyListWhenNoUsers() {
+	@DisplayName("Should return empty page when no users exist")
+	void shouldReturnEmptyPageWhenNoUsers() {
 		// Given
-		when(userRepository.findAll()).thenReturn(new ArrayList<>());
+		var emptyPage = new PageResult<User>(List.of(), 0, 20, 0L, 0);
+		when(userRepository.findAll(0, 20)).thenReturn(emptyPage);
 
 		// When
-		List<User> result = getAllUsersUseCase.execute(query);
+		PageResult<User> result = getAllUsersUseCase.execute(query);
 
 		// Then
 		assertThat(result).isNotNull();
-		assertThat(result).isEmpty();
+		assertThat(result.content()).isEmpty();
+		assertThat(result.totalElements()).isEqualTo(0L);
 
-		verify(userRepository, times(1)).findAll();
+		verify(userRepository, times(1)).findAll(0, 20);
 	}
 
 	@Test
-	@DisplayName("Should return list with single user")
-	void shouldReturnSingleUser() {
+	@DisplayName("Should pass page and size parameters to repository")
+	void shouldPassPaginationParams() {
 		// Given
-		List<User> singleUser = List.of(expectedUsers.get(0));
-		when(userRepository.findAll()).thenReturn(singleUser);
+		var query2 = new GetAllUsersQuery(2, 10);
+		var pageResult = new PageResult<>(List.of(users.get(0)), 2, 10, 21L, 3);
+		when(userRepository.findAll(2, 10)).thenReturn(pageResult);
 
 		// When
-		List<User> result = getAllUsersUseCase.execute(query);
+		PageResult<User> result = getAllUsersUseCase.execute(query2);
 
 		// Then
-		assertThat(result).isNotNull();
-		assertThat(result).hasSize(1);
-		assertThat(result.get(0).firstName()).isEqualTo("John");
-		assertThat(result.get(0).email()).isEqualTo("john.doe@example.com");
+		assertThat(result.page()).isEqualTo(2);
+		assertThat(result.size()).isEqualTo(10);
+		assertThat(result.totalElements()).isEqualTo(21L);
+		assertThat(result.totalPages()).isEqualTo(3);
 
-		verify(userRepository, times(1)).findAll();
+		verify(userRepository, times(1)).findAll(2, 10);
 	}
 
 	@Test
 	@DisplayName("Should call repository findAll exactly once")
 	void shouldCallRepositoryOnce() {
 		// Given
-		when(userRepository.findAll()).thenReturn(expectedUsers);
+		var pageResult = new PageResult<>(users, 0, 20, 3L, 1);
+		when(userRepository.findAll(0, 20)).thenReturn(pageResult);
 
 		// When
 		getAllUsersUseCase.execute(query);
 
 		// Then
-		verify(userRepository, times(1)).findAll();
+		verify(userRepository, times(1)).findAll(0, 20);
 		verifyNoMoreInteractions(userRepository);
 	}
 
@@ -141,35 +130,37 @@ class GetAllUsersUseCaseTest {
 	@DisplayName("Should return non-null result")
 	void shouldReturnNonNullResult() {
 		// Given
-		when(userRepository.findAll()).thenReturn(expectedUsers);
+		var pageResult = new PageResult<>(users, 0, 20, 3L, 1);
+		when(userRepository.findAll(0, 20)).thenReturn(pageResult);
 
 		// When
-		List<User> result = getAllUsersUseCase.execute(query);
+		PageResult<User> result = getAllUsersUseCase.execute(query);
 
 		// Then
 		assertThat(result).isNotNull();
 	}
 
 	@Test
-	@DisplayName("Should preserve user details in returned list")
+	@DisplayName("Should preserve user details in returned page")
 	void shouldPreserveUserDetails() {
 		// Given
-		when(userRepository.findAll()).thenReturn(expectedUsers);
+		var pageResult = new PageResult<>(users, 0, 20, 3L, 1);
+		when(userRepository.findAll(0, 20)).thenReturn(pageResult);
 
 		// When
-		List<User> result = getAllUsersUseCase.execute(query);
+		PageResult<User> result = getAllUsersUseCase.execute(query);
 
 		// Then
-		assertThat(result.get(0).firstName()).isEqualTo("John");
-		assertThat(result.get(0).lastName()).isEqualTo("Doe");
-		assertThat(result.get(0).email()).isEqualTo("john.doe@example.com");
+		assertThat(result.content().get(0).firstName()).isEqualTo("John");
+		assertThat(result.content().get(0).lastName()).isEqualTo("Doe");
+		assertThat(result.content().get(0).email()).isEqualTo("john.doe@example.com");
 
-		assertThat(result.get(1).firstName()).isEqualTo("Jane");
-		assertThat(result.get(1).lastName()).isEqualTo("Smith");
-		assertThat(result.get(1).email()).isEqualTo("jane.smith@example.com");
+		assertThat(result.content().get(1).firstName()).isEqualTo("Jane");
+		assertThat(result.content().get(1).lastName()).isEqualTo("Smith");
+		assertThat(result.content().get(1).email()).isEqualTo("jane.smith@example.com");
 
-		assertThat(result.get(2).firstName()).isEqualTo("Bob");
-		assertThat(result.get(2).lastName()).isEqualTo("Johnson");
-		assertThat(result.get(2).email()).isEqualTo("bob.johnson@example.com");
+		assertThat(result.content().get(2).firstName()).isEqualTo("Bob");
+		assertThat(result.content().get(2).lastName()).isEqualTo("Johnson");
+		assertThat(result.content().get(2).email()).isEqualTo("bob.johnson@example.com");
 	}
 }

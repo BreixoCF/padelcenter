@@ -1,6 +1,7 @@
 package com.bookings.padelcenter.application.update;
 
 import com.bookings.padelcenter.application.command.UpdateBookingCommand;
+import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.domain.exception.BookingNotFoundException;
 import com.bookings.padelcenter.domain.model.*;
 import com.bookings.padelcenter.domain.repository.BookingRepository;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -42,6 +44,11 @@ class UpdateBookingUseCaseTest {
 	private Field field;
 	private Center center;
 
+	private static final LocalDateTime EXISTING_START = LocalDateTime.of(2024, 12, 25, 10, 0);
+	private static final LocalDateTime EXISTING_END   = LocalDateTime.of(2024, 12, 25, 11, 0);
+	private static final LocalDateTime UPDATED_START  = LocalDateTime.of(2024, 12, 26, 10, 0);
+	private static final LocalDateTime UPDATED_END    = LocalDateTime.of(2024, 12, 26, 11, 0);
+
 	@BeforeEach
 	void setUp() {
 		bookingId = 1L;
@@ -49,57 +56,32 @@ class UpdateBookingUseCaseTest {
 
 		command = new UpdateBookingCommand(
 			bookingId,
-			"2024-12-26T10:00:00Z",
-			"2024-12-26T11:00:00Z",
+			UPDATED_START,
+			UPDATED_END,
 			new BigDecimal("30.00"),
-			modifiedBy
+			new AuthenticatedUser(modifiedBy)
 		);
 
 		UUID userId = UUID.randomUUID();
 		user = new User(
-			userId,
-			"John",
-			"Doe",
-			"john.doe@example.com",
-			"hashedPassword",
-			"600123456",
-			Set.of(),
-			Auditable.newAudit()
+			userId, "John", "Doe", "john.doe@example.com",
+			"hashedPassword", "600123456", Set.of(), Auditable.newAudit()
 		);
 
 		UUID centerId = UUID.randomUUID();
 		center = new Center(
-			centerId,
-			"Padel Center Barcelona",
-			"Calle Principal 123",
-			"Barcelona",
-			"933123456",
-			"barcelona@padelcenter.com",
-			null,
-			Auditable.newAudit()
+			centerId, "Padel Center Barcelona", "Calle Principal 123",
+			"Barcelona", "933123456", "barcelona@padelcenter.com", null, Auditable.newAudit()
 		);
 
 		UUID fieldId = UUID.randomUUID();
 		field = new Field(
-			fieldId,
-			"Court 1",
-			"Indoor",
-			new BigDecimal("25.00"),
-			true,
-			center,
-			Auditable.newAudit()
+			fieldId, "Court 1", "Indoor", new BigDecimal("25.00"), true, center, Auditable.newAudit()
 		);
 
 		existingBooking = new Booking(
-			bookingId,
-			user,
-			field,
-			"2024-12-25T10:00:00Z",
-			"2024-12-25T11:00:00Z",
-			new BigDecimal("25.00"),
-			Instant.now(),
-			BookingStatus.PENDING,
-			Auditable.newAudit()
+			bookingId, user, field, EXISTING_START, EXISTING_END,
+			new BigDecimal("25.00"), Instant.now(), BookingStatus.PENDING, Auditable.newAudit()
 		);
 	}
 
@@ -108,10 +90,7 @@ class UpdateBookingUseCaseTest {
 	void shouldUpdateBooking() {
 		// Given
 		Booking updatedBooking = existingBooking.updateDetails(
-			command.startTime(),
-			command.endTime(),
-			command.totalPrice(),
-			modifiedBy
+			command.startTime(), command.endTime(), command.totalPrice(), modifiedBy
 		);
 
 		when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(existingBooking));
@@ -122,8 +101,8 @@ class UpdateBookingUseCaseTest {
 
 		// Then
 		assertThat(result).isNotNull();
-		assertThat(result.startTime()).isEqualTo("2024-12-26T10:00:00Z");
-		assertThat(result.endTime()).isEqualTo("2024-12-26T11:00:00Z");
+		assertThat(result.startTime()).isEqualTo(UPDATED_START);
+		assertThat(result.endTime()).isEqualTo(UPDATED_END);
 		assertThat(result.totalPrice()).isEqualByComparingTo(new BigDecimal("30.00"));
 
 		verify(bookingRepository, times(1)).findById(bookingId);
@@ -240,8 +219,8 @@ class UpdateBookingUseCaseTest {
 		verify(bookingRepository).save(bookingCaptor.capture());
 		Booking capturedBooking = bookingCaptor.getValue();
 
-		assertThat(capturedBooking.startTime()).isEqualTo("2024-12-26T10:00:00Z");
-		assertThat(capturedBooking.endTime()).isEqualTo("2024-12-26T11:00:00Z");
+		assertThat(capturedBooking.startTime()).isEqualTo(UPDATED_START);
+		assertThat(capturedBooking.endTime()).isEqualTo(UPDATED_END);
 		assertThat(capturedBooking.totalPrice()).isEqualByComparingTo(new BigDecimal("30.00"));
 	}
 
@@ -250,10 +229,7 @@ class UpdateBookingUseCaseTest {
 	void shouldReturnSavedUpdatedBooking() {
 		// Given
 		Booking updatedBooking = existingBooking.updateDetails(
-			command.startTime(),
-			command.endTime(),
-			command.totalPrice(),
-			modifiedBy
+			command.startTime(), command.endTime(), command.totalPrice(), modifiedBy
 		);
 
 		when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(existingBooking));
@@ -272,10 +248,10 @@ class UpdateBookingUseCaseTest {
 		// Given
 		UpdateBookingCommand commandWithDifferentPrice = new UpdateBookingCommand(
 			bookingId,
-			"2024-12-25T14:00:00Z",
-			"2024-12-25T16:00:00Z",
+			LocalDateTime.of(2024, 12, 25, 14, 0),
+			LocalDateTime.of(2024, 12, 25, 16, 0),
 			new BigDecimal("50.00"),
-			modifiedBy
+			new AuthenticatedUser(modifiedBy)
 		);
 
 		when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(existingBooking));

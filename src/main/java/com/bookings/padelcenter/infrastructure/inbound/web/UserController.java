@@ -7,6 +7,7 @@ import com.bookings.padelcenter.application.read.GetAllUsersUseCase;
 import com.bookings.padelcenter.application.update.UpdatePasswordUseCase;
 import com.bookings.padelcenter.application.update.UpdateUserRolesUseCase;
 import com.bookings.padelcenter.application.update.UpdateUserUseCase;
+import com.bookings.padelcenter.domain.model.PageResult;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.CenterRoleRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateUserRequest;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdatePasswordRequest;
@@ -21,7 +22,6 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -64,13 +64,19 @@ public class UserController {
 	}
 
 	@GetMapping
-	public ResponseEntity<@NonNull List<CreateUserResponse>> getAllUsers() {
-		var query = new GetAllUsersQuery();
-		var users = getAllUsersUseCase.execute(query);
-		var response = users.stream()
-				.map(mapper::toResponse)
-				.toList();
-		return ResponseEntity.ok(response);
+	public ResponseEntity<@NonNull PageResult<CreateUserResponse>> getAllUsers(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "20") int size) {
+		var query = new GetAllUsersQuery(page, size);
+		var pageResult = getAllUsersUseCase.execute(query);
+		var mapped = new PageResult<>(
+				pageResult.content().stream().map(mapper::toResponse).toList(),
+				pageResult.page(),
+				pageResult.size(),
+				pageResult.totalElements(),
+				pageResult.totalPages()
+		);
+		return ResponseEntity.ok(mapped);
 	}
 
 	@PatchMapping("/{id}/password")
