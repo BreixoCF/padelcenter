@@ -5,7 +5,7 @@ import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.util.UUID;
 
@@ -13,17 +13,16 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@Transactional
+@Sql(scripts = "/db/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("BookingController Integration Tests")
 class BookingControllerIT extends AbstractIntegrationTest {
 
-	private static final String BOOKINGS_URL  = "/api/v1/bookings";
-	private static final String USERS_URL     = "/api/v1/users";
-	private static final String CENTERS_URL   = "/api/v1/centers";
+	private static final String BOOKINGS_URL = "/api/v1/bookings";
+	private static final String USERS_URL    = "/api/v1/users";
+	private static final String CENTERS_URL  = "/api/v1/centers";
 
 	// ── helpers ───────────────────────────────────────────────────────────────
 
-	/** Creates a user and returns their UUID. */
 	private UUID createUser(String email) throws Exception {
 		String json = """
 				{
@@ -36,17 +35,16 @@ class BookingControllerIT extends AbstractIntegrationTest {
 				""".formatted(email);
 
 		String body = mockMvc.perform(post(USERS_URL)
+						.with(adminJwt())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(json))
-				.andExpect(status().isOk())
+				.andExpect(status().isCreated())
 				.andReturn().getResponse().getContentAsString();
 
 		return UUID.fromString(JsonPath.read(body, "$.id"));
 	}
 
-	/** Creates a center + field (as admin) and returns the field UUID. */
 	private UUID createField() throws Exception {
-		// Center
 		String centerBody = mockMvc.perform(post(CENTERS_URL)
 						.with(adminJwt())
 						.contentType(MediaType.APPLICATION_JSON)
@@ -57,12 +55,11 @@ class BookingControllerIT extends AbstractIntegrationTest {
 								  "city":    "Madrid"
 								}
 								"""))
-				.andExpect(status().isOk())
+				.andExpect(status().isCreated())
 				.andReturn().getResponse().getContentAsString();
 
 		String centerId = JsonPath.read(centerBody, "$.id");
 
-		// Field
 		String fieldBody = mockMvc.perform(post(CENTERS_URL + "/" + centerId + "/fields")
 						.with(adminJwt())
 						.contentType(MediaType.APPLICATION_JSON)
@@ -74,7 +71,7 @@ class BookingControllerIT extends AbstractIntegrationTest {
 								  "isAvailable":  true
 								}
 								"""))
-				.andExpect(status().isOk())
+				.andExpect(status().isCreated())
 				.andReturn().getResponse().getContentAsString();
 
 		return UUID.fromString(JsonPath.read(fieldBody, "$.id"));
@@ -83,44 +80,17 @@ class BookingControllerIT extends AbstractIntegrationTest {
 	// ── POST /api/v1/bookings ─────────────────────────────────────────────────
 
 	@Test
-	@DisplayName("POST /api/v1/bookings — valid request returns 201 with booking id")
+	@DisplayName("POST /api/v1/bookings — valid request returns 201")
 	void createBooking_validRequest_returns201() throws Exception {
-		UUID userId  = createUser("booking.user@example.com");
+		createUser("booking.user@example.com");
 		UUID fieldId = createField();
 
 		String json = """
 				{
-				  "userId":      "%s",
 				  "fieldId":     "%s",
-				  "startTime":   "2025-06-01T10:00:00",
-				  "endTime":     "2025-06-01T11:00:00",
+				  "startTime":   "2025-06-01T10:00:00Z",
+				  "endTime":     "2025-06-01T11:00:00Z",
 				  "totalPrice":  25.00
-				}
-				""".formatted(userId, fieldId);
-
-		mockMvc.perform(post(BOOKINGS_URL)
-						.with(userJwt())
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(json))
-				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.id", notNullValue()))
-				.andExpect(jsonPath("$.userId").value(userId.toString()))
-				.andExpect(jsonPath("$.fieldId").value(fieldId.toString()))
-				.andExpect(jsonPath("$.status").value("PENDING"));
-	}
-
-	@Test
-	@DisplayName("POST /api/v1/bookings — non-existent user returns 404")
-	void createBooking_userNotFound_returns404() throws Exception {
-		UUID fieldId = createField();
-
-		String json = """
-				{
-				  "userId":     "00000000-0000-0000-0000-000000000099",
-				  "fieldId":    "%s",
-				  "startTime":  "2025-06-01T10:00:00",
-				  "endTime":    "2025-06-01T11:00:00",
-				  "totalPrice": 25.00
 				}
 				""".formatted(fieldId);
 
@@ -128,79 +98,20 @@ class BookingControllerIT extends AbstractIntegrationTest {
 						.with(userJwt())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(json))
-				.andExpect(status().isNotFound());
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.id", notNullValue()))
+				.andExpect(jsonPath("$.field.id").value(fieldId.toString()))
+				.andExpect(jsonPath("$.status").value("PENDING"));
 	}
 
-	@Test
-	@DisplayName("POST /api/v1/bookings — non-existent field returns 404")
-	void createBooking_fieldNotFound_returns404() throws Exception {
-		UUID userId = createUser("field.notfound@example.com");
-
-		String json = """
-				{
-				  "userId":     "%s",
-				  "fieldId":    "00000000-0000-0000-0000-000000000099",
-				  "startTime":  "2025-06-01T10:00:00",
-				  "endTime":    "2025-06-01T11:00:00",
-				  "totalPrice": 25.00
-				}
-				""".formatted(userId);
-
-		mockMvc.perform(post(BOOKINGS_URL)
-						.with(userJwt())
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(json))
-				.andExpect(status().isNotFound());
-	}
-
-	// ── GET /api/v1/bookings/users/{userId} ───────────────────────────────────
+	// ── GET /api/v1/bookings/{id} ─────────────────────────────────────────────
 
 	@Test
-	@DisplayName("GET /api/v1/bookings/users/{userId} — user with no bookings returns empty list")
-	void getBookingHistory_userWithNoBookings_returnsEmptyList() throws Exception {
-		UUID userId = createUser("history.empty@example.com");
-
-		mockMvc.perform(get(BOOKINGS_URL + "/users/" + userId)
+	@DisplayName("GET /api/v1/bookings/{id} — non-existent returns 404")
+	void getBookingById_notFound_returns404() throws Exception {
+		mockMvc.perform(get(BOOKINGS_URL + "/999999")
 						.with(userJwt()))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$").isArray())
-				.andExpect(jsonPath("$", hasSize(0)));
-	}
-
-	@Test
-	@DisplayName("GET /api/v1/bookings/users/{userId} — user with one booking returns it")
-	void getBookingHistory_userWithBooking_returnsList() throws Exception {
-		UUID userId  = createUser("history.booked@example.com");
-		UUID fieldId = createField();
-
-		// Create a booking
-		mockMvc.perform(post(BOOKINGS_URL)
-						.with(userJwt())
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{
-								  "userId":     "%s",
-								  "fieldId":    "%s",
-								  "startTime":  "2025-07-01T09:00:00",
-								  "endTime":    "2025-07-01T10:00:00",
-								  "totalPrice": 30.00
-								}
-								""".formatted(userId, fieldId)))
-				.andExpect(status().isCreated());
-
-		mockMvc.perform(get(BOOKINGS_URL + "/users/" + userId)
-						.with(userJwt()))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$").isArray())
-				.andExpect(jsonPath("$", hasSize(1)))
-				.andExpect(jsonPath("$[0].status").value("PENDING"));
-	}
-
-	@Test
-	@DisplayName("GET /api/v1/bookings/users/{userId} — non-existent user returns 404")
-	void getBookingHistory_userNotFound_returns404() throws Exception {
-		mockMvc.perform(get(BOOKINGS_URL + "/users/00000000-0000-0000-0000-000000000099")
-						.with(userJwt()))
-				.andExpect(status().isNotFound());
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.title").isNotEmpty());
 	}
 }

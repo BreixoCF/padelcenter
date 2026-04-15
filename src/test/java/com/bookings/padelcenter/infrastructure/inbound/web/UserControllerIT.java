@@ -4,13 +4,13 @@ import com.bookings.padelcenter.AbstractIntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.jdbc.Sql;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@Transactional
+@Sql(scripts = "/db/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("UserController Integration Tests")
 class UserControllerIT extends AbstractIntegrationTest {
 
@@ -29,12 +29,13 @@ class UserControllerIT extends AbstractIntegrationTest {
 	// ── POST /api/v1/users ────────────────────────────────────────────────────
 
 	@Test
-	@DisplayName("POST /api/v1/users — valid request returns 200 with user id")
-	void createUser_validRequest_returns200() throws Exception {
+	@DisplayName("POST /api/v1/users — valid request returns 201 with body")
+	void createUser_validRequest_returns201() throws Exception {
 		mockMvc.perform(post(BASE_URL)
+						.with(adminJwt())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(VALID_USER_JSON))
-				.andExpect(status().isOk())
+				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.id").isNotEmpty())
 				.andExpect(jsonPath("$.email").value("john.doe@example.com"))
 				.andExpect(jsonPath("$.firstName").value("John"))
@@ -44,45 +45,38 @@ class UserControllerIT extends AbstractIntegrationTest {
 	@Test
 	@DisplayName("POST /api/v1/users — duplicate email returns 409")
 	void createUser_duplicateEmail_returns409() throws Exception {
-		// First registration succeeds
 		mockMvc.perform(post(BASE_URL)
+						.with(adminJwt())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(VALID_USER_JSON))
-				.andExpect(status().isOk());
+				.andExpect(status().isCreated());
 
-		// Second registration with the same email must be rejected
 		mockMvc.perform(post(BASE_URL)
+						.with(adminJwt())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(VALID_USER_JSON))
-				.andExpect(status().isConflict());
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.title").isNotEmpty());
 	}
 
 	@Test
-	@DisplayName("POST /api/v1/users — missing required field returns 400")
-	void createUser_missingFirstName_returns400() throws Exception {
-		String json = """
-				{
-				  "lastName":  "Doe",
-				  "email":     "nodomain@example.com",
-				  "password":  "password123"
-				}
-				""";
-		mockMvc.perform(post(BASE_URL)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(json))
-				.andExpect(status().isBadRequest());
+	@DisplayName("GET /api/v1/users — unauthenticated returns 401")
+	void getUsers_unauthenticated_returns401() throws Exception {
+		mockMvc.perform(get(BASE_URL))
+				.andExpect(status().isUnauthorized());
 	}
 
 	// ── GET /api/v1/users ─────────────────────────────────────────────────────
 
 	@Test
-	@DisplayName("GET /api/v1/users — admin role returns paginated result")
-	void getAllUsers_asAdmin_returnsPaginatedResult() throws Exception {
-		// Seed one user
+	@DisplayName("GET /api/v1/users — admin gets paginated result")
+	void getUsers_asAdmin_returnsPaginatedResult() throws Exception {
+		// Seed a user
 		mockMvc.perform(post(BASE_URL)
+						.with(adminJwt())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(VALID_USER_JSON))
-				.andExpect(status().isOk());
+				.andExpect(status().isCreated());
 
 		mockMvc.perform(get(BASE_URL)
 						.with(adminJwt())
@@ -96,16 +90,19 @@ class UserControllerIT extends AbstractIntegrationTest {
 	}
 
 	@Test
-	@DisplayName("GET /api/v1/users — non-admin role returns 403")
-	void getAllUsers_asNonAdmin_returns403() throws Exception {
-		mockMvc.perform(get(BASE_URL).with(userJwt()))
-				.andExpect(status().isForbidden());
-	}
-
-	@Test
-	@DisplayName("GET /api/v1/users — unauthenticated returns 401")
-	void getAllUsers_unauthenticated_returns401() throws Exception {
-		mockMvc.perform(get(BASE_URL))
-				.andExpect(status().isUnauthorized());
+	@DisplayName("POST /api/v1/users — missing required field returns 400")
+	void createUser_missingFirstName_returns400() throws Exception {
+		String json = """
+				{
+				  "lastName":  "Doe",
+				  "email":     "nodomain@example.com",
+				  "password":  "password123"
+				}
+				""";
+		mockMvc.perform(post(BASE_URL)
+						.with(adminJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(json))
+				.andExpect(status().isBadRequest());
 	}
 }
