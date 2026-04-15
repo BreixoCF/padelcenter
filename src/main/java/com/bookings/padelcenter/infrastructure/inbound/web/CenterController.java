@@ -2,46 +2,51 @@ package com.bookings.padelcenter.infrastructure.inbound.web;
 
 import com.bookings.padelcenter.application.create.CreateCenterUseCase;
 import com.bookings.padelcenter.application.create.CreateFieldUseCase;
-import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateCenterRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateCenterResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateFieldRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateFieldResponse;
+import com.bookings.padelcenter.application.query.GetAllCentersQuery;
+import com.bookings.padelcenter.application.read.GetAllCentersUseCase;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.CenterApiMapper;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.FieldApiMapper;
-import jakarta.validation.Valid;
+import com.padelcenter.infrastructure.web.generated.api.CentersApi;
+import com.padelcenter.infrastructure.web.generated.model.CenterRequest;
+import com.padelcenter.infrastructure.web.generated.model.CenterResponse;
+import com.padelcenter.infrastructure.web.generated.model.FieldRequest;
+import com.padelcenter.infrastructure.web.generated.model.FieldResponse;
+import com.padelcenter.infrastructure.web.generated.model.ListCenters200Response;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/centers")
 @RequiredArgsConstructor
-public class CenterController {
+public class CenterController implements CentersApi {
 
 	private final CreateCenterUseCase createCenterUseCase;
+	private final GetAllCentersUseCase getAllCentersUseCase;
 	private final CreateFieldUseCase createFieldUseCase;
 	private final CenterApiMapper centerApiMapper;
 	private final FieldApiMapper fieldApiMapper;
 
-	@PostMapping
-	public ResponseEntity<@NonNull CreateCenterResponse> createCenter(@Valid @RequestBody CreateCenterRequest request) {
-		var command = centerApiMapper.toCommand(request);
-		var createdCenter = createCenterUseCase.execute(command);
-		var response = centerApiMapper.toResponse(createdCenter);
-		return ResponseEntity.ok(response);
+	@Override
+	public ResponseEntity<CenterResponse> createCenter(CenterRequest centerRequest) {
+		var command = centerApiMapper.toCommand(centerRequest);
+		var center = createCenterUseCase.execute(command);
+		return ResponseEntity.status(HttpStatus.CREATED).body(centerApiMapper.toResponse(center));
 	}
 
-	@PostMapping("/{centerId}/fields")
-	public ResponseEntity<@NonNull CreateFieldResponse> createField(@PathVariable UUID centerId,
-	                                                                @Valid @RequestBody CreateFieldRequest request) {
-		var command = fieldApiMapper.toCommand(centerId, request);
-		var createdField = createFieldUseCase.execute(command);
-		var response = fieldApiMapper.toResponse(createdField);
-		return ResponseEntity.ok(response);
+	@Override
+	public ResponseEntity<ListCenters200Response> listCenters(Integer page, Integer size, String sort) {
+		var query = new GetAllCentersQuery(page, size);
+		var pageResult = getAllCentersUseCase.execute(query);
+		return ResponseEntity.ok(centerApiMapper.toPagedResponse(pageResult));
 	}
 
-
+	@Override
+	public ResponseEntity<FieldResponse> createField(UUID centerId, FieldRequest fieldRequest) {
+		var command = fieldApiMapper.toCommand(centerId, fieldRequest);
+		var field = createFieldUseCase.execute(command);
+		return ResponseEntity.status(HttpStatus.CREATED).body(fieldApiMapper.toResponse(field));
+	}
 }

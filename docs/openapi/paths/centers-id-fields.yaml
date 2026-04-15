@@ -1,0 +1,49 @@
+parameters:
+  - name: centerId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+    description: Unique identifier of the center in which to create the field.
+    example: "aabbccdd-1234-5678-abcd-ef0123456789"
+
+post:
+  operationId: createField
+  summary: Create a field within a center
+  description: >
+    Creates a new bookable field inside the specified center.
+    Field names must be unique within the same center.
+    Requires ADMIN role.
+    Returns 201 on success (fix I-2).
+  tags:
+    - Centers
+    - Fields
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/field-request.yaml'
+        example:
+          name: "Court 1"
+          type: "Indoor"
+          pricePerHour: 25.00
+          isAvailable: true
+  responses:
+    '201':
+      description: Field created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/field-response.yaml'
+    '400':
+      $ref: '../components/responses/bad-request.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '409':
+      $ref: '../components/responses/conflict.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

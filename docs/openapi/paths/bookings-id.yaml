@@ -1,0 +1,64 @@
+parameters:
+  - name: bookingId
+    in: path
+    required: true
+    schema:
+      type: integer
+      format: int64
+    description: Unique numeric identifier of the booking.
+    example: 42
+
+get:
+  operationId: getBookingById
+  summary: Get a booking by ID
+  description: Returns the full booking representation for the given booking ID.
+  tags:
+    - Bookings
+  responses:
+    '200':
+      description: Booking found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/booking-response.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'
+
+put:
+  operationId: updateBooking
+  summary: Update a booking's time slot and price
+  description: >
+    Replaces the time slot and total price of an existing booking.
+    Both startTime and endTime must be valid ISO 8601 date-time strings (fix I-3).
+    The authenticated user must be the booking owner or an admin.
+  tags:
+    - Bookings
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/booking-update-request.yaml'
+        example:
+          startTime: "2025-06-15T11:00:00"
+          endTime: "2025-06-15T12:00:00"
+          totalPrice: 30.00
+  responses:
+    '200':
+      description: Booking updated successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/booking-response.yaml'
+    '400':
+      $ref: '../components/responses/bad-request.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

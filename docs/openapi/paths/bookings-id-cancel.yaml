@@ -1,0 +1,51 @@
+parameters:
+  - name: bookingId
+    in: path
+    required: true
+    schema:
+      type: integer
+      format: int64
+    description: Unique numeric identifier of the booking to cancel.
+    example: 42
+
+patch:
+  operationId: cancelBooking
+  summary: Cancel a booking
+  description: >
+    Transitions a booking to CANCELLED status. Only PENDING or CONFIRMED bookings
+    can be cancelled. Returns the updated booking (decision D3 — same BookingResponse
+    schema as other booking operations, replacing the former CancelBookingResponse).
+    Returns 409 Conflict if the booking is already cancelled.
+  tags:
+    - Bookings
+  responses:
+    '200':
+      description: Booking cancelled successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/booking-response.yaml'
+          example:
+            id: 42
+            userId: "123e4567-e89b-12d3-a456-426614174000"
+            field:
+              id: "f1e2d3c4-b5a6-7890-fedc-ba9876543210"
+              name: "Court 1"
+              type: "Indoor"
+              center:
+                name: "Padel Center Barcelona"
+                address: "Calle Principal 123"
+                city: "Barcelona"
+            startTime: "2025-06-15T10:00:00"
+            endTime: "2025-06-15T11:00:00"
+            totalPrice: 25.00
+            bookedAt: "2025-04-01T12:00:00Z"
+            status: "CANCELLED"
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '409':
+      $ref: '../components/responses/conflict.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

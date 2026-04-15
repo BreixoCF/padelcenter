@@ -1,0 +1,39 @@
+type: object
+description: Payload for registering a new user in the system.
+required:
+  - firstName
+  - lastName
+  - email
+  - password
+properties:
+  firstName:
+    type: string
+    minLength: 1
+    maxLength: 100
+    description: User's first name.
+    example: "Ana"
+  lastName:
+    type: string
+    minLength: 1
+    maxLength: 100
+    description: User's last name.
+    example: "García"
+  email:
+    type: string
+    format: email
+    maxLength: 255
+    description: User's email address. Must be unique within the system.
+    example: "ana.garcia@example.com"
+  password:
+    type: string
+    format: password
+    minLength: 8
+    maxLength: 255
+    description: Plain-text password. Will be hashed server-side. Minimum 8 characters.
+    example: "securePass123!"
+  phoneNumber:
+    type: string
+    maxLength: 20
+    nullable: true
+    description: Optional contact phone number.
+    example: "+34600123456"

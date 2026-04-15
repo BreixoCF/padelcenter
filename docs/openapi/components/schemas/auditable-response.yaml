@@ -1,0 +1,41 @@
+type: object
+description: >
+  Audit metadata automatically attached to every persistent resource.
+  All fields are nullable; createdAt is always set on creation.
+properties:
+  createdBy:
+    type: string
+    format: uuid
+    nullable: true
+    description: UUID of the user who created the resource.
+    example: "123e4567-e89b-12d3-a456-426614174000"
+  createdAt:
+    type: string
+    format: date-time
+    nullable: true
+    description: ISO 8601 timestamp of resource creation.
+    example: "2025-04-01T09:00:00Z"
+  modifiedBy:
+    type: string
+    format: uuid
+    nullable: true
+    description: UUID of the user who last modified the resource.
+    example: "123e4567-e89b-12d3-a456-426614174001"
+  modifiedAt:
+    type: string
+    format: date-time
+    nullable: true
+    description: ISO 8601 timestamp of the last modification.
+    example: "2025-04-10T14:30:00Z"
+  deletedBy:
+    type: string
+    format: uuid
+    nullable: true
+    description: UUID of the user who soft-deleted the resource. Null if not deleted.
+    example: null
+  deletedAt:
+    type: string
+    format: date-time
+    nullable: true
+    description: ISO 8601 timestamp of soft-deletion. Null if not deleted.
+    example: null

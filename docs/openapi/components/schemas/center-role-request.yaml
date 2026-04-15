@@ -1,0 +1,26 @@
+type: object
+description: >
+  Represents a single center-role assignment for a user.
+  Both fields are required (fix I-8 — previously had no validation).
+  Role uses an API-owned enum, not the domain model directly.
+required:
+  - centerId
+  - role
+properties:
+  centerId:
+    type: string
+    format: uuid
+    description: Unique identifier of the center to which the role applies.
+    example: "aabbccdd-1234-5678-abcd-ef0123456789"
+  role:
+    type: string
+    enum:
+      - ADMIN
+      - MANAGER
+      - USER
+    description: >
+      Role the user holds within the specified center.
+      ADMIN: full center management.
+      MANAGER: operational management.
+      USER: standard member access.
+    example: "MANAGER"

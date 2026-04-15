@@ -1,0 +1,14 @@
+description: >
+  Conflict — the request conflicts with the current state of the resource.
+  Common causes: duplicate email on user creation, booking already cancelled,
+  or a database unique-constraint violation.
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/problem-detail.yaml'
+    example:
+      type: "about:blank"
+      title: "Email Already Exists"
+      status: 409
+      detail: "El email 'ana@example.com' ya está registrado por otro usuario"
+      timestamp: "2025-04-15T10:30:00Z"

@@ -3,100 +3,119 @@ package com.bookings.padelcenter.infrastructure.inbound.web;
 import com.bookings.padelcenter.application.create.CreateUserUseCase;
 import com.bookings.padelcenter.application.delete.DeleteUserUseCase;
 import com.bookings.padelcenter.application.query.GetAllUsersQuery;
+import com.bookings.padelcenter.application.query.GetBookingHistoryQuery;
+import com.bookings.padelcenter.application.query.GetUserByIdQuery;
 import com.bookings.padelcenter.application.read.GetAllUsersUseCase;
+import com.bookings.padelcenter.application.read.GetBookingHistoryUseCase;
+import com.bookings.padelcenter.application.read.GetUserByIdUseCase;
 import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.application.update.UpdatePasswordUseCase;
 import com.bookings.padelcenter.application.update.UpdateUserRolesUseCase;
 import com.bookings.padelcenter.application.update.UpdateUserUseCase;
-import com.bookings.padelcenter.domain.model.PageResult;
-import com.bookings.padelcenter.infrastructure.inbound.dto.request.CenterRoleRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateUserRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdatePasswordRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdateUserRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateUserResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.UpdatePasswordResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.UpdateUserResponse;
+import com.bookings.padelcenter.infrastructure.inbound.mapper.BookingApiMapper;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.UserApiMapper;
-import jakarta.validation.Valid;
+import com.padelcenter.infrastructure.web.generated.api.UsersApi;
+import com.padelcenter.infrastructure.web.generated.model.CenterRoleRequest;
+import com.padelcenter.infrastructure.web.generated.model.GetUserBookings200Response;
+import com.padelcenter.infrastructure.web.generated.model.ListUsers200Response;
+import com.padelcenter.infrastructure.web.generated.model.MessageResponse;
+import com.padelcenter.infrastructure.web.generated.model.PasswordUpdateRequest;
+import com.padelcenter.infrastructure.web.generated.model.UserRequest;
+import com.padelcenter.infrastructure.web.generated.model.UserResponse;
+import com.padelcenter.infrastructure.web.generated.model.UserUpdateRequest;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-public class UserController {
+public class UserController implements UsersApi {
 
 	private final CreateUserUseCase createUserUseCase;
 	private final GetAllUsersUseCase getAllUsersUseCase;
+	private final GetUserByIdUseCase getUserByIdUseCase;
 	private final UpdateUserUseCase updateUserUseCase;
 	private final UpdateUserRolesUseCase updateUserRolesUseCase;
 	private final UpdatePasswordUseCase updatePasswordUseCase;
 	private final DeleteUserUseCase deleteUserUseCase;
+	private final GetBookingHistoryUseCase getBookingHistoryUseCase;
 
-	private final UserApiMapper mapper;
+	private final UserApiMapper userMapper;
+	private final BookingApiMapper bookingMapper;
 
-	@PostMapping
-	public ResponseEntity<@NonNull CreateUserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
-		var command = mapper.toCommand(request);
-		var createdUser = createUserUseCase.execute(command);
-		var response = mapper.toResponse(createdUser);
-		return ResponseEntity.ok(response);
+	@Override
+	public ResponseEntity<UserResponse> createUser(UserRequest userRequest) {
+		var command = userMapper.toCommand(userRequest);
+		var user = createUserUseCase.execute(command);
+		return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toResponse(user));
 	}
 
-	@PutMapping("/{id}")
-	public ResponseEntity<UpdateUserResponse> updateUser(@PathVariable UUID id,
-	                                                      @Valid @RequestBody UpdateUserRequest request) {
-		var command = mapper.toCommand(id, request);
-		var updatedUser = updateUserUseCase.execute(command);
-		var response = mapper.toUpdateUserResponse(updatedUser);
-		return ResponseEntity.ok(response);
-	}
-
-	@PatchMapping("/{id}/roles")
-	public ResponseEntity<UpdateUserResponse> updateUserRoles(@PathVariable UUID id,
-	                                                           @RequestBody Set<CenterRoleRequest> rolesRequest,
-	                                                           AuthenticatedUser authenticatedUser) {
-		var command = mapper.toUpdateUserRolesCommand(id, rolesRequest, authenticatedUser);
-		var updatedUser = updateUserRolesUseCase.execute(command);
-		var response = mapper.toUpdateUserResponse(updatedUser);
-		return ResponseEntity.ok(response);
-	}
-
-	@GetMapping
-	public ResponseEntity<@NonNull PageResult<CreateUserResponse>> getAllUsers(
-			@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "20") int size) {
+	@Override
+	public ResponseEntity<ListUsers200Response> listUsers(Integer page, Integer size, String sort) {
 		var query = new GetAllUsersQuery(page, size);
 		var pageResult = getAllUsersUseCase.execute(query);
-		var mapped = new PageResult<>(
-				pageResult.content().stream().map(mapper::toResponse).toList(),
-				pageResult.page(),
-				pageResult.size(),
+		List<UserResponse> content = pageResult.content().stream()
+				.map(userMapper::toResponse)
+				.toList();
+		var response = new ListUsers200Response(
+				content,
 				pageResult.totalElements(),
-				pageResult.totalPages()
+				pageResult.totalPages(),
+				pageResult.page(),
+				pageResult.size()
 		);
-		return ResponseEntity.ok(mapped);
-	}
-
-	@PatchMapping("/{id}/password")
-	public ResponseEntity<UpdatePasswordResponse> updatePassword(@PathVariable UUID id,
-	                                                              @Valid @RequestBody UpdatePasswordRequest request,
-	                                                              AuthenticatedUser authenticatedUser) {
-		var command = mapper.toUpdatePasswordCommand(id, request, authenticatedUser);
-		var updatedUser = updatePasswordUseCase.execute(command);
-		var response = mapper.toUpdatePasswordResponse(updatedUser);
 		return ResponseEntity.ok(response);
 	}
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteUser(@PathVariable UUID id, AuthenticatedUser authenticatedUser) {
-		var command = mapper.toDeleteUserCommand(id, authenticatedUser);
+	@Override
+	public ResponseEntity<UserResponse> getUserById(UUID id) {
+		var user = getUserByIdUseCase.execute(new GetUserByIdQuery(id));
+		return ResponseEntity.ok(userMapper.toResponse(user));
+	}
+
+	@Override
+	public ResponseEntity<UserResponse> updateUser(UUID id, UserUpdateRequest userUpdateRequest) {
+		var command = userMapper.toCommand(id, userUpdateRequest);
+		var user = updateUserUseCase.execute(command);
+		return ResponseEntity.ok(userMapper.toResponse(user));
+	}
+
+	@Override
+	public ResponseEntity<UserResponse> updateUserRoles(UUID id, List<CenterRoleRequest> centerRoleRequest) {
+		var command = userMapper.toUpdateUserRolesCommand(id, centerRoleRequest, currentUser());
+		var user = updateUserRolesUseCase.execute(command);
+		return ResponseEntity.ok(userMapper.toResponse(user));
+	}
+
+	@Override
+	public ResponseEntity<MessageResponse> updatePassword(UUID id, PasswordUpdateRequest passwordUpdateRequest) {
+		var command = userMapper.toUpdatePasswordCommand(id, passwordUpdateRequest, currentUser());
+		updatePasswordUseCase.execute(command);
+		return ResponseEntity.ok(userMapper.toMessageResponse("Password updated successfully"));
+	}
+
+	@Override
+	public ResponseEntity<Void> deleteUser(UUID id) {
+		var command = userMapper.toDeleteUserCommand(id, currentUser());
 		deleteUserUseCase.execute(command);
 		return ResponseEntity.noContent().build();
+	}
+
+	@Override
+	public ResponseEntity<GetUserBookings200Response> getUserBookings(UUID userId, Integer page, Integer size,
+	                                                                    String sort) {
+		var bookings = getBookingHistoryUseCase.execute(new GetBookingHistoryQuery(userId));
+		return ResponseEntity.ok(bookingMapper.toPagedBookingHistory(bookings, page, size));
+	}
+
+	private AuthenticatedUser currentUser() {
+		var auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+		return new AuthenticatedUser(UUID.fromString(auth.getToken().getSubject()));
 	}
 }

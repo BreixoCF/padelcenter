@@ -19,6 +19,8 @@
 		<java.version>21</java.version>
 		<lombok.version>1.18.38</lombok.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<springdoc.version>2.7.0</springdoc.version>
+		<openapi-generator.version>7.6.0</openapi-generator.version>
 	</properties>
 
 	<dependencies>
@@ -54,6 +56,18 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
+
+		<!-- OpenAPI / SpringDoc -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>${springdoc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openapitools</groupId>
+			<artifactId>jackson-databind-nullable</artifactId>
+			<version>0.2.6</version>
 		</dependency>
 
 		<!-- Utilities -->
@@ -125,6 +139,58 @@
 					</argLine>
 				</configuration>
 			</plugin>
+			<!-- OpenAPI code generation from docs/openapi/index.yaml -->
+			<plugin>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>${openapi-generator.version}</version>
+				<executions>
+					<execution>
+						<goals><goal>generate</goal></goals>
+						<configuration>
+							<inputSpec>${project.basedir}/docs/openapi/index.yaml</inputSpec>
+							<generatorName>spring</generatorName>
+							<output>${project.build.directory}/generated-sources/openapi</output>
+							<apiPackage>com.padelcenter.infrastructure.web.generated.api</apiPackage>
+							<modelPackage>com.padelcenter.infrastructure.web.generated.model</modelPackage>
+							<configOptions>
+								<interfaceOnly>true</interfaceOnly>
+								<useSpringBoot3>true</useSpringBoot3>
+								<useTags>true</useTags>
+								<useJakartaEe>true</useJakartaEe>
+								<openApiNullable>false</openApiNullable>
+								<documentationProvider>springdoc</documentationProvider>
+								<annotationLibrary>swagger2</annotationLibrary>
+								<useEnumCaseInsensitive>true</useEnumCaseInsensitive>
+								<dateLibrary>java8</dateLibrary>
+								<generateConstructorWithAllArgs>false</generateConstructorWithAllArgs>
+								<skipDefaultInterface>true</skipDefaultInterface>
+							</configOptions>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<generateSupportingFiles>false</generateSupportingFiles>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Register generated sources as a compile source root -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals><goal>add-source</goal></goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated-sources/openapi</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>

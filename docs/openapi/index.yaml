@@ -1,0 +1,148 @@
+openapi: "3.0.3"
+
+info:
+  title: Padel Center API
+  version: "1.0.0"
+  description: >
+    REST API for the Padel Center booking platform.
+    Manages users, padel centers, fields, and bookings.
+
+    **Authentication**: All endpoints require a valid JWT Bearer token obtained
+    from the identity provider, except where noted. Supply the token in the
+    `Authorization: Bearer <token>` header.
+
+    **Versioning**: The API is versioned via the URL path (`/api/v1/`).
+
+    **Error format**: All error responses conform to
+    [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457).
+  contact:
+    name: Padel Center Engineering
+    email: breixo2@gmail.com
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.padelcenter.com
+    description: Production server
+
+# Global security — applies to every operation unless overridden.
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Users
+    description: User registration, profile management, roles, and authentication operations.
+  - name: Bookings
+    description: Booking lifecycle — create, retrieve, update, and cancel bookings.
+  - name: Centers
+    description: Padel center management (ADMIN only for writes).
+  - name: Fields
+    description: Field management within centers (ADMIN only for writes).
+
+paths:
+  # ── Users ────────────────────────────────────────────────────────────────
+  /api/v1/users:
+    $ref: './paths/users.yaml'
+
+  /api/v1/users/{id}:
+    $ref: './paths/users-id.yaml'
+
+  /api/v1/users/{id}/roles:
+    $ref: './paths/users-id-roles.yaml'
+
+  /api/v1/users/{id}/password:
+    $ref: './paths/users-id-password.yaml'
+
+  /api/v1/users/{userId}/bookings:
+    $ref: './paths/users-id-bookings.yaml'
+
+  # ── Bookings ─────────────────────────────────────────────────────────────
+  /api/v1/bookings:
+    $ref: './paths/bookings.yaml'
+
+  /api/v1/bookings/{bookingId}:
+    $ref: './paths/bookings-id.yaml'
+
+  /api/v1/bookings/{bookingId}/cancel:
+    $ref: './paths/bookings-id-cancel.yaml'
+
+  # ── Centers ──────────────────────────────────────────────────────────────
+  /api/v1/centers:
+    $ref: './paths/centers.yaml'
+
+  /api/v1/centers/{centerId}/fields:
+    $ref: './paths/centers-id-fields.yaml'
+
+  # ── Fields ───────────────────────────────────────────────────────────────
+  /api/v1/fields:
+    $ref: './paths/fields.yaml'
+
+  /api/v1/fields/{id}:
+    $ref: './paths/fields-id.yaml'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        JWT token issued by the identity provider. Include in the
+        `Authorization: Bearer <token>` request header.
+
+  # ── Schemas ──────────────────────────────────────────────────────────────
+  schemas:
+    # Requests
+    UserRequest:
+      $ref: './components/schemas/user-request.yaml'
+    UserUpdateRequest:
+      $ref: './components/schemas/user-update-request.yaml'
+    PasswordUpdateRequest:
+      $ref: './components/schemas/password-update-request.yaml'
+    CenterRoleRequest:
+      $ref: './components/schemas/center-role-request.yaml'
+    CenterRequest:
+      $ref: './components/schemas/center-request.yaml'
+    FieldRequest:
+      $ref: './components/schemas/field-request.yaml'
+    BookingRequest:
+      $ref: './components/schemas/booking-request.yaml'
+    BookingUpdateRequest:
+      $ref: './components/schemas/booking-update-request.yaml'
+
+    # Responses
+    UserResponse:
+      $ref: './components/schemas/user-response.yaml'
+    CenterResponse:
+      $ref: './components/schemas/center-response.yaml'
+    CenterSummaryResponse:
+      $ref: './components/schemas/center-summary-response.yaml'
+    FieldResponse:
+      $ref: './components/schemas/field-response.yaml'
+    FieldSummaryResponse:
+      $ref: './components/schemas/field-summary-response.yaml'
+    BookingResponse:
+      $ref: './components/schemas/booking-response.yaml'
+    MessageResponse:
+      $ref: './components/schemas/message-response.yaml'
+    AuditableResponse:
+      $ref: './components/schemas/auditable-response.yaml'
+    PagedResponse:
+      $ref: './components/schemas/paged-response.yaml'
+    ProblemDetail:
+      $ref: './components/schemas/problem-detail.yaml'
+
+  # ── Reusable Responses ────────────────────────────────────────────────────
+  responses:
+    BadRequest:
+      $ref: './components/responses/bad-request.yaml'
+    Unauthorized:
+      $ref: './components/responses/unauthorized.yaml'
+    NotFound:
+      $ref: './components/responses/not-found.yaml'
+    Conflict:
+      $ref: './components/responses/conflict.yaml'
+    Unprocessable:
+      $ref: './components/responses/unprocessable.yaml'
+    ServerError:
+      $ref: './components/responses/server-error.yaml'

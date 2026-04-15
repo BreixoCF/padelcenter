@@ -15,3 +15,12 @@ spring:
           # Provide a non-empty default so the placeholder always resolves.
           # The IssuerUriCondition skips this bean when jwk-set-uri is also present (test profile).
           issuer-uri: ${JWT_ISSUER_URI:https://placeholder.invalid}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  show-actuator: false

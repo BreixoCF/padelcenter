@@ -1,69 +1,64 @@
 package com.bookings.padelcenter.infrastructure.inbound.web;
 
 import com.bookings.padelcenter.application.create.CreateBookingUseCase;
-import com.bookings.padelcenter.application.read.GetBookingHistoryUseCase;
+import com.bookings.padelcenter.application.query.GetBookingByIdQuery;
+import com.bookings.padelcenter.application.read.GetBookingByIdUseCase;
 import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.application.update.CancelBookingUseCase;
 import com.bookings.padelcenter.application.update.UpdateBookingUseCase;
-import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateBookingRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdateBookingRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.BookingHistoryResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.CancelBookingResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateBookingResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.UpdateBookingResponse;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.BookingApiMapper;
-import jakarta.validation.Valid;
+import com.padelcenter.infrastructure.web.generated.api.BookingsApi;
+import com.padelcenter.infrastructure.web.generated.model.BookingRequest;
+import com.padelcenter.infrastructure.web.generated.model.BookingResponse;
+import com.padelcenter.infrastructure.web.generated.model.BookingUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/bookings")
 @RequiredArgsConstructor
-public class BookingController {
+public class BookingController implements BookingsApi {
 
 	private final CreateBookingUseCase createBookingUseCase;
-	private final GetBookingHistoryUseCase getBookingHistoryUseCase;
+	private final GetBookingByIdUseCase getBookingByIdUseCase;
 	private final UpdateBookingUseCase updateBookingUseCase;
 	private final CancelBookingUseCase cancelBookingUseCase;
 	private final BookingApiMapper bookingApiMapper;
 
-	@PostMapping
-	public ResponseEntity<CreateBookingResponse> createBooking(@Valid @RequestBody CreateBookingRequest request) {
-		var command = bookingApiMapper.toCommand(request);
+	@Override
+	public ResponseEntity<BookingResponse> createBooking(BookingRequest bookingRequest) {
+		var command = bookingApiMapper.toCommand(bookingRequest, currentUser());
 		var booking = createBookingUseCase.execute(command);
-		var response = bookingApiMapper.toResponse(booking);
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		return ResponseEntity.status(HttpStatus.CREATED).body(bookingApiMapper.toResponse(booking));
 	}
 
-	@GetMapping("/users/{userId}")
-	public ResponseEntity<List<BookingHistoryResponse>> getBookingHistory(@PathVariable UUID userId) {
-		var query = bookingApiMapper.toQuery(userId);
-		var bookings = getBookingHistoryUseCase.execute(query);
-		var response = bookingApiMapper.toBookingHistoryResponse(bookings);
-		return ResponseEntity.ok(response);
+	@Override
+	public ResponseEntity<BookingResponse> getBookingById(Long bookingId) {
+		var booking = getBookingByIdUseCase.execute(new GetBookingByIdQuery(bookingId));
+		return ResponseEntity.ok(bookingApiMapper.toResponse(booking));
 	}
 
-	@PutMapping("/{bookingId}")
-	public ResponseEntity<UpdateBookingResponse> updateBooking(@PathVariable Long bookingId,
-	                                                            @Valid @RequestBody UpdateBookingRequest request,
-	                                                            AuthenticatedUser authenticatedUser) {
-		var command = bookingApiMapper.toUpdateCommand(bookingId, request, authenticatedUser);
+	@Override
+	public ResponseEntity<BookingResponse> updateBooking(Long bookingId, BookingUpdateRequest bookingUpdateRequest) {
+		var command = bookingApiMapper.toUpdateCommand(bookingId, bookingUpdateRequest, currentUser());
 		var booking = updateBookingUseCase.execute(command);
-		var response = bookingApiMapper.toUpdateResponse(booking);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(bookingApiMapper.toResponse(booking));
 	}
 
-	@PatchMapping("/{bookingId}/cancel")
-	public ResponseEntity<CancelBookingResponse> cancelBooking(@PathVariable Long bookingId,
-	                                                            AuthenticatedUser authenticatedUser) {
-		var command = bookingApiMapper.toCancelCommand(bookingId, authenticatedUser);
+	@Override
+	public ResponseEntity<BookingResponse> cancelBooking(Long bookingId) {
+		var command = bookingApiMapper.toCancelCommand(bookingId, currentUser());
 		var booking = cancelBookingUseCase.execute(command);
-		var response = bookingApiMapper.toCancelResponse(booking);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(bookingApiMapper.toResponse(booking));
+	}
+
+	private AuthenticatedUser currentUser() {
+		var auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+		return new AuthenticatedUser(UUID.fromString(auth.getToken().getSubject()));
 	}
 }

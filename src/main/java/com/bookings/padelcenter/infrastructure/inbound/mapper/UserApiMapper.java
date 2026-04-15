@@ -8,17 +8,19 @@ import com.bookings.padelcenter.application.command.UpdateUserRolesCommand;
 import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.domain.model.Auditable;
 import com.bookings.padelcenter.domain.model.CenterRole;
+import com.bookings.padelcenter.domain.model.Role;
 import com.bookings.padelcenter.domain.model.User;
-import com.bookings.padelcenter.infrastructure.inbound.dto.request.CenterRoleRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdatePasswordRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdateUserRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.AuditableResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateUserRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateUserResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.UpdatePasswordResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.UpdateUserResponse;
+import com.padelcenter.infrastructure.web.generated.model.AuditableResponse;
+import com.padelcenter.infrastructure.web.generated.model.CenterRoleRequest;
+import com.padelcenter.infrastructure.web.generated.model.MessageResponse;
+import com.padelcenter.infrastructure.web.generated.model.PasswordUpdateRequest;
+import com.padelcenter.infrastructure.web.generated.model.UserRequest;
+import com.padelcenter.infrastructure.web.generated.model.UserResponse;
+import com.padelcenter.infrastructure.web.generated.model.UserUpdateRequest;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,65 +28,38 @@ import java.util.stream.Collectors;
 @Component
 public class UserApiMapper {
 
-	public CreateUserCommand toCommand(CreateUserRequest request) {
+	public CreateUserCommand toCommand(UserRequest request) {
 		return new CreateUserCommand(
-				request.firstName(),
-				request.lastName(),
-				request.email(),
-				request.password(),
-				request.phoneNumber()
+				request.getFirstName(),
+				request.getLastName(),
+				request.getEmail(),
+				request.getPassword(),
+				request.getPhoneNumber()
 		);
 	}
 
-	public CreateUserResponse toResponse(User user) {
-		var audit = new AuditableResponse(
-				user.audit().createdBy(),
-				user.audit().createdAt(),
-				user.audit().modifiedBy(),
-				user.audit().modifiedAt(),
-				user.audit().deletedBy(),
-				user.audit().deletedAt()
-		);
-		return new CreateUserResponse(
-				user.id(),
-				user.firstName(),
-				user.lastName(),
-				user.email(),
-				user.phoneNumber(),
-				audit
-		);
+	public UserResponse toResponse(User user) {
+		return new UserResponse()
+				.id(user.id())
+				.firstName(user.firstName())
+				.lastName(user.lastName())
+				.email(user.email())
+				.phoneNumber(user.phoneNumber())
+				.audit(toAuditResponse(user.audit()));
 	}
 
-	public UpdateUserCommand toCommand(UUID id, UpdateUserRequest request) {
+	public UpdateUserCommand toCommand(UUID id, UserUpdateRequest request) {
 		return new UpdateUserCommand(
 				id,
-				request.firstName(),
-				request.lastName(),
-				request.email(),
-				request.password(),
-				request.phoneNumber()
+				request.getFirstName(),
+				request.getLastName(),
+				request.getEmail(),
+				request.getPassword(),
+				request.getPhoneNumber()
 		);
 	}
 
-	public UpdateUserResponse toUpdateUserResponse(User user) {
-		return new UpdateUserResponse(
-			user.id(),
-			user.firstName(),
-			user.lastName(),
-			user.email(),
-			user.phoneNumber(),
-			new AuditableResponse(
-				user.audit().createdBy(),
-				user.audit().createdAt(),
-				user.audit().modifiedBy(),
-				user.audit().modifiedAt(),
-				user.audit().deletedBy(),
-				user.audit().deletedAt()
-			)
-		);
-	}
-
-	public UpdateUserRolesCommand toUpdateUserRolesCommand(UUID id, Set<CenterRoleRequest> rolesRequest,
+	public UpdateUserRolesCommand toUpdateUserRolesCommand(UUID id, List<CenterRoleRequest> rolesRequest,
 	                                                        AuthenticatedUser authenticatedUser) {
 		var newRoles = rolesRequest.stream()
 				.map(this::toCenterRoleDomain)
@@ -96,27 +71,35 @@ public class UserApiMapper {
 		return new DeleteUserCommand(id, authenticatedUser);
 	}
 
-	public UpdatePasswordCommand toUpdatePasswordCommand(UUID userId, UpdatePasswordRequest request,
+	public UpdatePasswordCommand toUpdatePasswordCommand(UUID userId, PasswordUpdateRequest request,
 	                                                      AuthenticatedUser authenticatedUser) {
 		return new UpdatePasswordCommand(
-			userId,
-			request.currentPassword(),
-			request.newPassword(),
-			authenticatedUser
+				userId,
+				request.getCurrentPassword(),
+				request.getNewPassword(),
+				authenticatedUser
 		);
 	}
 
-	public UpdatePasswordResponse toUpdatePasswordResponse(User user) {
-		return new UpdatePasswordResponse(
-			user.id(),
-			"Password updated successfully"
-		);
+	public MessageResponse toMessageResponse(String message) {
+		return new MessageResponse().message(message);
+	}
+
+	AuditableResponse toAuditResponse(Auditable audit) {
+		if (audit == null) return null;
+		return new AuditableResponse()
+				.createdBy(audit.createdBy())
+				.createdAt(audit.createdAt() != null ? audit.createdAt().atOffset(ZoneOffset.UTC) : null)
+				.modifiedBy(audit.modifiedBy())
+				.modifiedAt(audit.modifiedAt() != null ? audit.modifiedAt().atOffset(ZoneOffset.UTC) : null)
+				.deletedBy(audit.deletedBy())
+				.deletedAt(audit.deletedAt() != null ? audit.deletedAt().atOffset(ZoneOffset.UTC) : null);
 	}
 
 	private CenterRole toCenterRoleDomain(CenterRoleRequest request) {
 		return new CenterRole(
-				request.centerId(),
-				request.role(),
+				request.getCenterId(),
+				Role.fromDescription(request.getRole().getValue()),
 				Auditable.newAudit()
 		);
 	}

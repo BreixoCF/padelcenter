@@ -1,0 +1,30 @@
+type: object
+description: Payload for creating a new field within an existing center. Requires ADMIN role.
+required:
+  - name
+  - pricePerHour
+properties:
+  name:
+    type: string
+    minLength: 1
+    maxLength: 50
+    description: Display name of the field. Must be unique within the same center.
+    example: "Court 1"
+  type:
+    type: string
+    maxLength: 50
+    nullable: true
+    description: Surface or enclosure type (e.g. "Indoor", "Outdoor", "Cristal").
+    example: "Indoor"
+  pricePerHour:
+    type: number
+    format: double
+    exclusiveMinimum: true
+    minimum: 0
+    description: Booking price per hour. Must be strictly greater than 0.
+    example: 25.00
+  isAvailable:
+    type: boolean
+    default: true
+    description: Whether this field is immediately available for bookings after creation.
+    example: true

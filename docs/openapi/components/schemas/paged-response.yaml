@@ -1,0 +1,33 @@
+type: object
+description: >
+  Generic wrapper for paginated list responses. Concrete paginated
+  endpoints extend this schema via allOf, overriding the 'content'
+  array with the appropriate item type.
+required:
+  - content
+  - totalElements
+  - totalPages
+  - currentPage
+  - pageSize
+properties:
+  content:
+    type: array
+    description: Page of items for the current request.
+    items: {}
+  totalElements:
+    type: integer
+    format: int64
+    description: Total number of elements across all pages.
+    example: 42
+  totalPages:
+    type: integer
+    description: Total number of pages given the current page size.
+    example: 3
+  currentPage:
+    type: integer
+    description: Zero-based index of the current page.
+    example: 0
+  pageSize:
+    type: integer
+    description: Number of elements requested per page.
+    example: 20

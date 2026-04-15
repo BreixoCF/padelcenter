@@ -1,0 +1,16 @@
+description: >
+  Validation failed — one or more request fields did not pass bean-validation constraints.
+  The 'errors' property contains a map of field names to error messages.
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/problem-detail.yaml'
+    example:
+      type: "about:blank"
+      title: "Bad Request"
+      status: 400
+      detail: "Validation failed"
+      timestamp: "2025-04-15T10:30:00Z"
+      errors:
+        email: "Email must be valid"
+        firstName: "First name is required"

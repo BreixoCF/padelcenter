@@ -6,55 +6,32 @@ import com.bookings.padelcenter.application.command.UpdateBookingCommand;
 import com.bookings.padelcenter.application.query.GetBookingHistoryQuery;
 import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.domain.model.Booking;
-import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateBookingRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.request.UpdateBookingRequest;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.AuditableResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.BookingHistoryResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.CancelBookingResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.CenterSummaryResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.CreateBookingResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.FieldSummaryResponse;
-import com.bookings.padelcenter.infrastructure.inbound.dto.response.UpdateBookingResponse;
+import com.padelcenter.infrastructure.web.generated.model.AuditableResponse;
+import com.padelcenter.infrastructure.web.generated.model.BookingRequest;
+import com.padelcenter.infrastructure.web.generated.model.BookingResponse;
+import com.padelcenter.infrastructure.web.generated.model.BookingUpdateRequest;
+import com.padelcenter.infrastructure.web.generated.model.GetUserBookings200Response;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class BookingApiMapper {
 
-	public CreateBookingCommand toCommand(CreateBookingRequest request) {
+	private final FieldApiMapper fieldApiMapper;
+
+	public CreateBookingCommand toCommand(BookingRequest request, AuthenticatedUser authenticatedUser) {
 		return new CreateBookingCommand(
-			request.userId(),
-			request.fieldId(),
-			LocalDateTime.parse(request.startTime()),
-			LocalDateTime.parse(request.endTime()),
-			request.totalPrice()
-		);
-	}
-
-	public CreateBookingResponse toResponse(Booking booking) {
-		var audit = new AuditableResponse(
-			booking.audit().createdBy(),
-			booking.audit().createdAt(),
-			booking.audit().modifiedBy(),
-			booking.audit().modifiedAt(),
-			booking.audit().deletedBy(),
-			booking.audit().deletedAt()
-		);
-
-		return new CreateBookingResponse(
-			booking.id(),
-			booking.user().id(),
-			booking.field().id(),
-			booking.startTime().toString(),
-			booking.endTime().toString(),
-			booking.totalPrice(),
-			booking.bookedAt(),
-			booking.status().name(),
-			audit
+				authenticatedUser.userId(),
+				request.getFieldId(),
+				request.getStartTime().toLocalDateTime(),
+				request.getEndTime().toLocalDateTime(),
+				BigDecimal.valueOf(request.getTotalPrice())
 		);
 	}
 
@@ -62,68 +39,43 @@ public class BookingApiMapper {
 		return new GetBookingHistoryQuery(userId);
 	}
 
-	public List<BookingHistoryResponse> toBookingHistoryResponse(List<Booking> bookings) {
-		return bookings.stream()
-			.map(this::toBookingHistoryItem)
-			.collect(Collectors.toList());
+	public BookingResponse toResponse(Booking booking) {
+		var fieldSummary = fieldApiMapper.toSummaryResponse(booking.field());
+		var response = new BookingResponse(
+				booking.id(),
+				booking.user().id(),
+				fieldSummary,
+				booking.startTime().atOffset(ZoneOffset.UTC),
+				booking.endTime().atOffset(ZoneOffset.UTC),
+				booking.totalPrice() != null ? booking.totalPrice().doubleValue() : null,
+				booking.bookedAt() != null ? booking.bookedAt().atOffset(ZoneOffset.UTC) : null,
+				BookingResponse.StatusEnum.fromValue(booking.status().name())
+		);
+		response.audit(toAuditResponse(booking));
+		return response;
 	}
 
-	private BookingHistoryResponse toBookingHistoryItem(Booking booking) {
-		var centerSummary = new CenterSummaryResponse(
-			booking.field().center().id().toString(),
-			booking.field().center().name(),
-			booking.field().center().city()
-		);
-
-		var fieldSummary = new FieldSummaryResponse(
-			booking.field().id(),
-			booking.field().name(),
-			booking.field().type(),
-			centerSummary
-		);
-
-		return new BookingHistoryResponse(
-			booking.id(),
-			fieldSummary,
-			booking.startTime().toString(),
-			booking.endTime().toString(),
-			booking.totalPrice(),
-			booking.bookedAt(),
-			booking.status().name()
+	public GetUserBookings200Response toPagedBookingHistory(List<Booking> bookings, int page, int size) {
+		var content = bookings.stream().map(this::toResponse).toList();
+		int totalElements = content.size();
+		int totalPages = size > 0 ? (int) Math.ceil((double) totalElements / size) : 0;
+		return new GetUserBookings200Response(
+				content,
+				(long) totalElements,
+				totalPages == 0 ? 1 : totalPages,
+				page,
+				size
 		);
 	}
 
-	public UpdateBookingCommand toUpdateCommand(Long bookingId, UpdateBookingRequest request,
+	public UpdateBookingCommand toUpdateCommand(Long bookingId, BookingUpdateRequest request,
 	                                             AuthenticatedUser authenticatedUser) {
 		return new UpdateBookingCommand(
-			bookingId,
-			LocalDateTime.parse(request.startTime()),
-			LocalDateTime.parse(request.endTime()),
-			request.totalPrice(),
-			authenticatedUser
-		);
-	}
-
-	public UpdateBookingResponse toUpdateResponse(Booking booking) {
-		var audit = new AuditableResponse(
-			booking.audit().createdBy(),
-			booking.audit().createdAt(),
-			booking.audit().modifiedBy(),
-			booking.audit().modifiedAt(),
-			booking.audit().deletedBy(),
-			booking.audit().deletedAt()
-		);
-
-		return new UpdateBookingResponse(
-			booking.id(),
-			booking.user().id(),
-			booking.field().id(),
-			booking.startTime().toString(),
-			booking.endTime().toString(),
-			booking.totalPrice(),
-			booking.bookedAt(),
-			booking.status().name(),
-			audit
+				bookingId,
+				request.getStartTime().toLocalDateTime(),
+				request.getEndTime().toLocalDateTime(),
+				BigDecimal.valueOf(request.getTotalPrice()),
+				authenticatedUser
 		);
 	}
 
@@ -131,11 +83,15 @@ public class BookingApiMapper {
 		return new CancelBookingCommand(bookingId, authenticatedUser);
 	}
 
-	public CancelBookingResponse toCancelResponse(Booking booking) {
-		return new CancelBookingResponse(
-			booking.id(),
-			booking.status().name(),
-			"Booking has been successfully cancelled"
-		);
+	private AuditableResponse toAuditResponse(Booking booking) {
+		var audit = booking.audit();
+		if (audit == null) return null;
+		return new AuditableResponse()
+				.createdBy(audit.createdBy())
+				.createdAt(audit.createdAt() != null ? audit.createdAt().atOffset(ZoneOffset.UTC) : null)
+				.modifiedBy(audit.modifiedBy())
+				.modifiedAt(audit.modifiedAt() != null ? audit.modifiedAt().atOffset(ZoneOffset.UTC) : null)
+				.deletedBy(audit.deletedBy())
+				.deletedAt(audit.deletedAt() != null ? audit.deletedAt().atOffset(ZoneOffset.UTC) : null);
 	}
 }
