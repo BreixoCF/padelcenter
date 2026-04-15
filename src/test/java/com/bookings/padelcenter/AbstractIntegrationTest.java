@@ -29,7 +29,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 @AutoConfigureMockMvc
 @Testcontainers
 @ActiveProfiles("test")
-abstract class AbstractIntegrationTest {
+public abstract class AbstractIntegrationTest {
 
 	/** Fixed UUID used as the authenticated admin subject in JWT mocks. */
 	static final UUID ADMIN_USER_ID =
