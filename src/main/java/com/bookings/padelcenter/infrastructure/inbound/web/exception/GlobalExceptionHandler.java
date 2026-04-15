@@ -4,6 +4,7 @@ import com.bookings.padelcenter.domain.exception.BookingAlreadyCancelledExceptio
 import com.bookings.padelcenter.domain.exception.EmailAlreadyExistsException;
 import com.bookings.padelcenter.domain.exception.InvalidPasswordException;
 import com.bookings.padelcenter.domain.exception.ResourceNotFoundException;
+import com.bookings.padelcenter.domain.exception.UnauthorizedException;
 import org.postgresql.util.PSQLException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -58,6 +59,15 @@ public class GlobalExceptionHandler {
 	public ProblemDetail handleBookingAlreadyCancelledException(BookingAlreadyCancelledException ex) {
 		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
 		problem.setTitle("Booking Already Cancelled");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
+	}
+
+	@ExceptionHandler(UnauthorizedException.class)
+	public ProblemDetail handleUnauthorizedException(UnauthorizedException ex) {
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+		problem.setTitle("Unauthorized");
 		problem.setType(URI.create("about:blank"));
 		problem.setProperty("timestamp", Instant.now());
 		return problem;

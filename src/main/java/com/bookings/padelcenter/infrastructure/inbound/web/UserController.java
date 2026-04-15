@@ -8,12 +8,12 @@ import com.bookings.padelcenter.application.query.GetUserByIdQuery;
 import com.bookings.padelcenter.application.read.GetAllUsersUseCase;
 import com.bookings.padelcenter.application.read.GetBookingHistoryUseCase;
 import com.bookings.padelcenter.application.read.GetUserByIdUseCase;
-import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.application.update.UpdatePasswordUseCase;
 import com.bookings.padelcenter.application.update.UpdateUserRolesUseCase;
 import com.bookings.padelcenter.application.update.UpdateUserUseCase;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.BookingApiMapper;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.UserApiMapper;
+import com.bookings.padelcenter.infrastructure.security.AuthenticatedUserResolver;
 import com.padelcenter.infrastructure.web.generated.api.UsersApi;
 import com.padelcenter.infrastructure.web.generated.model.CenterRoleRequest;
 import com.padelcenter.infrastructure.web.generated.model.GetUserBookings200Response;
@@ -26,8 +26,6 @@ import com.padelcenter.infrastructure.web.generated.model.UserUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -48,6 +46,7 @@ public class UserController implements UsersApi {
 
 	private final UserApiMapper userMapper;
 	private final BookingApiMapper bookingMapper;
+	private final AuthenticatedUserResolver authResolver;
 
 	@Override
 	public ResponseEntity<UserResponse> createUser(UserRequest userRequest) {
@@ -88,21 +87,21 @@ public class UserController implements UsersApi {
 
 	@Override
 	public ResponseEntity<UserResponse> updateUserRoles(UUID id, List<CenterRoleRequest> centerRoleRequest) {
-		var command = userMapper.toUpdateUserRolesCommand(id, centerRoleRequest, currentUser());
+		var command = userMapper.toUpdateUserRolesCommand(id, centerRoleRequest, authResolver.currentUser());
 		var user = updateUserRolesUseCase.execute(command);
 		return ResponseEntity.ok(userMapper.toResponse(user));
 	}
 
 	@Override
 	public ResponseEntity<MessageResponse> updatePassword(UUID id, PasswordUpdateRequest passwordUpdateRequest) {
-		var command = userMapper.toUpdatePasswordCommand(id, passwordUpdateRequest, currentUser());
+		var command = userMapper.toUpdatePasswordCommand(id, passwordUpdateRequest, authResolver.currentUser());
 		updatePasswordUseCase.execute(command);
 		return ResponseEntity.ok(userMapper.toMessageResponse("Password updated successfully"));
 	}
 
 	@Override
 	public ResponseEntity<Void> deleteUser(UUID id) {
-		var command = userMapper.toDeleteUserCommand(id, currentUser());
+		var command = userMapper.toDeleteUserCommand(id, authResolver.currentUser());
 		deleteUserUseCase.execute(command);
 		return ResponseEntity.noContent().build();
 	}
@@ -112,10 +111,5 @@ public class UserController implements UsersApi {
 	                                                                    String sort) {
 		var pageResult = getBookingHistoryUseCase.execute(new GetBookingHistoryQuery(userId, page, size));
 		return ResponseEntity.ok(bookingMapper.toPagedBookingHistory(pageResult));
-	}
-
-	private AuthenticatedUser currentUser() {
-		var auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-		return new AuthenticatedUser(UUID.fromString(auth.getToken().getSubject()));
 	}
 }
