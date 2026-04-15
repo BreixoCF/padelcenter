@@ -29,7 +29,6 @@ public class BookingApiMapper {
 		return new CreateBookingCommand(
 			request.userId(),
 			request.fieldId(),
-			// TODO(web-phase): replace with a proper DateTimeFormatter once request DTOs use LocalDateTime
 			LocalDateTime.parse(request.startTime()),
 			LocalDateTime.parse(request.endTime()),
 			request.totalPrice()
@@ -50,7 +49,6 @@ public class BookingApiMapper {
 			booking.id(),
 			booking.user().id(),
 			booking.field().id(),
-			// TODO(web-phase): replace with a proper DateTimeFormatter once response DTOs use LocalDateTime
 			booking.startTime().toString(),
 			booking.endTime().toString(),
 			booking.totalPrice(),
@@ -87,7 +85,6 @@ public class BookingApiMapper {
 		return new BookingHistoryResponse(
 			booking.id(),
 			fieldSummary,
-			// TODO(web-phase): replace with a proper DateTimeFormatter once response DTOs use LocalDateTime
 			booking.startTime().toString(),
 			booking.endTime().toString(),
 			booking.totalPrice(),
@@ -96,15 +93,14 @@ public class BookingApiMapper {
 		);
 	}
 
-	public UpdateBookingCommand toUpdateCommand(Long bookingId, UpdateBookingRequest request) {
+	public UpdateBookingCommand toUpdateCommand(Long bookingId, UpdateBookingRequest request,
+	                                             AuthenticatedUser authenticatedUser) {
 		return new UpdateBookingCommand(
 			bookingId,
-			// TODO(web-phase): replace with a proper DateTimeFormatter once request DTOs use LocalDateTime
 			LocalDateTime.parse(request.startTime()),
 			LocalDateTime.parse(request.endTime()),
 			request.totalPrice(),
-			// TODO(phase-8): extract authenticated user from SecurityContext
-			new AuthenticatedUser(null)
+			authenticatedUser
 		);
 	}
 
@@ -122,7 +118,6 @@ public class BookingApiMapper {
 			booking.id(),
 			booking.user().id(),
 			booking.field().id(),
-			// TODO(web-phase): replace with a proper DateTimeFormatter once response DTOs use LocalDateTime
 			booking.startTime().toString(),
 			booking.endTime().toString(),
 			booking.totalPrice(),
@@ -132,9 +127,8 @@ public class BookingApiMapper {
 		);
 	}
 
-	public CancelBookingCommand toCancelCommand(Long bookingId) {
-		// TODO(phase-8): extract authenticated user from SecurityContext
-		return new CancelBookingCommand(bookingId, new AuthenticatedUser(null));
+	public CancelBookingCommand toCancelCommand(Long bookingId, AuthenticatedUser authenticatedUser) {
+		return new CancelBookingCommand(bookingId, authenticatedUser);
 	}
 
 	public CancelBookingResponse toCancelResponse(Booking booking) {

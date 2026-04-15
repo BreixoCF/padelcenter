@@ -7,6 +7,7 @@ import com.bookings.padelcenter.domain.exception.UserNotFoundException;
 import com.bookings.padelcenter.domain.model.User;
 import com.bookings.padelcenter.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ public class UpdateUserRolesUseCase implements CommandUseCase<UpdateUserRolesCom
 	private final UserCommandMapper userCommandMapper;
 
 	@Override
+	@PreAuthorize("hasRole('ADMIN')")
 	public User execute(UpdateUserRolesCommand command) {
 		var user = userRepository.findById(command.userId())
 				.orElseThrow(() -> new UserNotFoundException(command.userId()));

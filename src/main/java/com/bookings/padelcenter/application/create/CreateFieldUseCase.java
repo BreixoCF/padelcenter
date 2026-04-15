@@ -8,6 +8,7 @@ import com.bookings.padelcenter.domain.model.Field;
 import com.bookings.padelcenter.domain.repository.CenterRepository;
 import com.bookings.padelcenter.domain.repository.FieldRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ public class CreateFieldUseCase implements CommandUseCase<CreateFieldCommand, Fi
 		private final CenterRepository centerRepository;
 		private final FieldRepository fieldRepository;
 
+		@PreAuthorize("hasRole('ADMIN')")
 		public Field execute(CreateFieldCommand command) {
 			var center = centerRepository.findById(command.centerId())
 					.orElseThrow(() -> new CenterNotFoundException(command.centerId()));

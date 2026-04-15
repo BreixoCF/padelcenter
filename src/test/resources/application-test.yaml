@@ -11,3 +11,10 @@ spring:
     show-sql: false
   flyway:
     enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Use jwk-set-uri in tests to avoid OIDC discovery calls at startup.
+          # The endpoint is never contacted in unit/integration tests that don't issue HTTP requests.
+          jwk-set-uri: http://localhost:9999/.well-known/jwks.json

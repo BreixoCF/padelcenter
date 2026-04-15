@@ -84,26 +84,25 @@ public class UserApiMapper {
 		);
 	}
 
-	public UpdateUserRolesCommand toUpdateUserRolesCommand(UUID id, Set<CenterRoleRequest> rolesRequest) {
+	public UpdateUserRolesCommand toUpdateUserRolesCommand(UUID id, Set<CenterRoleRequest> rolesRequest,
+	                                                        AuthenticatedUser authenticatedUser) {
 		var newRoles = rolesRequest.stream()
 				.map(this::toCenterRoleDomain)
 				.collect(Collectors.toSet());
-		// TODO(phase-8): extract authenticated user from SecurityContext
-		return new UpdateUserRolesCommand(id, newRoles, new AuthenticatedUser(null));
+		return new UpdateUserRolesCommand(id, newRoles, authenticatedUser);
 	}
 
-	public DeleteUserCommand toDeleteUserCommand(UUID id) {
-		// TODO(phase-8): extract authenticated user from SecurityContext
-		return new DeleteUserCommand(id, new AuthenticatedUser(null));
+	public DeleteUserCommand toDeleteUserCommand(UUID id, AuthenticatedUser authenticatedUser) {
+		return new DeleteUserCommand(id, authenticatedUser);
 	}
 
-	public UpdatePasswordCommand toUpdatePasswordCommand(UUID userId, UpdatePasswordRequest request) {
-		// TODO(phase-8): extract authenticated user from SecurityContext
+	public UpdatePasswordCommand toUpdatePasswordCommand(UUID userId, UpdatePasswordRequest request,
+	                                                      AuthenticatedUser authenticatedUser) {
 		return new UpdatePasswordCommand(
 			userId,
 			request.currentPassword(),
 			request.newPassword(),
-			new AuthenticatedUser(null)
+			authenticatedUser
 		);
 	}
 

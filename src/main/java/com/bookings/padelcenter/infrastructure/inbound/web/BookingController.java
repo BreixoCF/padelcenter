@@ -2,6 +2,7 @@ package com.bookings.padelcenter.infrastructure.inbound.web;
 
 import com.bookings.padelcenter.application.create.CreateBookingUseCase;
 import com.bookings.padelcenter.application.read.GetBookingHistoryUseCase;
+import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.application.update.CancelBookingUseCase;
 import com.bookings.padelcenter.application.update.UpdateBookingUseCase;
 import com.bookings.padelcenter.infrastructure.inbound.dto.request.CreateBookingRequest;
@@ -48,21 +49,21 @@ public class BookingController {
 	}
 
 	@PutMapping("/{bookingId}")
-	public ResponseEntity<UpdateBookingResponse> updateBooking(
-			@PathVariable Long bookingId,
-			@Valid @RequestBody UpdateBookingRequest request) {
-		var command = bookingApiMapper.toUpdateCommand(bookingId, request);
+	public ResponseEntity<UpdateBookingResponse> updateBooking(@PathVariable Long bookingId,
+	                                                            @Valid @RequestBody UpdateBookingRequest request,
+	                                                            AuthenticatedUser authenticatedUser) {
+		var command = bookingApiMapper.toUpdateCommand(bookingId, request, authenticatedUser);
 		var booking = updateBookingUseCase.execute(command);
 		var response = bookingApiMapper.toUpdateResponse(booking);
 		return ResponseEntity.ok(response);
 	}
 
 	@PatchMapping("/{bookingId}/cancel")
-	public ResponseEntity<CancelBookingResponse> cancelBooking(@PathVariable Long bookingId) {
-		var command = bookingApiMapper.toCancelCommand(bookingId);
+	public ResponseEntity<CancelBookingResponse> cancelBooking(@PathVariable Long bookingId,
+	                                                            AuthenticatedUser authenticatedUser) {
+		var command = bookingApiMapper.toCancelCommand(bookingId, authenticatedUser);
 		var booking = cancelBookingUseCase.execute(command);
 		var response = bookingApiMapper.toCancelResponse(booking);
 		return ResponseEntity.ok(response);
 	}
 }
-

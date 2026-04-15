@@ -4,6 +4,7 @@ import com.bookings.padelcenter.application.create.CreateUserUseCase;
 import com.bookings.padelcenter.application.delete.DeleteUserUseCase;
 import com.bookings.padelcenter.application.query.GetAllUsersQuery;
 import com.bookings.padelcenter.application.read.GetAllUsersUseCase;
+import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.application.update.UpdatePasswordUseCase;
 import com.bookings.padelcenter.application.update.UpdateUserRolesUseCase;
 import com.bookings.padelcenter.application.update.UpdateUserUseCase;
@@ -48,7 +49,8 @@ public class UserController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<UpdateUserResponse> updateUser(@PathVariable UUID id, @Valid @RequestBody UpdateUserRequest request) {
+	public ResponseEntity<UpdateUserResponse> updateUser(@PathVariable UUID id,
+	                                                      @Valid @RequestBody UpdateUserRequest request) {
 		var command = mapper.toCommand(id, request);
 		var updatedUser = updateUserUseCase.execute(command);
 		var response = mapper.toUpdateUserResponse(updatedUser);
@@ -56,8 +58,10 @@ public class UserController {
 	}
 
 	@PatchMapping("/{id}/roles")
-	public ResponseEntity<UpdateUserResponse> updateUserRoles(@PathVariable UUID id, @RequestBody Set<CenterRoleRequest> rolesRequest) {
-		var command = mapper.toUpdateUserRolesCommand(id, rolesRequest);
+	public ResponseEntity<UpdateUserResponse> updateUserRoles(@PathVariable UUID id,
+	                                                           @RequestBody Set<CenterRoleRequest> rolesRequest,
+	                                                           AuthenticatedUser authenticatedUser) {
+		var command = mapper.toUpdateUserRolesCommand(id, rolesRequest, authenticatedUser);
 		var updatedUser = updateUserRolesUseCase.execute(command);
 		var response = mapper.toUpdateUserResponse(updatedUser);
 		return ResponseEntity.ok(response);
@@ -80,18 +84,18 @@ public class UserController {
 	}
 
 	@PatchMapping("/{id}/password")
-	public ResponseEntity<UpdatePasswordResponse> updatePassword(
-			@PathVariable UUID id,
-			@Valid @RequestBody UpdatePasswordRequest request) {
-		var command = mapper.toUpdatePasswordCommand(id, request);
+	public ResponseEntity<UpdatePasswordResponse> updatePassword(@PathVariable UUID id,
+	                                                              @Valid @RequestBody UpdatePasswordRequest request,
+	                                                              AuthenticatedUser authenticatedUser) {
+		var command = mapper.toUpdatePasswordCommand(id, request, authenticatedUser);
 		var updatedUser = updatePasswordUseCase.execute(command);
 		var response = mapper.toUpdatePasswordResponse(updatedUser);
 		return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
-		var command = mapper.toDeleteUserCommand(id);
+	public ResponseEntity<Void> deleteUser(@PathVariable UUID id, AuthenticatedUser authenticatedUser) {
+		var command = mapper.toDeleteUserCommand(id, authenticatedUser);
 		deleteUserUseCase.execute(command);
 		return ResponseEntity.noContent().build();
 	}

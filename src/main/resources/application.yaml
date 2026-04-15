@@ -8,3 +8,10 @@ spring:
   threads:
     virtual:
       enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Provide a non-empty default so the placeholder always resolves.
+          # The IssuerUriCondition skips this bean when jwk-set-uri is also present (test profile).
+          issuer-uri: ${JWT_ISSUER_URI:https://placeholder.invalid}
