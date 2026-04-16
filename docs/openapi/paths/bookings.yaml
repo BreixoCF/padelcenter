@@ -33,5 +33,7 @@ post:
       $ref: '../components/responses/unauthorized.yaml'
     '404':
       $ref: '../components/responses/not-found.yaml'
+    '409':
+      $ref: '../components/responses/conflict.yaml'
     '500':
       $ref: '../components/responses/server-error.yaml'

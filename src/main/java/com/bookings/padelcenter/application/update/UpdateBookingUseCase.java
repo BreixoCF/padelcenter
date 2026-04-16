@@ -3,6 +3,7 @@ package com.bookings.padelcenter.application.update;
 import com.bookings.padelcenter.application.command.UpdateBookingCommand;
 import com.bookings.padelcenter.application.shared.CommandUseCase;
 import com.bookings.padelcenter.domain.exception.BookingNotFoundException;
+import com.bookings.padelcenter.domain.exception.BookingOverlapException;
 import com.bookings.padelcenter.domain.model.Booking;
 import com.bookings.padelcenter.domain.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,12 @@ public class UpdateBookingUseCase implements CommandUseCase<UpdateBookingCommand
 
 		var booking = bookingRepository.findById(command.bookingId())
 				.orElseThrow(() -> new BookingNotFoundException(command.bookingId()));
+
+		if (bookingRepository.existsOverlappingBooking(
+				booking.field().fieldId(), command.startTime(), command.endTime(), command.bookingId())) {
+			throw new BookingOverlapException(
+				booking.field().fieldId(), command.startTime(), command.endTime());
+		}
 
 		var updatedBooking = booking.updateDetails(
 			command.startTime(),

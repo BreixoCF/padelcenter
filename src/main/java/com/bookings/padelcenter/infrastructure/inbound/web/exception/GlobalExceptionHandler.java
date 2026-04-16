@@ -1,6 +1,7 @@
 package com.bookings.padelcenter.infrastructure.inbound.web.exception;
 
 import com.bookings.padelcenter.domain.exception.BookingAlreadyCancelledException;
+import com.bookings.padelcenter.domain.exception.BookingOverlapException;
 import com.bookings.padelcenter.domain.exception.EmailAlreadyExistsException;
 import com.bookings.padelcenter.domain.exception.FieldNotAvailableException;
 import com.bookings.padelcenter.domain.exception.InvalidPasswordException;
@@ -60,6 +61,15 @@ public class GlobalExceptionHandler {
 	public ProblemDetail handleFieldNotAvailableException(FieldNotAvailableException ex) {
 		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
 		problem.setTitle("Field Not Available");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
+	}
+
+	@ExceptionHandler(BookingOverlapException.class)
+	public ProblemDetail handleBookingOverlapException(BookingOverlapException ex) {
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+		problem.setTitle("Booking Overlap");
 		problem.setType(URI.create("about:blank"));
 		problem.setProperty("timestamp", Instant.now());
 		return problem;

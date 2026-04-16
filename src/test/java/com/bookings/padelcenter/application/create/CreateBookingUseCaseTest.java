@@ -2,7 +2,9 @@ package com.bookings.padelcenter.application.create;
 
 import com.bookings.padelcenter.application.command.CreateBookingCommand;
 import com.bookings.padelcenter.application.mapper.BookingCommandMapper;
+import com.bookings.padelcenter.domain.exception.BookingOverlapException;
 import com.bookings.padelcenter.domain.exception.FieldNotFoundException;
+import com.bookings.padelcenter.domain.exception.FieldNotAvailableException;
 import com.bookings.padelcenter.domain.exception.UserNotFoundException;
 import com.bookings.padelcenter.domain.model.*;
 import com.bookings.padelcenter.domain.repository.BookingRepository;
@@ -384,5 +386,41 @@ class CreateBookingUseCaseTest {
 		// Then
 		assertThat(result.bookedAt()).isNotNull();
 		assertThat(result.bookedAt()).isEqualTo(bookedAt);
+	}
+
+	@Test
+	@DisplayName("Should throw FieldNotAvailableException when field is not available")
+	void execute_unavailableField_throwsFieldNotAvailableException() {
+		// Given
+		Field unavailableField = new Field(
+			fieldId, "Court 1", "Indoor", new BigDecimal("25.00"), false, center, Auditable.newAudit()
+		);
+
+		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+		when(fieldRepository.findById(fieldId)).thenReturn(Optional.of(unavailableField));
+
+		// When & Then
+		assertThatThrownBy(() -> createBookingUseCase.execute(command))
+			.isInstanceOf(FieldNotAvailableException.class);
+
+		verify(bookingRepository, never()).existsOverlappingBooking(any(), any(), any(), any());
+		verify(bookingRepository, never()).save(any());
+	}
+
+	@Test
+	@DisplayName("Should throw BookingOverlapException when field is already booked in requested time range")
+	void execute_overlappingBooking_throwsBookingOverlapException() {
+		// Given
+		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+		when(fieldRepository.findById(fieldId)).thenReturn(Optional.of(field));
+		when(bookingRepository.existsOverlappingBooking(fieldId, START, END, null)).thenReturn(true);
+
+		// When & Then
+		assertThatThrownBy(() -> createBookingUseCase.execute(command))
+			.isInstanceOf(BookingOverlapException.class)
+			.hasMessageContaining(fieldId.toString());
+
+		verify(bookingRepository, times(1)).existsOverlappingBooking(fieldId, START, END, null);
+		verify(bookingRepository, never()).save(any());
 	}
 }

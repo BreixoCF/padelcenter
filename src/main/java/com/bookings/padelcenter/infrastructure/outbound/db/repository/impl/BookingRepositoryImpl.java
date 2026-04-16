@@ -11,6 +11,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,6 +21,8 @@ import java.util.UUID;
 @Repository
 @RequiredArgsConstructor
 public class BookingRepositoryImpl implements BookingRepository {
+
+	private static final ZoneId ZONE = ZoneId.of("UTC");
 
 	private final BookingJpaRepository bookingJpaRepository;
 	private final BookingPersistenceMapper mapper;
@@ -42,6 +47,14 @@ public class BookingRepositoryImpl implements BookingRepository {
 		return bookingJpaRepository.findAll().stream()
 			.map(mapper::toDomain)
 			.toList();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public boolean existsOverlappingBooking(UUID fieldId, LocalDateTime start, LocalDateTime end, Long excludeId) {
+		Instant startInstant = start.atZone(ZONE).toInstant();
+		Instant endInstant = end.atZone(ZONE).toInstant();
+		return bookingJpaRepository.existsOverlappingBooking(fieldId, startInstant, endInstant, excludeId);
 	}
 
 	@Override

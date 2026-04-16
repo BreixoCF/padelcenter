@@ -3,6 +3,7 @@ package com.bookings.padelcenter.application.update;
 import com.bookings.padelcenter.application.command.UpdateBookingCommand;
 import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.domain.exception.BookingNotFoundException;
+import com.bookings.padelcenter.domain.exception.BookingOverlapException;
 import com.bookings.padelcenter.domain.model.*;
 import com.bookings.padelcenter.domain.repository.BookingRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -287,5 +288,24 @@ class UpdateBookingUseCaseTest {
 
 		assertThat(capturedBooking.audit().createdBy()).isEqualTo(existingBooking.audit().createdBy());
 		assertThat(capturedBooking.audit().createdAt()).isEqualTo(existingBooking.audit().createdAt());
+	}
+
+	@Test
+	@DisplayName("Should throw BookingOverlapException when field is already booked in requested time range")
+	void execute_overlappingBooking_throwsBookingOverlapException() {
+		// Given
+		when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(existingBooking));
+		when(bookingRepository.existsOverlappingBooking(
+			field.fieldId(), UPDATED_START, UPDATED_END, bookingId)).thenReturn(true);
+
+		// When & Then
+		assertThatThrownBy(() -> updateBookingUseCase.execute(command))
+			.isInstanceOf(BookingOverlapException.class)
+			.hasMessageContaining(field.fieldId().toString());
+
+		verify(bookingRepository, times(1)).findById(bookingId);
+		verify(bookingRepository, times(1)).existsOverlappingBooking(
+			field.fieldId(), UPDATED_START, UPDATED_END, bookingId);
+		verify(bookingRepository, never()).save(any());
 	}
 }
