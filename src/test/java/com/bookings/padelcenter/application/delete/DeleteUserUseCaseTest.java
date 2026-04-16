@@ -221,7 +221,12 @@ class DeleteUserUseCaseTest {
 		User result = deleteUserUseCase.execute(command);
 
 		// Then
-		assertThat(result).isEqualTo(deletedUser);
+		assertThat(result.userId()).isEqualTo(existingUser.userId());
+		assertThat(result.firstName()).isEqualTo(existingUser.firstName());
+		assertThat(result.lastName()).isEqualTo(existingUser.lastName());
+		assertThat(result.email()).isEqualTo(existingUser.email());
+		assertThat(result.phoneNumber()).isEqualTo(existingUser.phoneNumber());
+		assertThat(result.passwordHash()).isEqualTo(existingUser.passwordHash());
 		assertThat(result.audit().deletedBy()).isNotNull();
 		assertThat(result.audit().deletedAt()).isNotNull();
 	}

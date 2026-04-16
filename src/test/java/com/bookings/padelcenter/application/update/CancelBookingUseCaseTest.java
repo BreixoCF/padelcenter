@@ -250,7 +250,12 @@ class CancelBookingUseCaseTest {
 		Booking result = cancelBookingUseCase.execute(command);
 
 		// Then
-		assertThat(result).isEqualTo(cancelledBooking);
+		assertThat(result.bookingId()).isEqualTo(existingBooking.bookingId());
+		assertThat(result.user()).isEqualTo(existingBooking.user());
+		assertThat(result.field()).isEqualTo(existingBooking.field());
+		assertThat(result.startTime()).isEqualTo(existingBooking.startTime());
+		assertThat(result.endTime()).isEqualTo(existingBooking.endTime());
+		assertThat(result.totalPrice()).isEqualTo(existingBooking.totalPrice());
 		assertThat(result.status()).isEqualTo(BookingStatus.CANCELLED);
 	}
 

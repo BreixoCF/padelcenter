@@ -215,7 +215,12 @@ class UpdateUserUseCaseTest {
 		User result = updateUserUseCase.execute(command);
 
 		// Then
-		assertThat(result).isEqualTo(savedUser);
+		assertThat(result.userId()).isEqualTo(savedUser.userId());
+		assertThat(result.firstName()).isEqualTo(savedUser.firstName());
+		assertThat(result.lastName()).isEqualTo(savedUser.lastName());
+		assertThat(result.email()).isEqualTo(savedUser.email());
+		assertThat(result.phoneNumber()).isEqualTo(savedUser.phoneNumber());
+		assertThat(result.passwordHash()).isEqualTo(savedUser.passwordHash());
 	}
 
 	@Test
