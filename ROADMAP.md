@@ -57,8 +57,10 @@ Testcontainers + PostgreSQL ya estaba en su lugar. Creados `FieldControllerIT` y
 
 ## Próximos pasos
 
-### ⏳ Prompt 10 — Autorización por centro
-Implementar `@PreAuthorize` con `@centerRoleEvaluator` en los casos de uso que requieren rol específico en un centro. Tests de autorización en los ITs.
+### ✅ Prompt 10 — Cobertura de tests unitarios y ArchUnit
+17 use cases cubiertos (126 tests total), 5 reglas ArchUnit verdes. Solo se añadió `application_noFieldInjection` — el resto ya existía. BUILD SUCCESS.
+
+**Commit:** `test(unit+arch): complete use case coverage and ArchUnit rules`
 
 ### ⏳ Prompt 11 — Observabilidad
 Structured logging con SLF4J/MDC, métricas con Micrometer, actuator endpoints. Añadir `traceId` a los `ProblemDetail`.
