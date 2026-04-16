@@ -6,6 +6,7 @@ import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noFields;
 
 @AnalyzeClasses(
 		packages = "com.bookings.padelcenter",
@@ -63,5 +64,19 @@ class ArchitectureTest {
 					.should().dependOnClassesThat()
 					.areAnnotatedWith("jakarta.persistence.Entity")
 					.because("the web layer must not couple to JPA entities");
+
+	/**
+	 * Application use cases must use constructor injection only.
+	 * Field injection with @Autowired is forbidden — use @RequiredArgsConstructor instead.
+	 */
+	@ArchTest
+	static final ArchRule application_noFieldInjection =
+			noFields()
+					.that().areDeclaredInClassesThat()
+					.resideInAPackage("..application..")
+					.should().beAnnotatedWith(
+							org.springframework.beans.factory.annotation.Autowired.class
+					)
+					.because("use cases must rely on constructor injection, not field injection");
 
 }
