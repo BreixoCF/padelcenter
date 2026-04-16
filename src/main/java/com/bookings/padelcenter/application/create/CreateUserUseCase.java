@@ -6,9 +6,11 @@ import com.bookings.padelcenter.application.shared.CommandUseCase;
 import com.bookings.padelcenter.domain.model.User;
 import com.bookings.padelcenter.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -19,7 +21,15 @@ public class CreateUserUseCase implements CommandUseCase<CreateUserCommand, User
 
 	@Override
 	public User execute(CreateUserCommand command) {
+		log.debug("user.create.start email={} firstName={} lastName={}",
+			command.email(), command.firstName(), command.lastName());
+
 		var userToCreate = userCommandMapper.toDomain(command);
-		return userRepository.save(userToCreate);
+		var user = userRepository.save(userToCreate);
+
+		log.info("user.created userId={} email={} firstName={} lastName={}",
+			user.id(), user.email(), user.firstName(), user.lastName());
+
+		return user;
 	}
 }

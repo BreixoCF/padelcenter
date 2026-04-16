@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Perfil local: JSON estructurado en consola -->
+    <springProfile name="local">
+        <appender name="CONSOLE_JSON"
+                  class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeCallerData>true</includeCallerData>
+                <customFields>
+                    {"app":"padelcenter","env":"local"}
+                </customFields>
+                <fieldNames>
+                    <timestamp>timestamp</timestamp>
+                    <message>message</message>
+                    <logger>logger</logger>
+                    <thread>thread</thread>
+                    <level>level</level>
+                </fieldNames>
+            </encoder>
+        </appender>
+
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </root>
+
+        <!-- Queries SQL de Hibernate -->
+        <logger name="org.hibernate.SQL"
+                level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </logger>
+        <logger name="org.hibernate.orm.jdbc.bind"
+                level="TRACE" additivity="false">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </logger>
+
+        <!-- Spring Security -->
+        <logger name="org.springframework.security"
+                level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </logger>
+
+        <!-- Spring Web (requests entrantes) -->
+        <logger name="org.springframework.web"
+                level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </logger>
+
+        <!-- Reducir ruido de librerías internas -->
+        <logger name="org.springframework.boot.autoconfigure"
+                level="WARN" additivity="false">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </logger>
+        <logger name="com.zaxxer.hikari"
+                level="WARN" additivity="false">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </logger>
+    </springProfile>
+
+    <!-- Perfil por defecto (no local) -->
+    <springProfile name="!local">
+        <appender name="CONSOLE"
+                  class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>
+                    {"app":"padelcenter"}
+                </customFields>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+</configuration>

@@ -6,10 +6,12 @@ import com.bookings.padelcenter.application.shared.CommandUseCase;
 import com.bookings.padelcenter.domain.model.Center;
 import com.bookings.padelcenter.domain.repository.CenterRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -20,7 +22,16 @@ public class CreateCenterUseCase implements CommandUseCase<CreateCenterCommand, 
 
 	@PreAuthorize("hasRole('ADMIN')")
 	public Center execute(CreateCenterCommand command) {
+		log.debug("center.create.start name={} city={}",
+			command.name(), command.city());
+
 		var centerToCreate = centerCommandMapper.toDomain(command);
-		return centerRepository.save(centerToCreate);
+		var center = centerRepository.save(centerToCreate);
+
+		log.info("center.created centerId={} name={} city={} managerId={}",
+			center.id(), center.name(), center.city(),
+			center.manager() != null ? center.manager().id() : null);
+
+		return center;
 	}
 }

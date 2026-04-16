@@ -8,9 +8,11 @@ import com.bookings.padelcenter.domain.model.PageResult;
 import com.bookings.padelcenter.domain.repository.BookingRepository;
 import com.bookings.padelcenter.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -21,9 +23,17 @@ public class GetBookingHistoryUseCase implements QueryUseCase<GetBookingHistoryQ
 
 	@Override
 	public PageResult<Booking> execute(GetBookingHistoryQuery query) {
+		log.debug("booking.history.start userId={} page={} size={}",
+			query.userId(), query.page(), query.size());
+
 		userRepository.findById(query.userId())
 				.orElseThrow(() -> new UserNotFoundException(query.userId()));
 
-		return bookingRepository.findByUserId(query.userId(), query.page(), query.size());
+		var result = bookingRepository.findByUserId(query.userId(), query.page(), query.size());
+
+		log.debug("booking.history.found userId={} count={} totalPages={}",
+			query.userId(), result.content().size(), result.totalPages());
+
+		return result;
 	}
 }

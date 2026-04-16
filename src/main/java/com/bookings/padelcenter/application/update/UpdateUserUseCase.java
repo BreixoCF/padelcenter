@@ -8,9 +8,11 @@ import com.bookings.padelcenter.domain.exception.UserNotFoundException;
 import com.bookings.padelcenter.domain.model.User;
 import com.bookings.padelcenter.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -21,12 +23,20 @@ public class UpdateUserUseCase implements CommandUseCase<UpdateUserCommand, User
 
 	@Override
 	public User execute(UpdateUserCommand command) {
+		log.debug("user.update.start userId={} email={}",
+			command.id(), command.email());
+
 		var user = userRepository.findById(command.id())
 				.orElseThrow(() -> new UserNotFoundException(command.id()));
 		if (!user.email().equals(command.email()) && userRepository.existsByEmail(command.email())) {
 			throw new EmailAlreadyExistsException(command.email());
 		}
 		var updatedUser = userCommandMapper.updateFromCommand(command, user);
-		return userRepository.save(updatedUser);
+		userRepository.save(updatedUser);
+
+		log.info("user.updated userId={} email={} firstName={} lastName={}",
+			updatedUser.id(), updatedUser.email(), updatedUser.firstName(), updatedUser.lastName());
+
+		return updatedUser;
 	}
 }

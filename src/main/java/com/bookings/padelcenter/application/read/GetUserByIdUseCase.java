@@ -6,10 +6,12 @@ import com.bookings.padelcenter.domain.exception.UserNotFoundException;
 import com.bookings.padelcenter.domain.model.User;
 import com.bookings.padelcenter.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -20,7 +22,12 @@ public class GetUserByIdUseCase implements QueryUseCase<GetUserByIdQuery, User> 
 	@NonNull
 	@Override
 	public User execute(GetUserByIdQuery query) {
-		return userRepository.findById(query.userId())
+		log.debug("user.get.start userId={}",
+			query.userId());
+		var user = userRepository.findById(query.userId())
 				.orElseThrow(() -> new UserNotFoundException(query.userId()));
+		log.debug("user.found userId={} email={}",
+			user.id(), user.email());
+		return user;
 	}
 }
