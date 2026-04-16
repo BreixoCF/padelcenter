@@ -2,6 +2,7 @@ package com.bookings.padelcenter.infrastructure.inbound.web.exception;
 
 import com.bookings.padelcenter.domain.exception.BookingAlreadyCancelledException;
 import com.bookings.padelcenter.domain.exception.EmailAlreadyExistsException;
+import com.bookings.padelcenter.domain.exception.FieldNotAvailableException;
 import com.bookings.padelcenter.domain.exception.InvalidPasswordException;
 import com.bookings.padelcenter.domain.exception.ResourceNotFoundException;
 import com.bookings.padelcenter.domain.exception.UnauthorizedException;
@@ -55,6 +56,15 @@ public class GlobalExceptionHandler {
 		return problem;
 	}
 
+	@ExceptionHandler(FieldNotAvailableException.class)
+	public ProblemDetail handleFieldNotAvailableException(FieldNotAvailableException ex) {
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+		problem.setTitle("Field Not Available");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
+	}
+
 	@ExceptionHandler(BookingAlreadyCancelledException.class)
 	public ProblemDetail handleBookingAlreadyCancelledException(BookingAlreadyCancelledException ex) {
 		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
@@ -75,7 +85,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(InvalidPasswordException.class)
 	public ProblemDetail handleInvalidPasswordException(InvalidPasswordException ex) {
-		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
 		problem.setTitle("Invalid Password");
 		problem.setType(URI.create("about:blank"));
 		problem.setProperty("timestamp", Instant.now());

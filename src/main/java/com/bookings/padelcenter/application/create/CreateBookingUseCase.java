@@ -3,6 +3,7 @@ package com.bookings.padelcenter.application.create;
 import com.bookings.padelcenter.application.command.CreateBookingCommand;
 import com.bookings.padelcenter.application.mapper.BookingCommandMapper;
 import com.bookings.padelcenter.application.shared.CommandUseCase;
+import com.bookings.padelcenter.domain.exception.FieldNotAvailableException;
 import com.bookings.padelcenter.domain.exception.FieldNotFoundException;
 import com.bookings.padelcenter.domain.exception.UserNotFoundException;
 import com.bookings.padelcenter.domain.model.Booking;
@@ -39,6 +40,13 @@ public class CreateBookingUseCase implements CommandUseCase<CreateBookingCommand
 
 		log.debug("booking.create.field.found fieldId={} available={}",
 			field.fieldId(), field.isAvailable());
+
+		if (!field.isAvailable()) {
+			throw new FieldNotAvailableException(command.fieldId());
+		}
+
+		// TODO: validate no overlapping bookings for this field (requires a
+		//  BookingRepository.existsByFieldAndTimeOverlap query before saving)
 
 		var bookingToCreate = bookingCommandMapper.toDomain(command, user, field);
 		var booking = bookingRepository.save(bookingToCreate);

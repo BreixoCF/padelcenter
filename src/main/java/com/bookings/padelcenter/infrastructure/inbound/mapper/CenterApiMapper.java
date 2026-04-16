@@ -38,7 +38,7 @@ public class CenterApiMapper {
 	}
 
 	public CenterSummaryResponse toSummaryResponse(Center center) {
-		return new CenterSummaryResponse(center.name(), center.address(), center.city());
+		return new CenterSummaryResponse(center.centerId(), center.name(), center.address(), center.city());
 	}
 
 	public ListCenters200Response toPagedResponse(PageResult<Center> page) {
