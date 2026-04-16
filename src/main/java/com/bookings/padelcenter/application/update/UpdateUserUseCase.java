@@ -32,11 +32,11 @@ public class UpdateUserUseCase implements CommandUseCase<UpdateUserCommand, User
 			throw new EmailAlreadyExistsException(command.email());
 		}
 		var updatedUser = userCommandMapper.updateFromCommand(command, user);
-		userRepository.save(updatedUser);
+		var savedUser = userRepository.save(updatedUser);
 
 		log.info("user.updated userId={} email={} firstName={} lastName={}",
-			updatedUser.userId(), updatedUser.email(), updatedUser.firstName(), updatedUser.lastName());
+			savedUser.userId(), savedUser.email(), savedUser.firstName(), savedUser.lastName());
 
-		return updatedUser;
+		return savedUser;
 	}
 }

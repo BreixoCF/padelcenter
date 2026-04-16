@@ -24,6 +24,6 @@ public class CenterEntity extends AuditableEntity<UUID> {
 	private String email;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "manager_id", referencedColumnName = "userId")
+	@JoinColumn(name = "manager_id", referencedColumnName = "user_id")
 	private UserEntity manager;
 }

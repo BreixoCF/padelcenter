@@ -9,11 +9,13 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 
 @Component
 @RequiredArgsConstructor
 public class BookingPersistenceMapper {
+
+	private static final ZoneId ZONE = ZoneId.of("UTC");
 
 	private final UserPersistenceMapper userPersistenceMapper;
 	private final FieldPersistenceMapper fieldPersistenceMapper;
@@ -63,13 +65,13 @@ public class BookingPersistenceMapper {
 		if (localDateTime == null) {
 			return null;
 		}
-		return localDateTime.toInstant(ZoneOffset.UTC);
+		return localDateTime.atZone(ZONE).toInstant();
 	}
 
 	private LocalDateTime toLocalDateTime(Instant instant) {
 		if (instant == null) {
 			return null;
 		}
-		return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+		return instant.atZone(ZONE).toLocalDateTime();
 	}
 }

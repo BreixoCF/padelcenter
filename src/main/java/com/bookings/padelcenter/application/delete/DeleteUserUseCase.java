@@ -28,11 +28,11 @@ public class DeleteUserUseCase implements CommandUseCase<DeleteUserCommand, User
 		var user = userRepository.findById(command.userId())
 				.orElseThrow(() -> new UserNotFoundException(command.userId()));
 		var deletedUser = user.delete(command.authenticatedUser().userId());
-		userRepository.save(deletedUser);
+		var savedUser = userRepository.save(deletedUser);
 
 		log.info("user.deleted userId={} email={} deletedBy={}",
-			deletedUser.userId(), deletedUser.email(), command.authenticatedUser().userId());
+			savedUser.userId(), savedUser.email(), command.authenticatedUser().userId());
 
-		return deletedUser;
+		return savedUser;
 	}
 }

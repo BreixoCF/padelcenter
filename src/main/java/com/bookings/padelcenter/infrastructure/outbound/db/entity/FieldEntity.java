@@ -19,7 +19,7 @@ public class FieldEntity extends AuditableEntity<UUID> {
 	private UUID fieldId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "center_id", referencedColumnName = "centerId", nullable = false)
+	@JoinColumn(name = "center_id", referencedColumnName = "center_id", nullable = false)
 	private CenterEntity center;
 
 	private String name;

@@ -34,11 +34,11 @@ public class CancelBookingUseCase implements CommandUseCase<CancelBookingCommand
 		}
 
 		var cancelledBooking = booking.cancel(command.authenticatedUser().userId());
-		bookingRepository.save(cancelledBooking);
+		var savedBooking = bookingRepository.save(cancelledBooking);
 
 		log.info("booking.cancelled bookingId={} fieldId={}",
-			cancelledBooking.bookingId(), cancelledBooking.field().fieldId());
+			savedBooking.bookingId(), savedBooking.field().fieldId());
 
-		return cancelledBooking;
+		return savedBooking;
 	}
 }

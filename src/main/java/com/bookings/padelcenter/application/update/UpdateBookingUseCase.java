@@ -33,12 +33,12 @@ public class UpdateBookingUseCase implements CommandUseCase<UpdateBookingCommand
 			command.authenticatedUser().userId()
 		);
 
-		bookingRepository.save(updatedBooking);
+		var savedBooking = bookingRepository.save(updatedBooking);
 
 		log.info("booking.updated bookingId={} start={} end={} totalPrice={}",
-			updatedBooking.bookingId(), updatedBooking.startTime(),
-			updatedBooking.endTime(), updatedBooking.totalPrice());
+			savedBooking.bookingId(), savedBooking.startTime(),
+			savedBooking.endTime(), savedBooking.totalPrice());
 
-		return updatedBooking;
+		return savedBooking;
 	}
 }
