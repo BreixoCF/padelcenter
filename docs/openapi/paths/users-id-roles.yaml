@@ -44,6 +44,8 @@ patch:
       $ref: '../components/responses/bad-request.yaml'
     '401':
       $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
     '404':
       $ref: '../components/responses/not-found.yaml'
     '500':

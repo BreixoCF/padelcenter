@@ -14,6 +14,7 @@ import com.padelcenter.infrastructure.web.generated.model.BookingUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -41,6 +42,8 @@ public class BookingController implements BookingsApi {
 	}
 
 	@Override
+	@PreAuthorize("@bookingOwnerEvaluator.isOwner("
+			+ "@authResolver.resolveUserId(authentication), #bookingId)")
 	public ResponseEntity<BookingResponse> updateBooking(Long bookingId, BookingUpdateRequest bookingUpdateRequest) {
 		var command = bookingApiMapper.toUpdateCommand(bookingId, bookingUpdateRequest, authResolver.currentUser());
 		var booking = updateBookingUseCase.execute(command);
@@ -48,6 +51,8 @@ public class BookingController implements BookingsApi {
 	}
 
 	@Override
+	@PreAuthorize("@bookingOwnerEvaluator.isOwner("
+			+ "@authResolver.resolveUserId(authentication), #bookingId)")
 	public ResponseEntity<BookingResponse> cancelBooking(Long bookingId) {
 		var command = bookingApiMapper.toCancelCommand(bookingId, authResolver.currentUser());
 		var booking = cancelBookingUseCase.execute(command);

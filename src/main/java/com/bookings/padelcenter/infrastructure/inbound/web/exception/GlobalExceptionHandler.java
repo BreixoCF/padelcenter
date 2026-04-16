@@ -11,6 +11,7 @@ import org.postgresql.util.PSQLException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -79,6 +80,16 @@ public class GlobalExceptionHandler {
 	public ProblemDetail handleBookingAlreadyCancelledException(BookingAlreadyCancelledException ex) {
 		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
 		problem.setTitle("Booking Already Cancelled");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
+	}
+
+	@ExceptionHandler(AccessDeniedException.class)
+	public ProblemDetail handleAccessDeniedException(AccessDeniedException ex) {
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN,
+				"You do not have permission to perform this action");
+		problem.setTitle("Forbidden");
 		problem.setType(URI.create("about:blank"));
 		problem.setProperty("timestamp", Instant.now());
 		return problem;

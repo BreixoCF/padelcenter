@@ -7,9 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -113,5 +115,88 @@ class BookingControllerIT extends AbstractIntegrationTest {
 						.with(userJwt()))
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.title").isNotEmpty());
+	}
+
+	// ── Authorization ────────────────────────────────────────────────────────
+
+	@Test
+	@DisplayName("PUT /api/v1/bookings/{id} — non-owner returns 403")
+	void updateBooking_asNonOwner_returns403() throws Exception {
+		// Create prerequisite data as admin/user
+		createUser("booking.owner@example.com");
+		UUID fieldId = createField();
+
+		// Create booking as REGULAR_USER_ID
+		String bookingJson = """
+				{
+				  "fieldId":     "%s",
+				  "startTime":   "2025-06-01T10:00:00Z",
+				  "endTime":     "2025-06-01T11:00:00Z",
+				  "totalPrice":  25.00
+				}
+				""".formatted(fieldId);
+
+		String bookingBody = mockMvc.perform(post(BOOKINGS_URL)
+						.with(userJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(bookingJson))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+
+		Long bookingId = ((Number) JsonPath.read(bookingBody, "$.bookingId")).longValue();
+
+		// Try to update as a different user
+		UUID otherUserId = UUID.fromString("00000000-0000-0000-0000-000000000099");
+		var otherUserJwt = jwt()
+				.jwt(j -> j.subject(otherUserId.toString())
+						.claim("roles", List.of("USER")))
+				.authorities(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"));
+
+		mockMvc.perform(put(BOOKINGS_URL + "/" + bookingId)
+						.with(otherUserJwt)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "startTime":  "2025-06-01T12:00:00Z",
+								  "endTime":    "2025-06-01T13:00:00Z",
+								  "totalPrice": 30.00
+								}
+								"""))
+				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@DisplayName("PATCH /api/v1/bookings/{id}/cancel — non-owner returns 403")
+	void cancelBooking_asNonOwner_returns403() throws Exception {
+		createUser("cancel.owner@example.com");
+		UUID fieldId = createField();
+
+		String bookingJson = """
+				{
+				  "fieldId":     "%s",
+				  "startTime":   "2025-06-01T14:00:00Z",
+				  "endTime":     "2025-06-01T15:00:00Z",
+				  "totalPrice":  25.00
+				}
+				""".formatted(fieldId);
+
+		String bookingBody = mockMvc.perform(post(BOOKINGS_URL)
+						.with(userJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(bookingJson))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+
+		Long bookingId = ((Number) JsonPath.read(bookingBody, "$.bookingId")).longValue();
+
+		UUID otherUserId = UUID.fromString("00000000-0000-0000-0000-000000000099");
+		var otherUserJwt = jwt()
+				.jwt(j -> j.subject(otherUserId.toString())
+						.claim("roles", List.of("USER")))
+				.authorities(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"));
+
+		mockMvc.perform(patch(BOOKINGS_URL + "/" + bookingId + "/cancel")
+						.with(otherUserJwt))
+				.andExpect(status().isForbidden());
 	}
 }

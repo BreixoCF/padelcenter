@@ -1,0 +1,13 @@
+description: >
+  Forbidden — the authenticated user does not have the required role or
+  ownership to perform this action.
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/problem-detail.yaml'
+    example:
+      type: "about:blank"
+      title: "Forbidden"
+      status: 403
+      detail: "You do not have permission to perform this action"
+      timestamp: "2025-04-15T10:30:00Z"

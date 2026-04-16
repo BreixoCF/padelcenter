@@ -41,6 +41,43 @@ class CenterControllerIT extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.city").value("Barcelona"));
 	}
 
+	@Test
+	@DisplayName("POST /api/v1/centers — regular user returns 403")
+	void createCenter_asUser_returns403() throws Exception {
+		mockMvc.perform(post(CENTERS_URL)
+						.with(userJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(VALID_CENTER_JSON))
+				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@DisplayName("POST /api/v1/centers/{id}/fields — regular user returns 403")
+	void createField_asUser_returns403() throws Exception {
+		// Create center as admin first
+		String centerBody = mockMvc.perform(post(CENTERS_URL)
+						.with(adminJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(VALID_CENTER_JSON))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+
+		String centerId = com.jayway.jsonpath.JsonPath.read(centerBody, "$.centerId");
+
+		mockMvc.perform(post(CENTERS_URL + "/" + centerId + "/fields")
+						.with(userJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "name":         "Court 1",
+								  "type":         "Indoor",
+								  "pricePerHour": 25.00,
+								  "isAvailable":  true
+								}
+								"""))
+				.andExpect(status().isForbidden());
+	}
+
 	// ── GET /api/v1/centers ───────────────────────────────────────────────────
 
 	@Test

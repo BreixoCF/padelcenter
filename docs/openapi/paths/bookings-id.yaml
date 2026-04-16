@@ -34,7 +34,7 @@ put:
   description: >
     Replaces the time slot and total price of an existing booking.
     Both startTime and endTime must be valid ISO 8601 date-time strings (fix I-3).
-    The authenticated user must be the booking owner or an admin.
+    Only the booking owner may perform this action.
   tags:
     - Bookings
   requestBody:
@@ -58,6 +58,8 @@ put:
       $ref: '../components/responses/bad-request.yaml'
     '401':
       $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
     '404':
       $ref: '../components/responses/not-found.yaml'
     '409':

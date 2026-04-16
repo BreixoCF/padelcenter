@@ -39,7 +39,7 @@ get:
   summary: List all users (paginated)
   description: >
     Returns a paginated list of all users in the system.
-    Requires ADMIN role.
+    Requires global ADMIN role.
   tags:
     - Users
   parameters:
@@ -87,5 +87,7 @@ get:
                       $ref: '../components/schemas/user-response.yaml'
     '401':
       $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
     '500':
       $ref: '../components/responses/server-error.yaml'

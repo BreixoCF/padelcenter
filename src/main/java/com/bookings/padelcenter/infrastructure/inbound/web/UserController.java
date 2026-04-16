@@ -26,6 +26,7 @@ import com.padelcenter.infrastructure.web.generated.model.UserUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -56,6 +57,7 @@ public class UserController implements UsersApi {
 	}
 
 	@Override
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ListUsers200Response> listUsers(Integer page, Integer size, String sort) {
 		var query = new GetAllUsersQuery(page, size);
 		var pageResult = getAllUsersUseCase.execute(query);
@@ -79,6 +81,8 @@ public class UserController implements UsersApi {
 	}
 
 	@Override
+	@PreAuthorize("@authResolver.resolveUserId(authentication).equals(#id)"
+			+ " or hasRole('ADMIN')")
 	public ResponseEntity<UserResponse> updateUser(UUID id, UserUpdateRequest userUpdateRequest) {
 		var command = userMapper.toCommand(id, userUpdateRequest);
 		var user = updateUserUseCase.execute(command);
@@ -86,6 +90,7 @@ public class UserController implements UsersApi {
 	}
 
 	@Override
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<UserResponse> updateUserRoles(UUID id, List<CenterRoleRequest> centerRoleRequest) {
 		var command = userMapper.toUpdateUserRolesCommand(id, centerRoleRequest, authResolver.currentUser());
 		var user = updateUserRolesUseCase.execute(command);
@@ -100,6 +105,8 @@ public class UserController implements UsersApi {
 	}
 
 	@Override
+	@PreAuthorize("@authResolver.resolveUserId(authentication).equals(#id)"
+			+ " or hasRole('ADMIN')")
 	public ResponseEntity<Void> deleteUser(UUID id) {
 		var command = userMapper.toDeleteUserCommand(id, authResolver.currentUser());
 		deleteUserUseCase.execute(command);

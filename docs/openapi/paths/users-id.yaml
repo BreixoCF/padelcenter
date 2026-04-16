@@ -34,6 +34,7 @@ put:
   description: >
     Replaces the mutable profile fields (name, email, phone, optionally password)
     of the specified user. Email is validated with format:email (fix I-9).
+    Only the user themselves or a global ADMIN may perform this action.
   tags:
     - Users
   requestBody:
@@ -58,6 +59,8 @@ put:
       $ref: '../components/responses/bad-request.yaml'
     '401':
       $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
     '404':
       $ref: '../components/responses/not-found.yaml'
     '409':
@@ -70,7 +73,8 @@ delete:
   summary: Soft-delete a user
   description: >
     Marks the user as deleted (soft-delete). The record is preserved in the
-    database with a deletedAt timestamp. Requires ADMIN role.
+    database with a deletedAt timestamp. Only the user themselves or a
+    global ADMIN may perform this action.
   tags:
     - Users
   responses:
@@ -78,6 +82,8 @@ delete:
       description: User deleted successfully. No response body.
     '401':
       $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
     '404':
       $ref: '../components/responses/not-found.yaml'
     '500':

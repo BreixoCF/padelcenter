@@ -138,6 +138,8 @@ components:
       $ref: './components/responses/bad-request.yaml'
     Unauthorized:
       $ref: './components/responses/unauthorized.yaml'
+    Forbidden:
+      $ref: './components/responses/forbidden.yaml'
     NotFound:
       $ref: './components/responses/not-found.yaml'
     Conflict:
