@@ -68,6 +68,11 @@ Structured logging con SLF4J/MDC, métricas con Micrometer, actuator endpoints. 
 ### ✅ Prompt 12 — CI/CD
 Pipeline GitHub Actions: build, test, análisis estático (Checkstyle/SpotBugs), publicación de imagen OCI con Cloud Native Buildpacks. Deferred a siguiente PR.
 
+### ✅ Prompt 13 — Validación de solapamiento de reservas
+Validación de solapamiento horario en creación y actualización de reservas. Query JPA `existsOverlappingBooking` con `Instant`, filtro `status IN (1,2)`, parámetro `excludeId` null para create / bookingId para update. Índice parcial `V4__add_booking_overlap_index.sql`. `BookingOverlapException` → 409 Conflict.
+
+**Commit:** `feat(booking): overlap validation with BookingOverlapException, JPA query and partial index`
+
 ---
 
 ## Estado general
