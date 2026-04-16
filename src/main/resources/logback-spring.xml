@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+    <!-- Registra los conversores de Spring Boot -->
+    <conversionRule conversionWord="clr"
+        converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <conversionRule conversionWord="wEx"
+        converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+
     <!-- ======================== -->
     <!-- PERFIL LOCAL: texto plano con colores -->
     <!-- ======================== -->
@@ -8,9 +14,7 @@
         <appender name="CONSOLE_COLOR"
                   class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
-                <pattern>
-                    %clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p){highlight} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx
-                </pattern>
+                <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p){highlight} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx</pattern>
                 <charset>UTF-8</charset>
             </encoder>
         </appender>
