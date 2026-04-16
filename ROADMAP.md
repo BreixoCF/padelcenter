@@ -73,6 +73,11 @@ Validación de solapamiento horario en creación y actualización de reservas. Q
 
 **Commit:** `feat(booking): overlap validation with BookingOverlapException, JPA query and partial index`
 
+### ✅ Prompt 14 — Autorización granular por centro (@PreAuthorize)
+`BookingOwnerEvaluator` para verificar propietario de reserva. Reglas `@PreAuthorize` en 8 endpoints: `hasRole('ADMIN')` para crear centros/listar usuarios/gestionar roles, `@authResolver` + `@centerRoleEvaluator` para campos, owner-or-admin para usuarios, `@bookingOwnerEvaluator` para reservas. `AccessDeniedException` → 403 ProblemDetail en `GlobalExceptionHandler`. `forbidden.yaml` en OpenAPI con 403 en endpoints protegidos. 7 nuevos tests de 403 en ITs. 132 tests, 0 fallos.
+
+**Commit:** `feat(security): per-center @PreAuthorize rules, BookingOwnerEvaluator, 403 in OpenAPI`
+
 ---
 
 ## Estado general
