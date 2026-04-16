@@ -78,6 +78,11 @@ Validación de solapamiento horario en creación y actualización de reservas. Q
 
 **Commit:** `feat(security): per-center @PreAuthorize rules, BookingOwnerEvaluator, 403 in OpenAPI`
 
+### ✅ Prompt 15 — Sprint 1: disponibilidad, campos por centro, auto-confirm
+`GetFieldAvailabilityUseCase` con 13 franjas fijas (09:00–22:00), query `findConfirmedByFieldAndDay` para marcar slots ocupados. `GetFieldsByCenterUseCase` con filtros opcionales `type`/`available` y paginación vía `findByCenterWithFilters`. Confirmación automática: `BookingCommandMapper` genera reservas con `BookingStatus.CONFIRMED` directamente (sin paso PENDING). OpenAPI actualizado con `FieldAvailability`, `TimeSlot`, endpoint `GET /fields/{fieldId}/availability` y `GET /centers/{centerId}/fields` con query params. 140 tests, 0 fallos.
+
+**Commit:** `feat(sprint1): field availability by day/slot, fields by center with filters, auto-confirm bookings on creation`
+
 ---
 
 ## Estado general
