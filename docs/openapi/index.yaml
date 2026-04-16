@@ -80,6 +80,9 @@ paths:
   /api/v1/fields/{id}:
     $ref: './paths/fields-id.yaml'
 
+  /api/v1/fields/{fieldId}/availability:
+    $ref: './paths/fields-id-availability.yaml'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -131,6 +134,10 @@ components:
       $ref: './components/schemas/paged-response.yaml'
     ProblemDetail:
       $ref: './components/schemas/problem-detail.yaml'
+    TimeSlot:
+      $ref: './components/schemas/time-slot.yaml'
+    FieldAvailability:
+      $ref: './components/schemas/field-availability.yaml'
 
   # ── Reusable Responses ────────────────────────────────────────────────────
   responses:

@@ -57,6 +57,6 @@ properties:
       - CONFIRMED
       - CANCELLED
     description: Current lifecycle status of the booking.
-    example: "PENDING"
+    example: "CONFIRMED"
   audit:
     $ref: './auditable-response.yaml'

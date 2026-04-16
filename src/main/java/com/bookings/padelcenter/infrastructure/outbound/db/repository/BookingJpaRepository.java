@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public interface BookingJpaRepository extends JpaRepository<BookingEntity, Long> {
@@ -27,5 +28,19 @@ public interface BookingJpaRepository extends JpaRepository<BookingEntity, Long>
 		@Param("start") Instant start,
 		@Param("end") Instant end,
 		@Param("excludeId") Long excludeId
+	);
+
+	@Query("""
+		SELECT b FROM BookingEntity b
+		WHERE b.field.fieldId = :fieldId
+		  AND b.status = 2
+		  AND b.startTime < :dayEnd
+		  AND b.endTime > :dayStart
+		ORDER BY b.startTime ASC
+		""")
+	List<BookingEntity> findConfirmedByFieldAndDay(
+		@Param("fieldId") UUID fieldId,
+		@Param("dayStart") Instant dayStart,
+		@Param("dayEnd") Instant dayEnd
 	);
 }

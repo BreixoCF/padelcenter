@@ -70,4 +70,22 @@ public class FieldRepositoryImpl implements FieldRepository {
 				.map(mapper::toDomain)
 				.toList();
 	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PageResult<Field> findByCenterWithFilters(UUID centerId, String type, Boolean available, int page, int size) {
+		var springPage = fieldJpaRepository.findByCenterWithFilters(
+				centerId, type, available, PageRequest.of(page, size));
+		var content = springPage.getContent()
+				.stream()
+				.map(mapper::toDomain)
+				.toList();
+		return new PageResult<>(
+				content,
+				springPage.getNumber(),
+				springPage.getSize(),
+				springPage.getTotalElements(),
+				springPage.getTotalPages()
+		);
+	}
 }

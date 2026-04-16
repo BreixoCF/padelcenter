@@ -26,4 +26,14 @@ public interface BookingRepository {
 	 * @return true if an overlapping booking exists
 	 */
 	boolean existsOverlappingBooking(UUID fieldId, LocalDateTime start, LocalDateTime end, Long excludeId);
+
+	/**
+	 * Returns all confirmed bookings for the given field that overlap the specified day.
+	 *
+	 * @param fieldId  target field
+	 * @param dayStart start of the day (inclusive)
+	 * @param dayEnd   end of the day (exclusive)
+	 * @return list of confirmed bookings for that day, ordered by start time
+	 */
+	List<Booking> findConfirmedByFieldAndDay(UUID fieldId, LocalDateTime dayStart, LocalDateTime dayEnd);
 }

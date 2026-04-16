@@ -1,0 +1,41 @@
+parameters:
+  - name: fieldId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+    description: Unique identifier of the field.
+    example: "f1e2d3c4-b5a6-7890-fedc-ba9876543210"
+
+get:
+  operationId: getFieldAvailability
+  summary: Get field availability for a specific date
+  description: >
+    Returns the availability for a field on a given date, broken into
+    fixed one-hour slots from 09:00 to 22:00 (13 slots). A slot is
+    marked unavailable if a CONFIRMED booking overlaps that time range.
+  tags:
+    - Fields
+  parameters:
+    - name: date
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date
+      description: The date for which to check availability (ISO 8601).
+      example: "2025-06-20"
+  responses:
+    '200':
+      description: Field availability for the requested date.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/field-availability.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

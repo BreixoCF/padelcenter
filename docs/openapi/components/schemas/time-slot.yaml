@@ -1,0 +1,21 @@
+type: object
+description: A one-hour time slot within a field's daily schedule.
+required:
+  - start
+  - end
+  - available
+properties:
+  start:
+    type: string
+    format: date-time
+    description: Start of the time slot (inclusive).
+    example: "2025-06-20T09:00:00"
+  end:
+    type: string
+    format: date-time
+    description: End of the time slot (exclusive).
+    example: "2025-06-20T10:00:00"
+  available:
+    type: boolean
+    description: Whether the slot is free to book.
+    example: true

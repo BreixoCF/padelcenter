@@ -3,7 +3,9 @@ package com.bookings.padelcenter.infrastructure.inbound.web;
 import com.bookings.padelcenter.application.create.CreateCenterUseCase;
 import com.bookings.padelcenter.application.create.CreateFieldUseCase;
 import com.bookings.padelcenter.application.query.GetAllCentersQuery;
+import com.bookings.padelcenter.application.query.GetFieldsByCenterQuery;
 import com.bookings.padelcenter.application.read.GetAllCentersUseCase;
+import com.bookings.padelcenter.application.read.GetFieldsByCenterUseCase;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.CenterApiMapper;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.FieldApiMapper;
 import com.padelcenter.infrastructure.web.generated.api.CentersApi;
@@ -11,6 +13,7 @@ import com.padelcenter.infrastructure.web.generated.model.CenterRequest;
 import com.padelcenter.infrastructure.web.generated.model.CenterResponse;
 import com.padelcenter.infrastructure.web.generated.model.FieldRequest;
 import com.padelcenter.infrastructure.web.generated.model.FieldResponse;
+import com.padelcenter.infrastructure.web.generated.model.ListCenterFields200Response;
 import com.padelcenter.infrastructure.web.generated.model.ListCenters200Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +30,7 @@ public class CenterController implements CentersApi {
 	private final CreateCenterUseCase createCenterUseCase;
 	private final GetAllCentersUseCase getAllCentersUseCase;
 	private final CreateFieldUseCase createFieldUseCase;
+	private final GetFieldsByCenterUseCase getFieldsByCenterUseCase;
 	private final CenterApiMapper centerApiMapper;
 	private final FieldApiMapper fieldApiMapper;
 
@@ -43,6 +47,14 @@ public class CenterController implements CentersApi {
 		var query = new GetAllCentersQuery(page, size);
 		var pageResult = getAllCentersUseCase.execute(query);
 		return ResponseEntity.ok(centerApiMapper.toPagedResponse(pageResult));
+	}
+
+	@Override
+	public ResponseEntity<ListCenterFields200Response> listCenterFields(
+			UUID centerId, String type, Boolean available, Integer page, Integer size) {
+		var query = new GetFieldsByCenterQuery(centerId, type, available, page, size);
+		var pageResult = getFieldsByCenterUseCase.execute(query);
+		return ResponseEntity.ok(fieldApiMapper.toPagedResponse(pageResult));
 	}
 
 	@Override

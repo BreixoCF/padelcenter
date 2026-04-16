@@ -59,6 +59,17 @@ public class BookingRepositoryImpl implements BookingRepository {
 
 	@Override
 	@Transactional(readOnly = true)
+	public List<Booking> findConfirmedByFieldAndDay(UUID fieldId, LocalDateTime dayStart, LocalDateTime dayEnd) {
+		var startInstant = dayStart.atZone(ZONE).toInstant();
+		var endInstant = dayEnd.atZone(ZONE).toInstant();
+		return bookingJpaRepository.findConfirmedByFieldAndDay(fieldId, startInstant, endInstant)
+			.stream()
+			.map(mapper::toDomain)
+			.toList();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
 	public PageResult<Booking> findByUserId(UUID userId, int page, int size) {
 		var springPage = bookingJpaRepository.findByUser_UserId(userId, PageRequest.of(page, size));
 		var content = springPage.getContent().stream()

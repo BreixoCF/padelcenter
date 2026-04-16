@@ -1,0 +1,22 @@
+type: object
+description: Daily availability for a specific field, broken into one-hour slots.
+required:
+  - fieldId
+  - date
+  - slots
+properties:
+  fieldId:
+    type: string
+    format: uuid
+    description: Unique identifier of the field.
+    example: "f1e2d3c4-b5a6-7890-fedc-ba9876543210"
+  date:
+    type: string
+    format: date
+    description: The date for which availability is reported.
+    example: "2025-06-20"
+  slots:
+    type: array
+    description: List of one-hour time slots for the day.
+    items:
+      $ref: '../schemas/time-slot.yaml'

@@ -22,7 +22,7 @@ public class BookingCommandMapper {
 			command.endTime(),
 			command.totalPrice(),
 			Instant.now(),
-			BookingStatus.PENDING,
+			BookingStatus.CONFIRMED,
 			Auditable.newAudit()
 		);
 	}

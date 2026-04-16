@@ -1,13 +1,16 @@
 package com.bookings.padelcenter.infrastructure.inbound.mapper;
 
 import com.bookings.padelcenter.application.command.CreateFieldCommand;
+import com.bookings.padelcenter.application.query.FieldAvailabilityResult;
 import com.bookings.padelcenter.domain.model.Field;
 import com.bookings.padelcenter.domain.model.PageResult;
 import com.padelcenter.infrastructure.web.generated.model.AuditableResponse;
+import com.padelcenter.infrastructure.web.generated.model.FieldAvailability;
 import com.padelcenter.infrastructure.web.generated.model.FieldRequest;
 import com.padelcenter.infrastructure.web.generated.model.FieldResponse;
 import com.padelcenter.infrastructure.web.generated.model.FieldSummaryResponse;
-import com.padelcenter.infrastructure.web.generated.model.ListFields200Response;
+import com.padelcenter.infrastructure.web.generated.model.ListCenterFields200Response;
+import com.padelcenter.infrastructure.web.generated.model.TimeSlot;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -49,15 +52,25 @@ public class FieldApiMapper {
 				.center(centerApiMapper.toSummaryResponse(field.center()));
 	}
 
-	public ListFields200Response toPagedResponse(PageResult<Field> page) {
+	public ListCenterFields200Response toPagedResponse(PageResult<Field> page) {
 		List<FieldResponse> content = page.content().stream().map(this::toResponse).toList();
-		return new ListFields200Response(
+		return new ListCenterFields200Response(
 				content,
 				page.totalElements(),
 				page.totalPages(),
 				page.page(),
 				page.size()
 		);
+	}
+
+	public FieldAvailability toAvailabilityResponse(FieldAvailabilityResult result) {
+		var slots = result.slots().stream()
+				.map(s -> new TimeSlot(
+						s.start().atOffset(ZoneOffset.UTC),
+						s.end().atOffset(ZoneOffset.UTC),
+						s.available()))
+				.toList();
+		return new FieldAvailability(result.fieldId(), result.date(), slots);
 	}
 
 	private AuditableResponse toAuditResponse(Field field) {

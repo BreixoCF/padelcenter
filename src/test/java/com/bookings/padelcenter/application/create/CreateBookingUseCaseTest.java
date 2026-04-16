@@ -115,7 +115,7 @@ class CreateBookingUseCaseTest {
 			END,
 			new BigDecimal("25.00"),
 			Instant.now(),
-			BookingStatus.PENDING,
+			BookingStatus.CONFIRMED,
 			Auditable.newAudit()
 		);
 	}
@@ -132,7 +132,7 @@ class CreateBookingUseCaseTest {
 			END,
 			new BigDecimal("25.00"),
 			Instant.now(),
-			BookingStatus.PENDING,
+			BookingStatus.CONFIRMED,
 			Auditable.newAudit()
 		);
 
@@ -152,7 +152,7 @@ class CreateBookingUseCaseTest {
 		assertThat(result.startTime()).isEqualTo(START);
 		assertThat(result.endTime()).isEqualTo(END);
 		assertThat(result.totalPrice()).isEqualByComparingTo(new BigDecimal("25.00"));
-		assertThat(result.status()).isEqualTo(BookingStatus.PENDING);
+		assertThat(result.status()).isEqualTo(BookingStatus.CONFIRMED);
 
 		verify(userRepository, times(1)).findById(userId);
 		verify(fieldRepository, times(1)).findById(fieldId);
@@ -239,7 +239,7 @@ class CreateBookingUseCaseTest {
 			END,
 			new BigDecimal("25.00"),
 			Instant.now(),
-			BookingStatus.PENDING,
+			BookingStatus.CONFIRMED,
 			Auditable.newAudit()
 		);
 
@@ -272,8 +272,8 @@ class CreateBookingUseCaseTest {
 	}
 
 	@Test
-	@DisplayName("Should create booking with PENDING status")
-	void shouldCreateBookingWithPendingStatus() {
+	@DisplayName("Should create booking with CONFIRMED status")
+	void shouldCreateBookingWithConfirmedStatus() {
 		// Given
 		Booking savedBooking = new Booking(
 			1L,
@@ -283,7 +283,7 @@ class CreateBookingUseCaseTest {
 			END,
 			new BigDecimal("25.00"),
 			Instant.now(),
-			BookingStatus.PENDING,
+			BookingStatus.CONFIRMED,
 			Auditable.newAudit()
 		);
 
@@ -296,7 +296,7 @@ class CreateBookingUseCaseTest {
 		Booking result = createBookingUseCase.execute(command);
 
 		// Then
-		assertThat(result.status()).isEqualTo(BookingStatus.PENDING);
+		assertThat(result.status()).isEqualTo(BookingStatus.CONFIRMED);
 	}
 
 	@Test
@@ -311,7 +311,7 @@ class CreateBookingUseCaseTest {
 			END,
 			new BigDecimal("25.00"),
 			Instant.now(),
-			BookingStatus.PENDING,
+			BookingStatus.CONFIRMED,
 			Auditable.newAudit()
 		);
 
@@ -340,7 +340,7 @@ class CreateBookingUseCaseTest {
 			END,
 			new BigDecimal("25.00"),
 			Instant.now(),
-			BookingStatus.PENDING,
+			BookingStatus.CONFIRMED,
 			Auditable.newAudit()
 		);
 
@@ -371,7 +371,7 @@ class CreateBookingUseCaseTest {
 			END,
 			new BigDecimal("25.00"),
 			bookedAt,
-			BookingStatus.PENDING,
+			BookingStatus.CONFIRMED,
 			Auditable.newAudit()
 		);
 

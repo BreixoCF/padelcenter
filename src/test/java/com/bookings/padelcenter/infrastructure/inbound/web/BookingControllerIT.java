@@ -103,7 +103,7 @@ class BookingControllerIT extends AbstractIntegrationTest {
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.bookingId", notNullValue()))
 				.andExpect(jsonPath("$.field.fieldId").value(fieldId.toString()))
-				.andExpect(jsonPath("$.status").value("PENDING"));
+				.andExpect(jsonPath("$.status").value("CONFIRMED"));
 	}
 
 	// ── GET /api/v1/bookings/{id} ─────────────────────────────────────────────
