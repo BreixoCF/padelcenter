@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record Field(
-	UUID id,
+	UUID fieldId,
 	String name,
 	String type,
 	BigDecimal pricePerHour,

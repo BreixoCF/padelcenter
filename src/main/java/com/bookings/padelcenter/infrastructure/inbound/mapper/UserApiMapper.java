@@ -40,7 +40,7 @@ public class UserApiMapper {
 
 	public UserResponse toResponse(User user) {
 		return new UserResponse()
-				.id(user.id())
+				.userId(user.userId())
 				.firstName(user.firstName())
 				.lastName(user.lastName())
 				.email(user.email())

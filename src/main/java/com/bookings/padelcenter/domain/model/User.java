@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public record User(
-	UUID id,
+	UUID userId,
 	String firstName,
 	String lastName,
 	String email,
@@ -23,7 +23,7 @@ public record User(
 
 	public User updateRoles(Set<CenterRole> newRoles, UUID modifiedBy) {
 		return new User(
-			this.id,
+			this.userId,
 			this.firstName,
 			this.lastName,
 			this.email,
@@ -40,7 +40,7 @@ public record User(
 			.collect(java.util.stream.Collectors.toSet());
 
 		return new User(
-			this.id,
+			this.userId,
 			this.firstName,
 			this.lastName,
 			this.email,
@@ -53,7 +53,7 @@ public record User(
 
 	public User updatePassword(String newPasswordHash, UUID modifiedBy) {
 		return new User(
-			this.id,
+			this.userId,
 			this.firstName,
 			this.lastName,
 			this.email,

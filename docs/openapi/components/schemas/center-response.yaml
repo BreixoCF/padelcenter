@@ -1,12 +1,12 @@
 type: object
 description: Full padel center representation returned on create and list operations.
 required:
-  - id
+  - centerId
   - name
   - address
   - city
 properties:
-  id:
+  centerId:
     type: string
     format: uuid
     description: Unique identifier of the center.

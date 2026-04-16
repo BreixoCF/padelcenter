@@ -160,7 +160,7 @@ class UpdateBookingUseCaseTest {
 		verify(bookingRepository).save(bookingCaptor.capture());
 		Booking capturedBooking = bookingCaptor.getValue();
 
-		assertThat(capturedBooking.id()).isEqualTo(bookingId);
+		assertThat(capturedBooking.bookingId()).isEqualTo(bookingId);
 		assertThat(capturedBooking.user()).isEqualTo(existingBooking.user());
 		assertThat(capturedBooking.field()).isEqualTo(existingBooking.field());
 	}

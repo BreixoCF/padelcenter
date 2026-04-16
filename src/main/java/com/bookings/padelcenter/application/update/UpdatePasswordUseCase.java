@@ -40,7 +40,7 @@ public class UpdatePasswordUseCase implements CommandUseCase<UpdatePasswordComma
 		userRepository.save(updatedUser);
 
 		log.info("user.password.updated userId={}",
-			updatedUser.id());
+			updatedUser.userId());
 
 		return updatedUser;
 	}

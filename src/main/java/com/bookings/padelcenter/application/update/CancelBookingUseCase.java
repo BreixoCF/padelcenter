@@ -37,7 +37,7 @@ public class CancelBookingUseCase implements CommandUseCase<CancelBookingCommand
 		bookingRepository.save(cancelledBooking);
 
 		log.info("booking.cancelled bookingId={} fieldId={}",
-			cancelledBooking.id(), cancelledBooking.field().id());
+			cancelledBooking.bookingId(), cancelledBooking.field().fieldId());
 
 		return cancelledBooking;
 	}

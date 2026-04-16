@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record Booking(
-	Long id,
+	Long bookingId,
 	User user,
 	Field field,
 	LocalDateTime startTime,
@@ -18,7 +18,7 @@ public record Booking(
 ) {
 	public Booking updateDetails(LocalDateTime startTime, LocalDateTime endTime, BigDecimal totalPrice, UUID modifiedBy) {
 		return new Booking(
-			this.id,
+			this.bookingId,
 			this.user,
 			this.field,
 			startTime,
@@ -32,7 +32,7 @@ public record Booking(
 
 	public Booking cancel(UUID modifiedBy) {
 		return new Booking(
-			this.id,
+			this.bookingId,
 			this.user,
 			this.field,
 			this.startTime,

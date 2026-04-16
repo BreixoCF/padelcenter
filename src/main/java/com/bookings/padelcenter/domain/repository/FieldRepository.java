@@ -12,6 +12,6 @@ public interface FieldRepository {
 	List<Field> findAll();
 	PageResult<Field> findAll(int page, int size);
 	Field save(Field field);
-	Optional<Field> findById(UUID id);
+	Optional<Field> findById(UUID fieldId);
 	List<Field> findByCenterId(UUID centerId);
 }

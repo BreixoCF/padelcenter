@@ -41,7 +41,7 @@ public class CreateFieldUseCase implements CommandUseCase<CreateFieldCommand, Fi
 			var field = fieldRepository.save(fieldToCreate);
 
 			log.info("field.created fieldId={} centerId={} name={} pricePerHour={}",
-				field.id(), field.center().id(), field.name(), field.pricePerHour());
+				field.fieldId(), field.center().centerId(), field.name(), field.pricePerHour());
 
 			return field;
 		}

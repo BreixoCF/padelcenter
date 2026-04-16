@@ -81,7 +81,7 @@ class DeleteUserUseCaseTest {
 
 		// Then
 		assertThat(result).isNotNull();
-		assertThat(result.id()).isEqualTo(userId);
+		assertThat(result.userId()).isEqualTo(userId);
 		assertThat(result.audit().deletedBy()).isEqualTo(deletedBy);
 		assertThat(result.audit().deletedAt()).isNotNull();
 
@@ -161,7 +161,7 @@ class DeleteUserUseCaseTest {
 		verify(userRepository).save(userCaptor.capture());
 		User capturedUser = userCaptor.getValue();
 
-		assertThat(capturedUser.id()).isEqualTo(existingUser.id());
+		assertThat(capturedUser.userId()).isEqualTo(existingUser.userId());
 		assertThat(capturedUser.firstName()).isEqualTo(existingUser.firstName());
 		assertThat(capturedUser.lastName()).isEqualTo(existingUser.lastName());
 		assertThat(capturedUser.email()).isEqualTo(existingUser.email());

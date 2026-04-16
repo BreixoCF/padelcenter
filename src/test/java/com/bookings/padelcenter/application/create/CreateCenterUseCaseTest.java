@@ -130,6 +130,6 @@ class CreateCenterUseCaseTest {
 
 		// Then
 		assertThat(result).isEqualTo(savedCenter);
-		assertThat(result.id()).isNotNull();
+		assertThat(result.centerId()).isNotNull();
 	}
 }

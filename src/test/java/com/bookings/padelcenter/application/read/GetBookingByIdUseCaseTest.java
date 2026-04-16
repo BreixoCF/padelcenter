@@ -63,7 +63,7 @@ class GetBookingByIdUseCaseTest {
 		var result = getBookingByIdUseCase.execute(query);
 
 		assertThat(result).isEqualTo(booking);
-		assertThat(result.id()).isEqualTo(bookingId);
+		assertThat(result.bookingId()).isEqualTo(bookingId);
 		verify(bookingRepository).findById(bookingId);
 	}
 

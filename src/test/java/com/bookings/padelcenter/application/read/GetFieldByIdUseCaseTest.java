@@ -46,7 +46,7 @@ class GetFieldByIdUseCaseTest {
 		var result = getFieldByIdUseCase.execute(query);
 
 		assertThat(result).isEqualTo(field);
-		assertThat(result.id()).isEqualTo(fieldId);
+		assertThat(result.fieldId()).isEqualTo(fieldId);
 		verify(fieldRepository).findById(fieldId);
 	}
 

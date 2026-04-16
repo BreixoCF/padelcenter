@@ -21,8 +21,8 @@ public class BookingPersistenceMapper {
 
 	public BookingEntity toEntity(Booking booking) {
 		var entity = new BookingEntity();
-		if (booking.id() != null) {
-			entity.setId(booking.id());
+		if (booking.bookingId() != null) {
+			entity.setBookingId(booking.bookingId());
 		}
 		entity.setUser(userPersistenceMapper.toEntity(booking.user()));
 		entity.setField(fieldPersistenceMapper.toEntity(booking.field()));
@@ -47,7 +47,7 @@ public class BookingPersistenceMapper {
 			entity.getDeletedAt()
 		);
 		return new Booking(
-			entity.getId(),
+			entity.getBookingId(),
 			user,
 			field,
 			toLocalDateTime(entity.getStartTime()),

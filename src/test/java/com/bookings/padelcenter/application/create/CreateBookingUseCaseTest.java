@@ -144,7 +144,7 @@ class CreateBookingUseCaseTest {
 
 		// Then
 		assertThat(result).isNotNull();
-		assertThat(result.id()).isEqualTo(1L);
+		assertThat(result.bookingId()).isEqualTo(1L);
 		assertThat(result.user()).isEqualTo(user);
 		assertThat(result.field()).isEqualTo(field);
 		assertThat(result.startTime()).isEqualTo(START);
@@ -251,8 +251,8 @@ class CreateBookingUseCaseTest {
 
 		// Then
 		assertThat(result).isEqualTo(savedBooking);
-		assertThat(result.id()).isNotNull();
-		assertThat(result.id()).isEqualTo(1L);
+		assertThat(result.bookingId()).isNotNull();
+		assertThat(result.bookingId()).isEqualTo(1L);
 	}
 
 	@Test
@@ -322,8 +322,8 @@ class CreateBookingUseCaseTest {
 		Booking result = createBookingUseCase.execute(command);
 
 		// Then
-		assertThat(result.user().id()).isEqualTo(userId);
-		assertThat(result.field().id()).isEqualTo(fieldId);
+		assertThat(result.user().userId()).isEqualTo(userId);
+		assertThat(result.field().fieldId()).isEqualTo(fieldId);
 	}
 
 	@Test

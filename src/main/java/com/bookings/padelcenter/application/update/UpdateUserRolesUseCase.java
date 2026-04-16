@@ -33,7 +33,7 @@ public class UpdateUserRolesUseCase implements CommandUseCase<UpdateUserRolesCom
 		userRepository.save(updatedUser);
 
 		log.info("user.roles.updated userId={} rolesCount={}",
-			updatedUser.id(), updatedUser.centerRoles().size());
+			updatedUser.userId(), updatedUser.centerRoles().size());
 
 		return updatedUser;
 	}

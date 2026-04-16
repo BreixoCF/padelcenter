@@ -29,7 +29,7 @@ public class UserCommandMapper {
 	public User updateFromCommand(UpdateUserCommand command, User user) {
 		var updatedAuditable = user.audit().update(user.audit().modifiedBy());
 		return new User(
-				user.id(),
+				user.userId(),
 				command.firstName(),
 				command.lastName(),
 				command.email(),

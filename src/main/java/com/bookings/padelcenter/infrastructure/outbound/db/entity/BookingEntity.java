@@ -16,7 +16,8 @@ public class BookingEntity extends AuditableEntity<UUID> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	@Column(name = "booking_id")
+	private Long bookingId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)

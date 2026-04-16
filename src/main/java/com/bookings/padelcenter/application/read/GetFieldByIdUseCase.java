@@ -27,7 +27,7 @@ public class GetFieldByIdUseCase implements QueryUseCase<GetFieldByIdQuery, Fiel
 		var field = fieldRepository.findById(query.fieldId())
 				.orElseThrow(() -> new FieldNotFoundException(query.fieldId()));
 		log.debug("field.found fieldId={} centerId={} name={}",
-			field.id(), field.center().id(), field.name());
+			field.fieldId(), field.center().centerId(), field.name());
 		return field;
 	}
 }

@@ -3,7 +3,7 @@ package com.bookings.padelcenter.domain.model;
 import java.util.UUID;
 
 public record Center(
-	UUID id,
+	UUID centerId,
 	String name,
 	String address,
 	String city,

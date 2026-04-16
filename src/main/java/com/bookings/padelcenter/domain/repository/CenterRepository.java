@@ -10,7 +10,7 @@ public interface CenterRepository {
 
 	PageResult<Center> findAll(int page, int size);
 	Center save(Center center);
-	Optional<Center> findById(UUID id);
+	Optional<Center> findById(UUID centerId);
 	Optional<Center> findByName(String name);
 	boolean existsByName(String name);
 }

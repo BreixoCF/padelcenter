@@ -27,7 +27,7 @@ public class GetBookingByIdUseCase implements QueryUseCase<GetBookingByIdQuery, 
 		var booking = bookingRepository.findById(query.bookingId())
 				.orElseThrow(() -> new BookingNotFoundException(query.bookingId()));
 		log.debug("booking.found bookingId={} fieldId={} status={}",
-			booking.id(), booking.field().id(), booking.status());
+			booking.bookingId(), booking.field().fieldId(), booking.status());
 		return booking;
 	}
 }

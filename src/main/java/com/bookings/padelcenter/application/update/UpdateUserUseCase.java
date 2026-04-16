@@ -24,10 +24,10 @@ public class UpdateUserUseCase implements CommandUseCase<UpdateUserCommand, User
 	@Override
 	public User execute(UpdateUserCommand command) {
 		log.debug("user.update.start userId={} email={}",
-			command.id(), command.email());
+			command.userId(), command.email());
 
-		var user = userRepository.findById(command.id())
-				.orElseThrow(() -> new UserNotFoundException(command.id()));
+		var user = userRepository.findById(command.userId())
+				.orElseThrow(() -> new UserNotFoundException(command.userId()));
 		if (!user.email().equals(command.email()) && userRepository.existsByEmail(command.email())) {
 			throw new EmailAlreadyExistsException(command.email());
 		}
@@ -35,7 +35,7 @@ public class UpdateUserUseCase implements CommandUseCase<UpdateUserCommand, User
 		userRepository.save(updatedUser);
 
 		log.info("user.updated userId={} email={} firstName={} lastName={}",
-			updatedUser.id(), updatedUser.email(), updatedUser.firstName(), updatedUser.lastName());
+			updatedUser.userId(), updatedUser.email(), updatedUser.firstName(), updatedUser.lastName());
 
 		return updatedUser;
 	}

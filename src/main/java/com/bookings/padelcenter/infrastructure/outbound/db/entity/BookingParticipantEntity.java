@@ -13,6 +13,7 @@ public class BookingParticipantEntity extends AuditableEntity<UUID> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "booking_participant_id")
 	private Long bookingParticipantId;
 
 	@ManyToOne(fetch = FetchType.LAZY)

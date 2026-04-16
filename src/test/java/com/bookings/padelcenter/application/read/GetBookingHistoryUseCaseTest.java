@@ -199,7 +199,7 @@ class GetBookingHistoryUseCaseTest {
 
 		assertThat(result.content()).isNotEmpty();
 		Booking firstBooking = result.content().get(0);
-		assertThat(firstBooking.id()).isNotNull();
+		assertThat(firstBooking.bookingId()).isNotNull();
 		assertThat(firstBooking.user()).isNotNull();
 		assertThat(firstBooking.field()).isNotNull();
 		assertThat(firstBooking.startTime()).isNotNull();
@@ -217,7 +217,7 @@ class GetBookingHistoryUseCaseTest {
 
 		PageResult<Booking> result = getBookingHistoryUseCase.execute(query);
 
-		assertThat(result.content()).allMatch(booking -> booking.user().id().equals(userId));
+		assertThat(result.content()).allMatch(booking -> booking.user().userId().equals(userId));
 		verify(bookingRepository).findByUserId(userId, PAGE, SIZE);
 	}
 
@@ -232,7 +232,7 @@ class GetBookingHistoryUseCaseTest {
 		PageResult<Booking> result = getBookingHistoryUseCase.execute(query);
 
 		assertThat(result.content()).hasSize(1);
-		assertThat(result.content().get(0).id()).isEqualTo(1L);
+		assertThat(result.content().get(0).bookingId()).isEqualTo(1L);
 	}
 
 	@Test

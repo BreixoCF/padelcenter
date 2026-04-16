@@ -153,7 +153,7 @@ class CreateFieldUseCaseTest {
 		verify(fieldRepository).save(fieldCaptor.capture());
 		Field capturedField = fieldCaptor.getValue();
 
-		assertThat(capturedField.id()).isNull();
+		assertThat(capturedField.fieldId()).isNull();
 	}
 
 	@Test
@@ -199,6 +199,6 @@ class CreateFieldUseCaseTest {
 
 		// Then
 		assertThat(result).isEqualTo(savedField);
-		assertThat(result.id()).isNotNull();
+		assertThat(result.fieldId()).isNotNull();
 	}
 }

@@ -130,6 +130,6 @@ class CreateUserUseCaseTest {
 
 		// Then
 		assertThat(result).isEqualTo(savedUser);
-		assertThat(result.id()).isNotNull();
+		assertThat(result.userId()).isNotNull();
 	}
 }

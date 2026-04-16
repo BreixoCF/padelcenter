@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface BookingRepository {
 
 	Booking save(Booking booking);
-	Optional<Booking> findById(Long id);
+	Optional<Booking> findById(Long bookingId);
 	List<Booking> findAll();
 	PageResult<Booking> findByUserId(UUID userId, int page, int size);
 }

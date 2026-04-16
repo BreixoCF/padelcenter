@@ -1,12 +1,12 @@
 type: object
 description: Full field representation returned by all field read and write operations.
 required:
-  - id
+  - fieldId
   - name
   - pricePerHour
   - isAvailable
 properties:
-  id:
+  fieldId:
     type: string
     format: uuid
     description: Unique identifier of the field.

@@ -3,7 +3,7 @@ package com.bookings.padelcenter.application.command;
 import java.util.UUID;
 
 public record UpdateUserCommand(
-	UUID id,
+	UUID userId,
 	String firstName,
 	String lastName,
 	String email,

@@ -41,7 +41,7 @@ class BookingControllerIT extends AbstractIntegrationTest {
 				.andExpect(status().isCreated())
 				.andReturn().getResponse().getContentAsString();
 
-		return UUID.fromString(JsonPath.read(body, "$.id"));
+		return UUID.fromString(JsonPath.read(body, "$.userId"));
 	}
 
 	private UUID createField() throws Exception {
@@ -58,7 +58,7 @@ class BookingControllerIT extends AbstractIntegrationTest {
 				.andExpect(status().isCreated())
 				.andReturn().getResponse().getContentAsString();
 
-		String centerId = JsonPath.read(centerBody, "$.id");
+		String centerId = JsonPath.read(centerBody, "$.centerId");
 
 		String fieldBody = mockMvc.perform(post(CENTERS_URL + "/" + centerId + "/fields")
 						.with(adminJwt())
@@ -74,7 +74,7 @@ class BookingControllerIT extends AbstractIntegrationTest {
 				.andExpect(status().isCreated())
 				.andReturn().getResponse().getContentAsString();
 
-		return UUID.fromString(JsonPath.read(fieldBody, "$.id"));
+		return UUID.fromString(JsonPath.read(fieldBody, "$.fieldId"));
 	}
 
 	// ── POST /api/v1/bookings ─────────────────────────────────────────────────
@@ -99,8 +99,8 @@ class BookingControllerIT extends AbstractIntegrationTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(json))
 				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.id", notNullValue()))
-				.andExpect(jsonPath("$.field.id").value(fieldId.toString()))
+				.andExpect(jsonPath("$.bookingId", notNullValue()))
+				.andExpect(jsonPath("$.field.fieldId").value(fieldId.toString()))
 				.andExpect(jsonPath("$.status").value("PENDING"));
 	}
 

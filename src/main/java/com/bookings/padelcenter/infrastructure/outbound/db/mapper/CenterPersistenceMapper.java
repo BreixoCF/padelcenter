@@ -14,8 +14,8 @@ public class CenterPersistenceMapper {
 
 	public CenterEntity toEntity(Center center) {
 		var entity = new CenterEntity();
-		if (center.id() != null) {
-			entity.setCenterId(center.id());
+		if (center.centerId() != null) {
+			entity.setCenterId(center.centerId());
 		}
 		entity.setName(center.name());
 		entity.setAddress(center.address());

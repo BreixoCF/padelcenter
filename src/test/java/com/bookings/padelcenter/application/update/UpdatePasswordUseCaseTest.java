@@ -192,7 +192,7 @@ class UpdatePasswordUseCaseTest {
 		verify(userRepository).save(userCaptor.capture());
 		User capturedUser = userCaptor.getValue();
 
-		assertThat(capturedUser.id()).isEqualTo(existingUser.id());
+		assertThat(capturedUser.userId()).isEqualTo(existingUser.userId());
 		assertThat(capturedUser.firstName()).isEqualTo(existingUser.firstName());
 		assertThat(capturedUser.lastName()).isEqualTo(existingUser.lastName());
 		assertThat(capturedUser.email()).isEqualTo(existingUser.email());

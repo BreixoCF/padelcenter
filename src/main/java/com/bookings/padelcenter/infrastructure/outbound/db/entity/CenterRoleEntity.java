@@ -15,6 +15,7 @@ public class CenterRoleEntity extends AuditableEntity<UUID> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "center_role_id")
 	private Long centerRoleId;
 
 	@Enumerated(EnumType.STRING)

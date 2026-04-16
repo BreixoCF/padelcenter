@@ -28,7 +28,7 @@ public class CenterApiMapper {
 
 	public CenterResponse toResponse(Center center) {
 		return new CenterResponse()
-				.id(center.id())
+				.centerId(center.centerId())
 				.name(center.name())
 				.address(center.address())
 				.city(center.city())

@@ -15,6 +15,7 @@ public class FieldEntity extends AuditableEntity<UUID> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
+	@Column(name = "field_id")
 	private UUID fieldId;
 
 	@ManyToOne(fetch = FetchType.LAZY)

@@ -1,12 +1,12 @@
 type: object
 description: Full user representation returned by all user read and write operations.
 required:
-  - id
+  - userId
   - firstName
   - lastName
   - email
 properties:
-  id:
+  userId:
     type: string
     format: uuid
     description: Unique identifier of the user.

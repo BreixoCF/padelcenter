@@ -43,7 +43,7 @@ class GetUserByIdUseCaseTest {
 		var result = getUserByIdUseCase.execute(query);
 
 		assertThat(result).isEqualTo(user);
-		assertThat(result.id()).isEqualTo(userId);
+		assertThat(result.userId()).isEqualTo(userId);
 		verify(userRepository).findById(userId);
 	}
 

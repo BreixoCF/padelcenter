@@ -117,7 +117,7 @@ class CancelBookingUseCaseTest {
 		// Then
 		assertThat(result).isNotNull();
 		assertThat(result.status()).isEqualTo(BookingStatus.CANCELLED);
-		assertThat(result.id()).isEqualTo(bookingId);
+		assertThat(result.bookingId()).isEqualTo(bookingId);
 
 		verify(bookingRepository, times(1)).findById(bookingId);
 		verify(bookingRepository, times(1)).save(any(Booking.class));
@@ -209,7 +209,7 @@ class CancelBookingUseCaseTest {
 		verify(bookingRepository).save(bookingCaptor.capture());
 		Booking capturedBooking = bookingCaptor.getValue();
 
-		assertThat(capturedBooking.id()).isEqualTo(existingBooking.id());
+		assertThat(capturedBooking.bookingId()).isEqualTo(existingBooking.bookingId());
 		assertThat(capturedBooking.user()).isEqualTo(existingBooking.user());
 		assertThat(capturedBooking.field()).isEqualTo(existingBooking.field());
 		assertThat(capturedBooking.startTime()).isEqualTo(existingBooking.startTime());

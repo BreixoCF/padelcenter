@@ -34,7 +34,7 @@ class FieldControllerIT extends AbstractIntegrationTest {
 				.andExpect(status().isCreated())
 				.andReturn().getResponse().getContentAsString();
 
-		String centerId = JsonPath.read(centerBody, "$.id");
+		String centerId = JsonPath.read(centerBody, "$.centerId");
 
 		mockMvc.perform(post(CENTERS_URL + "/" + centerId + "/fields")
 						.with(adminJwt())

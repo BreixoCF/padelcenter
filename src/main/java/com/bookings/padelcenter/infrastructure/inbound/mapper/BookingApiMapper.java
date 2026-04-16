@@ -36,8 +36,8 @@ public class BookingApiMapper {
 	public BookingResponse toResponse(Booking booking) {
 		var fieldSummary = fieldApiMapper.toSummaryResponse(booking.field());
 		var response = new BookingResponse(
-				booking.id(),
-				booking.user().id(),
+				booking.bookingId(),
+				booking.user().userId(),
 				fieldSummary,
 				booking.startTime().atOffset(ZoneOffset.UTC),
 				booking.endTime().atOffset(ZoneOffset.UTC),

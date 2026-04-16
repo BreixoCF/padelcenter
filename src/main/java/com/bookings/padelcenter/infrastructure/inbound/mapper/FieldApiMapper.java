@@ -34,7 +34,7 @@ public class FieldApiMapper {
 
 	public FieldResponse toResponse(Field field) {
 		return new FieldResponse()
-				.id(field.id())
+				.fieldId(field.fieldId())
 				.name(field.name())
 				.type(field.type())
 				.pricePerHour(field.pricePerHour() != null ? field.pricePerHour().doubleValue() : null)
@@ -44,7 +44,7 @@ public class FieldApiMapper {
 	}
 
 	public FieldSummaryResponse toSummaryResponse(Field field) {
-		return new FieldSummaryResponse(field.id(), field.name())
+		return new FieldSummaryResponse(field.fieldId(), field.name())
 				.type(field.type())
 				.center(centerApiMapper.toSummaryResponse(field.center()));
 	}

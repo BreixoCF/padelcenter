@@ -38,14 +38,14 @@ public class CreateBookingUseCase implements CommandUseCase<CreateBookingCommand
 				.orElseThrow(() -> new FieldNotFoundException(command.fieldId()));
 
 		log.debug("booking.create.field.found fieldId={} available={}",
-			field.id(), field.isAvailable());
+			field.fieldId(), field.isAvailable());
 
 		var bookingToCreate = bookingCommandMapper.toDomain(command, user, field);
 		var booking = bookingRepository.save(bookingToCreate);
 
 		log.info("booking.created bookingId={} fieldId={} userId={} totalPrice={}",
-			booking.id(), booking.field().id(),
-			booking.user().id(), booking.totalPrice());
+			booking.bookingId(), booking.field().fieldId(),
+			booking.user().userId(), booking.totalPrice());
 
 		return booking;
 	}

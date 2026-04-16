@@ -15,8 +15,8 @@ public class FieldPersistenceMapper {
 
 	public FieldEntity toEntity(Field field) {
 		var entity = new FieldEntity();
-		if (field.id() != null) {
-			entity.setFieldId(field.id());
+		if (field.fieldId() != null) {
+			entity.setFieldId(field.fieldId());
 		}
 		entity.setType(field.type());
 		entity.setName(field.name());

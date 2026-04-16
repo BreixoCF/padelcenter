@@ -36,7 +36,7 @@ class UserControllerIT extends AbstractIntegrationTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(VALID_USER_JSON))
 				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.id").isNotEmpty())
+				.andExpect(jsonPath("$.userId").isNotEmpty())
 				.andExpect(jsonPath("$.email").value("john.doe@example.com"))
 				.andExpect(jsonPath("$.firstName").value("John"))
 				.andExpect(jsonPath("$.lastName").value("Doe"));

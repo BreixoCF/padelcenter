@@ -29,8 +29,8 @@ public class CreateCenterUseCase implements CommandUseCase<CreateCenterCommand, 
 		var center = centerRepository.save(centerToCreate);
 
 		log.info("center.created centerId={} name={} city={} managerId={}",
-			center.id(), center.name(), center.city(),
-			center.manager() != null ? center.manager().id() : null);
+			center.centerId(), center.name(), center.city(),
+			center.manager() != null ? center.manager().userId() : null);
 
 		return center;
 	}

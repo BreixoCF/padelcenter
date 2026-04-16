@@ -10,7 +10,7 @@ public interface UserRepository {
 
 	PageResult<User> findAll(int page, int size);
 	User save(User user);
-	Optional<User> findById(UUID id);
+	Optional<User> findById(UUID userId);
 	Optional<User> findByEmail(String email);
 	boolean existsByEmail(String email);
 }

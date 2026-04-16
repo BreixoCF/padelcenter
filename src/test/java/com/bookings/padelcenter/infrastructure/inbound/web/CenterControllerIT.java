@@ -36,7 +36,7 @@ class CenterControllerIT extends AbstractIntegrationTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(VALID_CENTER_JSON))
 				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.id", notNullValue()))
+				.andExpect(jsonPath("$.centerId", notNullValue()))
 				.andExpect(jsonPath("$.name").value("Padel BCN"))
 				.andExpect(jsonPath("$.city").value("Barcelona"));
 	}

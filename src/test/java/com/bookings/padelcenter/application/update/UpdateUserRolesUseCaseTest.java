@@ -143,7 +143,7 @@ class UpdateUserRolesUseCaseTest {
 		verify(userRepository).save(userCaptor.capture());
 		User savedUser = userCaptor.getValue();
 
-		assertThat(savedUser.id()).isEqualTo(existingUser.id());
+		assertThat(savedUser.userId()).isEqualTo(existingUser.userId());
 		assertThat(savedUser.firstName()).isEqualTo(existingUser.firstName());
 		assertThat(savedUser.lastName()).isEqualTo(existingUser.lastName());
 		assertThat(savedUser.email()).isEqualTo(existingUser.email());

@@ -28,7 +28,7 @@ public class CreateUserUseCase implements CommandUseCase<CreateUserCommand, User
 		var user = userRepository.save(userToCreate);
 
 		log.info("user.created userId={} email={} firstName={} lastName={}",
-			user.id(), user.email(), user.firstName(), user.lastName());
+			user.userId(), user.email(), user.firstName(), user.lastName());
 
 		return user;
 	}

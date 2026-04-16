@@ -27,7 +27,7 @@ public class GetUserByIdUseCase implements QueryUseCase<GetUserByIdQuery, User> 
 		var user = userRepository.findById(query.userId())
 				.orElseThrow(() -> new UserNotFoundException(query.userId()));
 		log.debug("user.found userId={} email={}",
-			user.id(), user.email());
+			user.userId(), user.email());
 		return user;
 	}
 }

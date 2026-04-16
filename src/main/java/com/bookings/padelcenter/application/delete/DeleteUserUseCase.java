@@ -31,7 +31,7 @@ public class DeleteUserUseCase implements CommandUseCase<DeleteUserCommand, User
 		userRepository.save(deletedUser);
 
 		log.info("user.deleted userId={} email={} deletedBy={}",
-			deletedUser.id(), deletedUser.email(), command.authenticatedUser().userId());
+			deletedUser.userId(), deletedUser.email(), command.authenticatedUser().userId());
 
 		return deletedUser;
 	}

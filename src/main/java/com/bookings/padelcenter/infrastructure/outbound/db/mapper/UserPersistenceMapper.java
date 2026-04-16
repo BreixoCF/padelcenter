@@ -19,8 +19,8 @@ public class UserPersistenceMapper {
 
 	public UserEntity toEntity(User user) {
 		var entity = new UserEntity();
-		if (user.id() != null) {
-			entity.setUserId(user.id());
+		if (user.userId() != null) {
+			entity.setUserId(user.userId());
 		}
 
 		entity.setFirstName(user.firstName());
