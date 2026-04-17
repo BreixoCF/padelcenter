@@ -36,4 +36,25 @@ public interface BookingRepository {
 	 * @return list of confirmed bookings for that day, ordered by start time
 	 */
 	List<Booking> findConfirmedByFieldAndDay(UUID fieldId, LocalDateTime dayStart, LocalDateTime dayEnd);
+
+	/**
+	 * Returns paginated bookings for all fields of a center,
+	 * with optional filters for field, date range, or specific day.
+	 * Returns all statuses.
+	 *
+	 * @param centerId  target center
+	 * @param fieldId   optional field filter
+	 * @param dayStart  start of range (inclusive), null if no filter
+	 * @param dayEnd    end of range (exclusive), null if no filter
+	 * @param page      zero-based page number
+	 * @param size      page size
+	 */
+	PageResult<Booking> findByCenterWithFilters(
+		UUID centerId,
+		UUID fieldId,
+		LocalDateTime dayStart,
+		LocalDateTime dayEnd,
+		int page,
+		int size
+	);
 }

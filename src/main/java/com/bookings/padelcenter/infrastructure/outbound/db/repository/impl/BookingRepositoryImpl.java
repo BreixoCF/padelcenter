@@ -70,6 +70,26 @@ public class BookingRepositoryImpl implements BookingRepository {
 
 	@Override
 	@Transactional(readOnly = true)
+	public PageResult<Booking> findByCenterWithFilters(
+			UUID centerId, UUID fieldId, LocalDateTime dayStart, LocalDateTime dayEnd, int page, int size) {
+		Instant startInstant = dayStart != null ? dayStart.atZone(ZONE).toInstant() : null;
+		Instant endInstant = dayEnd != null ? dayEnd.atZone(ZONE).toInstant() : null;
+		var springPage = bookingJpaRepository.findByCenterWithFilters(
+				centerId, fieldId, startInstant, endInstant, PageRequest.of(page, size));
+		var content = springPage.getContent().stream()
+				.map(mapper::toDomain)
+				.toList();
+		return new PageResult<>(
+				content,
+				springPage.getNumber(),
+				springPage.getSize(),
+				springPage.getTotalElements(),
+				springPage.getTotalPages()
+		);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
 	public PageResult<Booking> findByUserId(UUID userId, int page, int size) {
 		var springPage = bookingJpaRepository.findByUser_UserId(userId, PageRequest.of(page, size));
 		var content = springPage.getContent().stream()

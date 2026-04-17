@@ -1,18 +1,22 @@
 package com.bookings.padelcenter.infrastructure.inbound.web;
 
+import com.bookings.padelcenter.application.command.UpdateFieldAvailabilityCommand;
 import com.bookings.padelcenter.application.query.GetAllFieldsQuery;
 import com.bookings.padelcenter.application.query.GetFieldAvailabilityQuery;
 import com.bookings.padelcenter.application.query.GetFieldByIdQuery;
 import com.bookings.padelcenter.application.read.GetAllFieldsUseCase;
 import com.bookings.padelcenter.application.read.GetFieldAvailabilityUseCase;
 import com.bookings.padelcenter.application.read.GetFieldByIdUseCase;
+import com.bookings.padelcenter.application.update.UpdateFieldAvailabilityUseCase;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.FieldApiMapper;
 import com.padelcenter.infrastructure.web.generated.api.FieldsApi;
 import com.padelcenter.infrastructure.web.generated.model.FieldAvailability;
 import com.padelcenter.infrastructure.web.generated.model.FieldResponse;
 import com.padelcenter.infrastructure.web.generated.model.ListCenterFields200Response;
+import com.padelcenter.infrastructure.web.generated.model.UpdateFieldAvailabilityRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -25,6 +29,7 @@ public class FieldController implements FieldsApi {
 	private final GetAllFieldsUseCase getAllFieldsUseCase;
 	private final GetFieldByIdUseCase getFieldByIdUseCase;
 	private final GetFieldAvailabilityUseCase getFieldAvailabilityUseCase;
+	private final UpdateFieldAvailabilityUseCase updateFieldAvailabilityUseCase;
 	private final FieldApiMapper fieldApiMapper;
 
 	@Override
@@ -44,5 +49,14 @@ public class FieldController implements FieldsApi {
 	public ResponseEntity<FieldAvailability> getFieldAvailability(UUID fieldId, LocalDate date) {
 		var result = getFieldAvailabilityUseCase.execute(new GetFieldAvailabilityQuery(fieldId, date));
 		return ResponseEntity.ok(fieldApiMapper.toAvailabilityResponse(result));
+	}
+
+	@Override
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<FieldResponse> updateFieldAvailability(
+			UUID fieldId, UpdateFieldAvailabilityRequest updateFieldAvailabilityRequest) {
+		var command = new UpdateFieldAvailabilityCommand(fieldId, updateFieldAvailabilityRequest.getAvailable());
+		var field = updateFieldAvailabilityUseCase.execute(command);
+		return ResponseEntity.ok(fieldApiMapper.toResponse(field));
 	}
 }

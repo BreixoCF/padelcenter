@@ -10,6 +10,8 @@ import com.padelcenter.infrastructure.web.generated.model.AuditableResponse;
 import com.padelcenter.infrastructure.web.generated.model.BookingRequest;
 import com.padelcenter.infrastructure.web.generated.model.BookingResponse;
 import com.padelcenter.infrastructure.web.generated.model.BookingUpdateRequest;
+import com.padelcenter.infrastructure.web.generated.model.CenterBookingSummary;
+import com.padelcenter.infrastructure.web.generated.model.GetCenterBookings200Response;
 import com.padelcenter.infrastructure.web.generated.model.GetUserBookings200Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -68,6 +70,30 @@ public class BookingApiMapper {
 				request.getEndTime().toLocalDateTime(),
 				BigDecimal.valueOf(request.getTotalPrice()),
 				authenticatedUser
+		);
+	}
+
+	public CenterBookingSummary toCenterBookingSummary(Booking booking) {
+		return new CenterBookingSummary(
+				booking.bookingId(),
+				booking.field().fieldId(),
+				booking.field().name(),
+				booking.user().userId(),
+				booking.startTime().atOffset(ZoneOffset.UTC),
+				booking.endTime().atOffset(ZoneOffset.UTC),
+				booking.totalPrice() != null ? booking.totalPrice().doubleValue() : null,
+				CenterBookingSummary.StatusEnum.fromValue(booking.status().name())
+		);
+	}
+
+	public GetCenterBookings200Response toPagedCenterBookings(PageResult<Booking> pageResult) {
+		var content = pageResult.content().stream().map(this::toCenterBookingSummary).toList();
+		return new GetCenterBookings200Response(
+				content,
+				pageResult.totalElements(),
+				pageResult.totalPages(),
+				pageResult.page(),
+				pageResult.size()
 		);
 	}
 

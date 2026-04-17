@@ -39,3 +39,39 @@ get:
       $ref: '../components/responses/not-found.yaml'
     '500':
       $ref: '../components/responses/server-error.yaml'
+
+patch:
+  operationId: updateFieldAvailability
+  summary: Update field availability (admin only)
+  description: >
+    Enables or disables a field (e.g. for maintenance or weather reasons)
+    without deleting it. Requires global ADMIN role.
+  tags:
+    - Fields
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            available:
+              type: boolean
+              example: false
+          required:
+            - available
+  responses:
+    '200':
+      description: Field updated with new availability status.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/field-response.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

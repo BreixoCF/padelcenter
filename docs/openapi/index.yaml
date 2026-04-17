@@ -70,8 +70,14 @@ paths:
   /api/v1/centers:
     $ref: './paths/centers.yaml'
 
+  /api/v1/centers/{centerId}:
+    $ref: './paths/centers-id.yaml'
+
   /api/v1/centers/{centerId}/fields:
     $ref: './paths/centers-id-fields.yaml'
+
+  /api/v1/centers/{centerId}/bookings:
+    $ref: './paths/centers-id-bookings.yaml'
 
   # ── Fields ───────────────────────────────────────────────────────────────
   /api/v1/fields:
@@ -126,6 +132,8 @@ components:
       $ref: './components/schemas/field-summary-response.yaml'
     BookingResponse:
       $ref: './components/schemas/booking-response.yaml'
+    CenterBookingSummary:
+      $ref: './components/schemas/center-booking-summary.yaml'
     MessageResponse:
       $ref: './components/schemas/message-response.yaml'
     AuditableResponse:

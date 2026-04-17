@@ -43,4 +43,20 @@ public interface BookingJpaRepository extends JpaRepository<BookingEntity, Long>
 		@Param("dayStart") Instant dayStart,
 		@Param("dayEnd") Instant dayEnd
 	);
+
+	@Query("""
+		SELECT b FROM BookingEntity b
+		WHERE b.field.center.centerId = :centerId
+		  AND (:fieldId IS NULL OR b.field.fieldId = :fieldId)
+		  AND (:dayStart IS NULL OR b.startTime >= :dayStart)
+		  AND (:dayEnd IS NULL OR b.startTime < :dayEnd)
+		ORDER BY b.startTime ASC
+		""")
+	Page<BookingEntity> findByCenterWithFilters(
+		@Param("centerId") UUID centerId,
+		@Param("fieldId") UUID fieldId,
+		@Param("dayStart") Instant dayStart,
+		@Param("dayEnd") Instant dayEnd,
+		Pageable pageable
+	);
 }
