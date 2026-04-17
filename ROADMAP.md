@@ -83,6 +83,11 @@ Validación de solapamiento horario en creación y actualización de reservas. Q
 
 **Commit:** `feat(sprint1): field availability by day/slot, fields by center with filters, auto-confirm bookings on creation`
 
+### ✅ Sprint 2 — Dashboard de reservas, disponibilidad de pistas, detalle de centro
+`GET /api/v1/centers/{centerId}/bookings` con filtros opcionales `date`, `startDate`/`endDate`, `fieldId` y paginación. `PATCH /api/v1/fields/{fieldId}/availability` para cerrar/reabrir pistas sin eliminarlas (`UpdateFieldAvailabilityUseCase` inmutable: construye nuevo record `Field`). `GET /api/v1/centers/{centerId}` como endpoint público (`security: []`). `findByCenterWithFilters` en `BookingRepository` + JPQL + impl. 10 tests nuevos, ArchUnit verde. 150 tests, 0 fallos.
+
+**Commit:** `feat(sprint2): center bookings dashboard, field availability management, center detail endpoint`
+
 ---
 
 ## Estado general
