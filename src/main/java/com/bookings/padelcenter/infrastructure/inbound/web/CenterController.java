@@ -6,19 +6,23 @@ import com.bookings.padelcenter.application.query.GetAllCentersQuery;
 import com.bookings.padelcenter.application.query.GetCenterBookingsQuery;
 import com.bookings.padelcenter.application.query.GetCenterByIdQuery;
 import com.bookings.padelcenter.application.query.GetFieldsByCenterQuery;
+import com.bookings.padelcenter.application.query.GetTournamentsByCenterQuery;
 import com.bookings.padelcenter.application.read.GetAllCentersUseCase;
 import com.bookings.padelcenter.application.read.GetCenterBookingsUseCase;
 import com.bookings.padelcenter.application.read.GetCenterByIdUseCase;
 import com.bookings.padelcenter.application.read.GetFieldsByCenterUseCase;
+import com.bookings.padelcenter.application.read.GetTournamentsByCenterUseCase;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.BookingApiMapper;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.CenterApiMapper;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.FieldApiMapper;
+import com.bookings.padelcenter.infrastructure.inbound.mapper.TournamentApiMapper;
 import com.padelcenter.infrastructure.web.generated.api.CentersApi;
 import com.padelcenter.infrastructure.web.generated.model.CenterRequest;
 import com.padelcenter.infrastructure.web.generated.model.CenterResponse;
 import com.padelcenter.infrastructure.web.generated.model.FieldRequest;
 import com.padelcenter.infrastructure.web.generated.model.FieldResponse;
 import com.padelcenter.infrastructure.web.generated.model.GetCenterBookings200Response;
+import com.padelcenter.infrastructure.web.generated.model.GetTournamentsByCenter200Response;
 import com.padelcenter.infrastructure.web.generated.model.ListCenterFields200Response;
 import com.padelcenter.infrastructure.web.generated.model.ListCenters200Response;
 import lombok.RequiredArgsConstructor;
@@ -40,9 +44,11 @@ public class CenterController implements CentersApi {
 	private final CreateFieldUseCase createFieldUseCase;
 	private final GetFieldsByCenterUseCase getFieldsByCenterUseCase;
 	private final GetCenterBookingsUseCase getCenterBookingsUseCase;
+	private final GetTournamentsByCenterUseCase getTournamentsByCenterUseCase;
 	private final CenterApiMapper centerApiMapper;
 	private final FieldApiMapper fieldApiMapper;
 	private final BookingApiMapper bookingApiMapper;
+	private final TournamentApiMapper tournamentApiMapper;
 
 	@Override
 	@PreAuthorize("hasRole('ADMIN')")
@@ -82,6 +88,14 @@ public class CenterController implements CentersApi {
 		var query = new GetCenterBookingsQuery(centerId, fieldId, date, startDate, endDate, page, size);
 		var pageResult = getCenterBookingsUseCase.execute(query);
 		return ResponseEntity.ok(bookingApiMapper.toPagedCenterBookings(pageResult));
+	}
+
+	@Override
+	public ResponseEntity<GetTournamentsByCenter200Response> getTournamentsByCenter(
+			UUID centerId, Integer page, Integer size) {
+		var query = new GetTournamentsByCenterQuery(centerId, page != null ? page : 0, size != null ? size : 20);
+		var pageResult = getTournamentsByCenterUseCase.execute(query);
+		return ResponseEntity.ok(tournamentApiMapper.toPagedResponse(pageResult));
 	}
 
 	@Override

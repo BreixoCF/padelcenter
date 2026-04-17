@@ -1,0 +1,28 @@
+parameters:
+  - name: tournamentId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+
+get:
+  operationId: getTournamentMatches
+  summary: Get all matches for a tournament
+  description: Returns all matches ordered by round and group name.
+  tags:
+    - Tournaments
+  security: []
+  responses:
+    '200':
+      description: List of matches.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/match-response.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

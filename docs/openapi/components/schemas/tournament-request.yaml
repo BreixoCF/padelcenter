@@ -1,0 +1,37 @@
+type: object
+required:
+  - centerId
+  - name
+  - format
+  - maxPairs
+  - startDate
+  - endDate
+properties:
+  centerId:
+    type: string
+    format: uuid
+  name:
+    type: string
+    example: "Copa Verano 2025"
+  description:
+    type: string
+    example: "Torneo de verano para todos los niveles"
+  format:
+    type: string
+    enum:
+      - ROUND_ROBIN
+      - ELIMINATION
+      - GROUPS_AND_ELIMINATION
+    example: "ROUND_ROBIN"
+  maxPairs:
+    type: integer
+    minimum: 4
+    example: 8
+  startDate:
+    type: string
+    format: date
+    example: "2025-07-01"
+  endDate:
+    type: string
+    format: date
+    example: "2025-07-15"

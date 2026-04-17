@@ -5,7 +5,7 @@ info:
   version: "1.0.0"
   description: >
     REST API for the Padel Center booking platform.
-    Manages users, padel centers, fields, and bookings.
+    Manages users, padel centers, fields, bookings, and tournaments.
 
     **Authentication**: All endpoints require a valid JWT Bearer token obtained
     from the identity provider, except where noted. Supply the token in the
@@ -38,6 +38,10 @@ tags:
     description: Padel center management (ADMIN only for writes).
   - name: Fields
     description: Field management within centers (ADMIN only for writes).
+  - name: Tournaments
+    description: Tournament lifecycle — create, register pairs, generate brackets, report results.
+  - name: Matches
+    description: Match result reporting.
 
 paths:
   # ── Users ────────────────────────────────────────────────────────────────
@@ -88,6 +92,35 @@ paths:
 
   /api/v1/fields/{fieldId}/availability:
     $ref: './paths/fields-id-availability.yaml'
+
+  # ── Tournaments ───────────────────────────────────────────────────────────
+  /api/v1/tournaments:
+    $ref: './paths/tournaments.yaml'
+
+  /api/v1/tournaments/{tournamentId}:
+    $ref: './paths/tournaments-id.yaml'
+
+  /api/v1/tournaments/{tournamentId}/registration/open:
+    $ref: './paths/tournaments-id-registration-open.yaml'
+
+  /api/v1/tournaments/{tournamentId}/registration/close:
+    $ref: './paths/tournaments-id-registration-close.yaml'
+
+  /api/v1/tournaments/{tournamentId}/pairs:
+    $ref: './paths/tournaments-id-pairs.yaml'
+
+  /api/v1/tournaments/{tournamentId}/pairs/{pairId}/confirm:
+    $ref: './paths/tournaments-id-pairs-id-confirm.yaml'
+
+  /api/v1/tournaments/{tournamentId}/matches:
+    $ref: './paths/tournaments-id-matches.yaml'
+
+  /api/v1/centers/{centerId}/tournaments:
+    $ref: './paths/centers-id-tournaments.yaml'
+
+  # ── Matches ───────────────────────────────────────────────────────────────
+  /api/v1/matches/{matchId}/result:
+    $ref: './paths/matches-id-result.yaml'
 
 components:
   securitySchemes:
@@ -146,6 +179,20 @@ components:
       $ref: './components/schemas/time-slot.yaml'
     FieldAvailability:
       $ref: './components/schemas/field-availability.yaml'
+    TournamentRequest:
+      $ref: './components/schemas/tournament-request.yaml'
+    TournamentResponse:
+      $ref: './components/schemas/tournament-response.yaml'
+    TournamentPairResponse:
+      $ref: './components/schemas/tournament-pair-response.yaml'
+    RegisterPairRequest:
+      $ref: './components/schemas/register-pair-request.yaml'
+    MatchResponse:
+      $ref: './components/schemas/match-response.yaml'
+    MatchResultResponse:
+      $ref: './components/schemas/match-result-response.yaml'
+    MatchResultRequest:
+      $ref: './components/schemas/match-result-request.yaml'
 
   # ── Reusable Responses ────────────────────────────────────────────────────
   responses:

@@ -4,7 +4,11 @@ import com.bookings.padelcenter.domain.exception.BookingAlreadyCancelledExceptio
 import com.bookings.padelcenter.domain.exception.BookingOverlapException;
 import com.bookings.padelcenter.domain.exception.EmailAlreadyExistsException;
 import com.bookings.padelcenter.domain.exception.FieldNotAvailableException;
+import com.bookings.padelcenter.domain.exception.InvalidMatchResultException;
 import com.bookings.padelcenter.domain.exception.InvalidPasswordException;
+import com.bookings.padelcenter.domain.exception.InvalidTournamentStatusException;
+import com.bookings.padelcenter.domain.exception.PairAlreadyRegisteredException;
+import com.bookings.padelcenter.domain.exception.PlayerAlreadyInPairException;
 import com.bookings.padelcenter.domain.exception.ResourceNotFoundException;
 import com.bookings.padelcenter.domain.exception.UnauthorizedException;
 import org.postgresql.util.PSQLException;
@@ -108,6 +112,42 @@ public class GlobalExceptionHandler {
 	public ProblemDetail handleInvalidPasswordException(InvalidPasswordException ex) {
 		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
 		problem.setTitle("Invalid Password");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
+	}
+
+	@ExceptionHandler(InvalidTournamentStatusException.class)
+	public ProblemDetail handleInvalidTournamentStatusException(InvalidTournamentStatusException ex) {
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+		problem.setTitle("Invalid Tournament Status");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
+	}
+
+	@ExceptionHandler(PairAlreadyRegisteredException.class)
+	public ProblemDetail handlePairAlreadyRegisteredException(PairAlreadyRegisteredException ex) {
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+		problem.setTitle("Pair Already Registered");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
+	}
+
+	@ExceptionHandler(PlayerAlreadyInPairException.class)
+	public ProblemDetail handlePlayerAlreadyInPairException(PlayerAlreadyInPairException ex) {
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+		problem.setTitle("Player Already In Pair");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
+	}
+
+	@ExceptionHandler(InvalidMatchResultException.class)
+	public ProblemDetail handleInvalidMatchResultException(InvalidMatchResultException ex) {
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+		problem.setTitle("Invalid Match Result");
 		problem.setType(URI.create("about:blank"));
 		problem.setProperty("timestamp", Instant.now());
 		return problem;
