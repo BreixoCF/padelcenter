@@ -88,6 +88,11 @@ Validación de solapamiento horario en creación y actualización de reservas. Q
 
 **Commit:** `feat(sprint2): center bookings dashboard, field availability management, center detail endpoint`
 
+### ✅ Sprint 3 — Sistema de torneos
+Modelo de dominio `Tournament` (DRAFT→REGISTRATION_OPEN→REGISTRATION_CLOSED→IN_PROGRESS) con transiciones de estado validadas. `TournamentPair` con confirmación manual por el organizador (PENDING→CONFIRMED). `BracketGeneratorService` en capa `application/service/` (ArchUnit: sin Spring en domain) para 3 formatos: round-robin (n*(n-1)/2 partidos), elimination (potencia de 2, rondas TBD), groups+elimination (grupos de 4 + eliminatoria). `ReportMatchResultUseCase` valida que el reportador sea jugador de la pareja. `TournamentRoleEvaluator` delega a `CenterRoleEvaluator` para `@PreAuthorize` en endpoints de torneo. Persistencia: `TournamentEntity`, `TournamentPairEntity`, `MatchEntity` + `V5__create_tournament_tables.sql`. 9 endpoints nuevos (tournaments CRUD, pairs, matches, result). 30 tests nuevos, ArchUnit verde. 170 tests, 0 fallos.
+
+**Commit:** `feat(sprint3): tournament system with round-robin, elimination and groups formats, pair registration, bracket generation, match results`
+
 ---
 
 ## Estado general
@@ -101,5 +106,12 @@ Se ha completado la migración a estándares CLAUDE.md:
 - Tests: 126 unit + 5 ArchUnit + 4 integration tests (Testcontainers)
 - Documentación técnica: ERD, ADRs, README, dev guides
 - Código listo para producción con validaciones, error handling, optimistic locking
+
+**Sprint 3 — Sistema de torneos: ✅ COMPLETO**
+
+- 75 ficheros nuevos/modificados, 3034 líneas añadidas
+- 9 endpoints nuevos (tournaments, pairs, matches, result report)
+- 3 formatos de cuadro: round-robin, eliminación, grupos+eliminación
+- 170 tests totales, 0 fallos, ArchUnit verde
 
 **Fase 2 — Observabilidad + CI/CD: ⏳ NEXT PR** (arquitectura lista, implementación deferred)
