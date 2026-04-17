@@ -93,25 +93,21 @@ Modelo de dominio `Tournament` (DRAFT→REGISTRATION_OPEN→REGISTRATION_CLOSED�
 
 **Commit:** `feat(sprint3): tournament system with round-robin, elimination and groups formats, pair registration, bracket generation, match results`
 
+### ✅ Keycloak — Integración como proveedor de identidad
+Backend convertido a **resource server puro**: Keycloak 24.0.3 emite los tokens, Spring Boot solo los valida. `LocalSecurityConfig.java` eliminado — el secreto HMAC local ya no existe. `docker-compose.yaml` ampliado con servicio `keycloak` + `init-multiple-dbs.sh` para `padelcenterdb` y `keycloakdb` en el mismo contenedor Postgres. Realm `padelcenter-dev` importado automáticamente desde `tools/keycloak/padelcenter-dev-realm.json` con clientes `padelcenter-web` (público, PKCE) y `padelcenter-api` (bearer-only), roles `ADMIN`/`USER` y 2 usuarios de prueba. `CorsConfig` con `allowCredentials=true` para `localhost:3000` y `localhost:8081`. `V6__add_keycloak_id_to_users.sql` añade columna `keycloak_id TEXT UNIQUE`. `SyncUserUseCase` idempotente: `POST /api/v1/auth/sync` crea o recupera el `User` local mapeando `sub` del JWT como `keycloakId`. 170 tests, 0 fallos.
+
+**Commit:** `feat(auth): Keycloak integration, CORS config, user sync endpoint, keycloak_id column`
+
 ---
 
 ## Estado general
 
 **Fase 1 — Arquitectura + Core + Documentación: ✅ COMPLETA**
 
-Se ha completado la migración a estándares CLAUDE.md:
 - Arquitectura hexagonal reforzada (domain → application → infrastructure)
-- API-first con OpenAPI Generator (37 archivos YAML, 16 endpoints)
-- Seguridad JWT completa con AuthenticatedUserResolver y CenterRoleEvaluator
-- Tests: 126 unit + 5 ArchUnit + 4 integration tests (Testcontainers)
-- Documentación técnica: ERD, ADRs, README, dev guides
-- Código listo para producción con validaciones, error handling, optimistic locking
-
-**Sprint 3 — Sistema de torneos: ✅ COMPLETO**
-
-- 75 ficheros nuevos/modificados, 3034 líneas añadidas
-- 9 endpoints nuevos (tournaments, pairs, matches, result report)
-- 3 formatos de cuadro: round-robin, eliminación, grupos+eliminación
-- 170 tests totales, 0 fallos, ArchUnit verde
+- API-first con OpenAPI Generator
+- Keycloak 24.0.3 como IdP — resource server puro, sin secretos en código
+- CORS configurado para frontend web y móvil
+- Tests: 170 unit + ArchUnit verdes
 
 **Fase 2 — Observabilidad + CI/CD: ⏳ NEXT PR** (arquitectura lista, implementación deferred)
