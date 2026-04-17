@@ -48,6 +48,7 @@ class CreateUserUseCaseTest {
 
 		expectedUser = new User(
 			UUID.randomUUID(),
+			null,
 			"John",
 			"Doe",
 			"john.doe@example.com",
@@ -113,6 +114,7 @@ class CreateUserUseCaseTest {
 		// Given
 		User savedUser = new User(
 			UUID.randomUUID(),
+			null,
 			"John",
 			"Doe",
 			"john.doe@example.com",

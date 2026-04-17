@@ -57,6 +57,7 @@ class UpdateUserUseCaseTest {
 
 		existingUser = new User(
 			userId,
+			null,
 			"John",
 			"Doe",
 			"john.doe@example.com",
@@ -68,6 +69,7 @@ class UpdateUserUseCaseTest {
 
 		updatedUser = new User(
 			userId,
+			null,
 			"John",
 			"Updated",
 			"john.updated@example.com",
@@ -152,6 +154,7 @@ class UpdateUserUseCaseTest {
 
 		User updatedUserSameEmail = new User(
 			userId,
+			null,
 			"John",
 			"Updated",
 			"john.doe@example.com",
@@ -197,6 +200,7 @@ class UpdateUserUseCaseTest {
 		// Given
 		User savedUser = new User(
 			userId,
+			null,
 			"John",
 			"Updated",
 			"john.updated@example.com",
@@ -239,6 +243,7 @@ class UpdateUserUseCaseTest {
 
 		User userWithUpdates = new User(
 			userId,
+			null,
 			"John",
 			"UpdatedName",
 			sameEmail,

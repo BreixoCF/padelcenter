@@ -1,23 +1,47 @@
 services:
-  postgres-padelcenter:
+  postgres:
     container_name: postgres-padelcenter
     image: postgres:17
     restart: always
     environment:
-      POSTGRES_DB: padelcenterdb
-      POSTGRES_USER: padeluser
-      POSTGRES_PASSWORD: padelpassword
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_MULTIPLE_DATABASES: padelcenterdb,keycloakdb
     ports:
       - "5432:5432"
     volumes:
-      - pgdata_padelcenter:/var/lib/postgresql
+      - pgdata_padelcenter:/var/lib/postgresql/data
+      - ./init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh
     networks:
       - padelcenter-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U padeluser -d padelcenterdb"]
+      test: ["CMD-SHELL", "pg_isready -U app -d padelcenterdb"]
       interval: 5s
       timeout: 3s
       retries: 5
+
+  keycloak:
+    container_name: keycloak-padelcenter
+    image: quay.io/keycloak/keycloak:24.0.3
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloakdb
+      KC_DB_USERNAME: app
+      KC_DB_PASSWORD: app
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+    ports:
+      - "8180:8080"
+    volumes:
+      - ../keycloak/:/opt/keycloak/data/import/
+    networks:
+      - padelcenter-network
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   padelcenter:
     container_name: padelcenter
@@ -29,11 +53,13 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: local
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-padelcenter:5432/padelcenterdb
-      SPRING_DATASOURCE_USERNAME: padeluser
-      SPRING_DATASOURCE_PASSWORD: padelpassword
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/padelcenterdb
+      SPRING_DATASOURCE_USERNAME: app
+      SPRING_DATASOURCE_PASSWORD: app
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/padelcenter-dev
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/padelcenter-dev/protocol/openid-connect/certs
     depends_on:
-      postgres-padelcenter:
+      postgres:
         condition: service_healthy
     networks:
       - padelcenter-network

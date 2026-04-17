@@ -65,7 +65,7 @@ class UpdateBookingUseCaseTest {
 
 		UUID userId = UUID.randomUUID();
 		user = new User(
-			userId, "John", "Doe", "john.doe@example.com",
+			userId, null, "John", "Doe", "john.doe@example.com",
 			"hashedPassword", "600123456", Set.of(), Auditable.newAudit()
 		);
 

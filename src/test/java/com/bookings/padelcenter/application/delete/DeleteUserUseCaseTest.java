@@ -51,6 +51,7 @@ class DeleteUserUseCaseTest {
 
 		existingUser = new User(
 			userId,
+			null,
 			"John",
 			"Doe",
 			"john.doe@example.com",
@@ -259,7 +260,7 @@ class DeleteUserUseCaseTest {
 		);
 
 		User userWithRoles = new User(
-			userId, "John", "Doe", "john.doe@example.com",
+			userId, null, "John", "Doe", "john.doe@example.com",
 			"hashedPassword", "600123456", roles, existingUser.audit()
 		);
 
@@ -292,7 +293,7 @@ class DeleteUserUseCaseTest {
 		);
 
 		User userWithRoles = new User(
-			userId, "John", "Doe", "john.doe@example.com",
+			userId, null, "John", "Doe", "john.doe@example.com",
 			"hashedPassword", "600123456", roles, existingUser.audit()
 		);
 
@@ -325,7 +326,7 @@ class DeleteUserUseCaseTest {
 		Set<CenterRole> roles = Set.of(originalRole);
 
 		User userWithRoles = new User(
-			userId, "John", "Doe", "john.doe@example.com",
+			userId, null, "John", "Doe", "john.doe@example.com",
 			"hashedPassword", "600123456", roles, existingUser.audit()
 		);
 
@@ -352,7 +353,7 @@ class DeleteUserUseCaseTest {
 	void shouldHandleUserWithNoCenterRoles() {
 		// Given
 		User userWithoutRoles = new User(
-			userId, "John", "Doe", "john.doe@example.com",
+			userId, null, "John", "Doe", "john.doe@example.com",
 			"hashedPassword", "600123456", Set.of(), existingUser.audit()
 		);
 

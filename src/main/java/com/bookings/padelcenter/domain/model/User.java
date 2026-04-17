@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public record User(
 	UUID userId,
+	String keycloakId,
 	String firstName,
 	String lastName,
 	String email,
@@ -24,6 +25,7 @@ public record User(
 	public User updateRoles(Set<CenterRole> newRoles, UUID modifiedBy) {
 		return new User(
 			this.userId,
+			this.keycloakId,
 			this.firstName,
 			this.lastName,
 			this.email,
@@ -41,6 +43,7 @@ public record User(
 
 		return new User(
 			this.userId,
+			this.keycloakId,
 			this.firstName,
 			this.lastName,
 			this.email,
@@ -54,6 +57,7 @@ public record User(
 	public User updatePassword(String newPasswordHash, UUID modifiedBy) {
 		return new User(
 			this.userId,
+			this.keycloakId,
 			this.firstName,
 			this.lastName,
 			this.email,

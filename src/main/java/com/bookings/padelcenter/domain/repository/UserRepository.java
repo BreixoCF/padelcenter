@@ -12,5 +12,6 @@ public interface UserRepository {
 	User save(User user);
 	Optional<User> findById(UUID userId);
 	Optional<User> findByEmail(String email);
+	Optional<User> findByKeycloakId(String keycloakId);
 	boolean existsByEmail(String email);
 }

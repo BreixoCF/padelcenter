@@ -23,6 +23,7 @@ public class UserPersistenceMapper {
 			entity.setUserId(user.userId());
 		}
 
+		entity.setKeycloakId(user.keycloakId());
 		entity.setFirstName(user.firstName());
 		entity.setLastName(user.lastName());
 		entity.setEmail(user.email());
@@ -54,6 +55,7 @@ public class UserPersistenceMapper {
 			);
 			return new User(
 					entity.getUserId(),
+					entity.getKeycloakId(),
 					entity.getFirstName(),
 					entity.getLastName(),
 					entity.getEmail(),

@@ -121,7 +121,7 @@ class RegisterPairUseCaseTest {
 	}
 
 	private User buildUser(UUID userId) {
-		return new User(userId, "First", "Last", "user@test.com",
+		return new User(userId, null, "First", "Last", "user@test.com",
 				"hash", "000000000", Set.of(), Auditable.newAudit());
 	}
 }

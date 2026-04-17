@@ -42,8 +42,14 @@ tags:
     description: Tournament lifecycle — create, register pairs, generate brackets, report results.
   - name: Matches
     description: Match result reporting.
+  - name: Auth
+    description: Authentication helpers — user sync after SSO login.
 
 paths:
+  # ── Auth ─────────────────────────────────────────────────────────────────
+  /api/v1/auth/sync:
+    $ref: './paths/auth-sync.yaml'
+
   # ── Users ────────────────────────────────────────────────────────────────
   /api/v1/users:
     $ref: './paths/users.yaml'

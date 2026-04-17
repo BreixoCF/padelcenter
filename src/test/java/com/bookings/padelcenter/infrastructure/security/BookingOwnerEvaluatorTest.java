@@ -77,7 +77,7 @@ class BookingOwnerEvaluatorTest {
 
 	private static Booking bookingWithOwner(UUID userId) {
 		var audit = new Auditable(userId, Instant.now(), null, null, null, null);
-		var user = new User(userId, "Test", "User", "test@example.com",
+		var user = new User(userId, null, "Test", "User", "test@example.com",
 				"hash", "600000001", Set.of(), audit);
 		return new Booking(BOOKING_ID, user, null,
 				LocalDateTime.of(2025, 6, 1, 10, 0),

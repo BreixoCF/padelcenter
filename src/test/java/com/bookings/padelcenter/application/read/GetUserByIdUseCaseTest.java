@@ -34,7 +34,7 @@ class GetUserByIdUseCaseTest {
 	@DisplayName("execute_existingId_returnsUser")
 	void execute_existingId_returnsUser() {
 		var userId = UUID.randomUUID();
-		var user = new User(userId, "Ana", "García", "ana@test.com",
+		var user = new User(userId, null, "Ana", "García", "ana@test.com",
 				"hash", "600000000", Set.of(), Auditable.newAudit());
 		var query = new GetUserByIdQuery(userId);
 

@@ -39,15 +39,15 @@ class GetAllUsersUseCaseTest {
 
 		users = List.of(
 			new User(
-				UUID.randomUUID(), "John", "Doe", "john.doe@example.com",
+				UUID.randomUUID(), null, "John", "Doe", "john.doe@example.com",
 				"hashedPassword1", "600123456", Set.of(), Auditable.newAudit()
 			),
 			new User(
-				UUID.randomUUID(), "Jane", "Smith", "jane.smith@example.com",
+				UUID.randomUUID(), null, "Jane", "Smith", "jane.smith@example.com",
 				"hashedPassword2", "600654321", Set.of(), Auditable.newAudit()
 			),
 			new User(
-				UUID.randomUUID(), "Bob", "Johnson", "bob.johnson@example.com",
+				UUID.randomUUID(), null, "Bob", "Johnson", "bob.johnson@example.com",
 				"hashedPassword3", "600987654", Set.of(), Auditable.newAudit()
 			)
 		);

@@ -13,8 +13,8 @@ import java.util.Collections;
 public class UserCommandMapper {
 
 	public User toDomain(CreateUserCommand command) {
-		var auditable = Auditable.newAudit();
 		return new User(
+				null,
 				null,
 				command.firstName(),
 				command.lastName(),
@@ -22,21 +22,21 @@ public class UserCommandMapper {
 				command.password(),
 				command.phoneNumber(),
 				Collections.emptySet(),
-				auditable
+				Auditable.newAudit()
 		);
 	}
 
 	public User updateFromCommand(UpdateUserCommand command, User user) {
-		var updatedAuditable = user.audit().update(user.audit().modifiedBy());
 		return new User(
 				user.userId(),
+				user.keycloakId(),
 				command.firstName(),
 				command.lastName(),
 				command.email(),
 				command.password(),
 				command.phoneNumber(),
 				user.centerRoles(),
-				updatedAuditable
+				user.audit().update(user.audit().modifiedBy())
 		);
 	}
 }
