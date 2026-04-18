@@ -98,6 +98,11 @@ Backend convertido a **resource server puro**: Keycloak 24.0.3 emite los tokens,
 
 **Commit:** `feat(auth): Keycloak integration, CORS config, user sync endpoint, keycloak_id column`
 
+### ✅ Fase 2 — Gaps de API (GET /me + PUT /fields/{id})
+`GET /api/v1/me` resuelve el usuario autenticado por `keycloakId` (claim `sub` del JWT). Lanza `ResourceNotFoundException` con mensaje `"User not synced — call POST /auth/sync first"` si el usuario aún no ha pasado por el flujo de sincronización. `PUT /api/v1/fields/{id}` realiza la actualización completa e inmutable del `Field` (nuevo record preservando `center` e `id`), restringido a `ADMIN`. OpenAPI actualizado: `GET /api/v1/me` en `paths/me.yaml` y `PUT /api/v1/fields/{id}` + schema `FieldUpdateRequest` en `paths/fields-id.yaml`. 6 nuevos tests unitarios (2 `GetCurrentUserUseCaseTest`, 4 `UpdateFieldUseCaseTest`). ArchUnit verde.
+
+**Commit:** `feat(gaps): GET /me current user profile, PUT /fields/{id} full field update`
+
 ---
 
 ## Estado general
@@ -110,4 +115,9 @@ Backend convertido a **resource server puro**: Keycloak 24.0.3 emite los tokens,
 - CORS configurado para frontend web y móvil
 - Tests: 170 unit + ArchUnit verdes
 
-**Fase 2 — Observabilidad + CI/CD: ⏳ NEXT PR** (arquitectura lista, implementación deferred)
+**Fase 2 — Gaps de API: ✅ COMPLETA**
+
+- `GET /api/v1/me` — resolución por `keycloakId`, mensaje claro si no sincronizado
+- `PUT /api/v1/fields/{id}` — actualización inmutable preservando `center`+`id`, solo ADMIN
+- 6 tests nuevos, ArchUnit verde
+- Tests totales: 176 unit + ArchUnit verdes
