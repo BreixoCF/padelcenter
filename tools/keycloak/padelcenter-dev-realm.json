@@ -92,23 +92,11 @@
       ]
     }
   ],
-  "defaultClientScopes": [
+  "defaultDefaultClientScopes": [
     "web-origins",
     "acr",
     "profile",
     "roles",
     "email"
-  ],
-  "protocolMappers": [
-    {
-      "name": "userId-sub-mapper",
-      "protocol": "openid-connect",
-      "protocolMapper": "oidc-sub-mapper",
-      "consentRequired": false,
-      "config": {
-        "access.token.claim": "true",
-        "id.token.claim": "true"
-      }
-    }
   ]
 }

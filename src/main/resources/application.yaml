@@ -18,6 +18,15 @@ spring:
 app:
   timezone: UTC
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
 springdoc:
   api-docs:
     path: /api-docs
