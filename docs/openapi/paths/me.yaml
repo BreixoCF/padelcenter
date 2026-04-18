@@ -1,0 +1,22 @@
+get:
+  operationId: getMeProfile
+  summary: Get the currently authenticated user's profile
+  description: >
+    Returns the local User record for the authenticated principal.
+    Requires that the user has previously called `POST /api/v1/auth/sync`
+    to create a local record. Returns 404 if the user has not been synced yet.
+  tags:
+    - Auth
+  responses:
+    '200':
+      description: Authenticated user's profile.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/user-response.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

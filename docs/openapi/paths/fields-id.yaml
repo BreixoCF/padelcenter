@@ -27,3 +27,35 @@ get:
       $ref: '../components/responses/not-found.yaml'
     '500':
       $ref: '../components/responses/server-error.yaml'
+
+put:
+  operationId: updateField
+  summary: Full update of a field
+  description: Replaces all mutable fields of an existing field. Requires ADMIN role.
+  tags:
+    - Fields
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/field-update-request.yaml'
+  responses:
+    '200':
+      description: Field updated successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/field-response.yaml'
+    '400':
+      $ref: '../components/responses/bad-request.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'
