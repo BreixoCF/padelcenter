@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuthStore } from '@/lib/auth/store';
 import { apiClient } from '@/lib/api/client';
 import { getKeycloak } from '@/lib/auth/keycloak';
@@ -41,7 +42,7 @@ export default function LoginPage() {
       setAccessToken(access_token);
       const { data: user } = await apiClient.post('/api/v1/auth/sync');
       setUser(user);
-      router.replace('/dashboard');
+      router.replace('/centers');
     } catch {
       toast({
         title: 'Error al iniciar sesión',
@@ -112,6 +113,13 @@ export default function LoginPage() {
           <Button variant="outline" className="w-full" onClick={handleGoogle}>
             Continuar con Google
           </Button>
+
+          <p className="text-center text-sm text-slate-500 mt-2">
+            ¿No tienes cuenta?{' '}
+            <Link href="/register" className="text-slate-900 hover:underline">
+              Crear cuenta
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </div>

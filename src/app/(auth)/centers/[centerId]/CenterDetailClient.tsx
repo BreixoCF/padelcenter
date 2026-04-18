@@ -40,13 +40,11 @@ export default function CenterDetailClient({ centerId }: { centerId: string }) {
       <ErrorState onRetry={() => refetch()} />
     ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {fields.map((field: any) => (
+        {fields.map((field) => (
           <FieldCard
             key={field.fieldId}
             field={field}
-            onBook={(fieldId, pricePerHour) =>
-              setSelectedField({ fieldId, pricePerHour })
-            }
+            onBook={(fieldId, pricePerHour) => setSelectedField({ fieldId, pricePerHour })}
           />
         ))}
       </div>

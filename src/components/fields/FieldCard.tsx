@@ -7,7 +7,7 @@ interface FieldCardProps {
   field: {
     fieldId: string;
     name: string;
-    type: string;
+    type?: string;
     pricePerHour: number;
     isAvailable?: boolean;
   };

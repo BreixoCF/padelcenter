@@ -32,7 +32,10 @@
       "Bash(curl -s http://localhost:3000/centers)",
       "Bash(curl -s http://localhost:8080/api/v1/centers)",
       "Bash(curl -s -o /dev/null -w \"Backend /centers: %{http_code}\\\\n\" http://localhost:8080/api/v1/centers)",
-      "Bash(curl -s -o /dev/null -w \"Backend /api-docs: %{http_code}\\\\n\" http://localhost:8080/api-docs)"
+      "Bash(curl -s -o /dev/null -w \"Backend /api-docs: %{http_code}\\\\n\" http://localhost:8080/api-docs)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/register)",
+      "Bash(curl -s http://localhost:3000/)"
     ]
   }
 }
