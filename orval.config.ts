@@ -14,7 +14,7 @@ export default defineConfig({
       override: {
         mutator: {
           path: 'src/lib/api/client.ts',
-          name: 'apiClient',
+          name: 'customInstance',
         },
         query: {
           useQuery: true,

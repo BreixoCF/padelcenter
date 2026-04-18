@@ -45,10 +45,12 @@ export default function BookingModal({
 
     createBooking(
       {
-        fieldId,
-        startTime: selectedSlot.start,
-        endTime: selectedSlot.end,
-        totalPrice: pricePerHour,
+        data: {
+          fieldId,
+          startTime: selectedSlot.start,
+          endTime: selectedSlot.end,
+          totalPrice: pricePerHour,
+        },
       },
       {
         onSuccess: () => {

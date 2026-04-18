@@ -11,7 +11,7 @@ interface CenterListProps {
 }
 
 export default function CenterList({ initialData }: CenterListProps) {
-  const { data, isLoading, isError, refetch } = useCenters(0, 20);
+  const { data, isLoading, isError, refetch } = useCenters({ page: 0, size: 20 });
   const centers = data?.content ?? initialData?.content ?? [];
 
   if (isLoading && !initialData) return <GridSkeleton />;

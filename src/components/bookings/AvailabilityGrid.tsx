@@ -25,7 +25,7 @@ export default function AvailabilityGrid({
   onSelectSlot,
 }: AvailabilityGridProps) {
   const dateStr = format(date, 'yyyy-MM-dd');
-  const { data, isLoading } = useFieldAvailability(fieldId, dateStr);
+  const { data, isLoading } = useFieldAvailability(fieldId, { date: dateStr });
 
   if (isLoading)
     return (

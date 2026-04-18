@@ -61,3 +61,9 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export function customInstance<T>(
+  config: import('axios').AxiosRequestConfig
+): Promise<T> {
+  return apiClient(config).then((r) => r.data as T);
+}

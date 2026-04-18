@@ -11,7 +11,7 @@ import { CalendarX } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
-  const { data, isLoading } = useUserBookings(user?.userId ?? '', 0, 10);
+  const { data, isLoading } = useUserBookings(user?.userId ?? '', { page: 0, size: 10 });
   const bookings = data?.content ?? [];
 
   return (
