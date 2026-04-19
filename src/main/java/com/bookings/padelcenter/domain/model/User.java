@@ -22,6 +22,20 @@ public record User(
 			.orElse(Role.USER);
 	}
 
+	public User linkKeycloak(String keycloakId) {
+		return new User(
+			this.userId,
+			this.keycloakId != null ? this.keycloakId : keycloakId,
+			this.firstName,
+			this.lastName,
+			this.email,
+			this.passwordHash,
+			this.phoneNumber,
+			this.centerRoles,
+			this.audit
+		);
+	}
+
 	public User updateRoles(Set<CenterRole> newRoles, UUID modifiedBy) {
 		return new User(
 			this.userId,
