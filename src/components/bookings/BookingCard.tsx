@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Calendar, Clock, Euro } from 'lucide-react';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -18,7 +19,12 @@ const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 
   PENDING: 'outline',
 };
 
-export default function BookingCard({ booking }: { booking: any }) {
+interface BookingCardProps {
+  booking: any;
+  onCancel?: () => void;
+}
+
+export default function BookingCard({ booking, onCancel }: BookingCardProps) {
   const start = new Date(booking.startTime);
   const end = new Date(booking.endTime);
 
@@ -35,9 +41,7 @@ export default function BookingCard({ booking }: { booking: any }) {
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="h-3.5 w-3.5" />
-                <span>
-                  {format(start, 'HH:mm')} — {format(end, 'HH:mm')}
-                </span>
+                <span>{format(start, 'HH:mm')} — {format(end, 'HH:mm')}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Euro className="h-3.5 w-3.5" />
@@ -49,6 +53,17 @@ export default function BookingCard({ booking }: { booking: any }) {
             {STATUS_LABELS[booking.status] ?? booking.status}
           </Badge>
         </div>
+        {onCancel && (
+          <div className="mt-3 pt-3 border-t">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onCancel}
+              className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300">
+              Cancelar reserva
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
