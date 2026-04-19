@@ -47,14 +47,16 @@ export default function AdminBookingsPage() {
 
   const { data: bookingsData, isLoading } = useGetCenterBookings(
     selectedCenter,
-    { date: dateStr, page, size: 20 },
+    {
+      date: dateStr,
+      status: statusFilter === 'ALL' ? undefined : statusFilter as 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED',
+      page,
+      size: 20,
+    },
     { query: { enabled: !!selectedCenter } }
   );
 
-  const allBookings = bookingsData?.content ?? [];
-  const bookings = statusFilter === 'ALL'
-    ? allBookings
-    : allBookings.filter((b: any) => b.status === statusFilter);
+  const bookings = bookingsData?.content ?? [];
 
   const handlePrevDay = () => {
     const d = new Date(selectedDate);
