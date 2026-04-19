@@ -27,7 +27,7 @@ import type {
   BookingRequest,
   BookingResponse,
   BookingUpdateRequest,
-  GetUserBookings200Response,
+  GetMyBookings200Response,
   GetUserBookingsParams,
   ProblemDetail
 } from '../models';
@@ -332,7 +332,7 @@ export const getUserBookings = (
 ) => {
 
 
-      return customInstance<GetUserBookings200Response>(
+      return customInstance<GetMyBookings200Response>(
       {url: `/api/v1/users/${userId}/bookings`, method: 'GET',
         params, signal
     },

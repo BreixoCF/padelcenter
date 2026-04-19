@@ -24,6 +24,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  GetMyBookings200Response,
+  GetMyBookingsParams,
   GetMyTournaments200Response,
   GetMyTournamentsParams,
   ProblemDetail,
@@ -273,6 +275,100 @@ export function useGetMyTournaments<TData = Awaited<ReturnType<typeof getMyTourn
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetMyTournamentsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Returns a paginated list of bookings for the authenticated user, optionally filtered by status.
+ * @summary Get current user's bookings with optional status filter
+ */
+export const getMyBookings = (
+    params?: GetMyBookingsParams,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<GetMyBookings200Response>(
+      {url: `/api/v1/me/bookings`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getGetMyBookingsQueryKey = (params?: GetMyBookingsParams,) => {
+    return [
+    `/api/v1/me/bookings`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMyBookingsQueryOptions = <TData = Awaited<ReturnType<typeof getMyBookings>>, TError = ProblemDetail>(params?: GetMyBookingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyBookings>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyBookingsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyBookings>>> = ({ signal }) => getMyBookings(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyBookings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMyBookingsQueryResult = NonNullable<Awaited<ReturnType<typeof getMyBookings>>>
+export type GetMyBookingsQueryError = ProblemDetail
+
+
+export function useGetMyBookings<TData = Awaited<ReturnType<typeof getMyBookings>>, TError = ProblemDetail>(
+ params: undefined |  GetMyBookingsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyBookings>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyBookings>>,
+          TError,
+          Awaited<ReturnType<typeof getMyBookings>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyBookings<TData = Awaited<ReturnType<typeof getMyBookings>>, TError = ProblemDetail>(
+ params?: GetMyBookingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyBookings>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyBookings>>,
+          TError,
+          Awaited<ReturnType<typeof getMyBookings>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyBookings<TData = Awaited<ReturnType<typeof getMyBookings>>, TError = ProblemDetail>(
+ params?: GetMyBookingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyBookings>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get current user's bookings with optional status filter
+ */
+
+export function useGetMyBookings<TData = Awaited<ReturnType<typeof getMyBookings>>, TError = ProblemDetail>(
+ params?: GetMyBookingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyBookings>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyBookingsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

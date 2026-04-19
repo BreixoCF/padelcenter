@@ -1,8 +1,7 @@
-// TODO: Add delete tournament button when DELETE /api/v1/tournaments/{id} endpoint is available in the backend
 'use client';
 import { useState } from 'react';
 import { useListCenters, useGetTournamentsByCenter } from '@/lib/api/generated/centers/centers';
-import { useCreateTournament } from '@/lib/api/generated/tournaments/tournaments';
+import { useCreateTournament, useDeleteTournament } from '@/lib/api/generated/tournaments/tournaments';
 import { TournamentRequestFormat } from '@/lib/api/generated/models/tournamentRequestFormat';
 import PageHeader from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,12 @@ import {
   TableHeader, TableRow,
 } from '@/components/ui/table';
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -20,7 +25,7 @@ import {
   Select, SelectContent, SelectItem,
   SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
 
@@ -52,6 +57,7 @@ export default function AdminTournamentsPage() {
   const { toast } = useToast();
   const [selectedCenter, setSelectedCenter] = useState<string>('');
   const [showCreate, setShowCreate] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<{
     name: string;
     format: TournamentRequestFormat;
@@ -73,6 +79,7 @@ export default function AdminTournamentsPage() {
     { query: { enabled: !!selectedCenter } }
   );
   const { mutate: createTournament, isPending } = useCreateTournament();
+  const { mutate: deleteTournament, isPending: isDeleting } = useDeleteTournament();
 
   const centers = centersData?.content ?? [];
   const tournaments = tournamentsData?.content ?? [];
@@ -107,6 +114,28 @@ export default function AdminTournamentsPage() {
             description: err.response?.data?.detail,
             variant: 'destructive',
           });
+        },
+      }
+    );
+  };
+
+  const handleDelete = () => {
+    if (!deleteId) return;
+    deleteTournament(
+      { tournamentId: deleteId },
+      {
+        onSuccess: () => {
+          toast({ title: 'Torneo eliminado' });
+          refetch();
+          setDeleteId(null);
+        },
+        onError: (err: any) => {
+          toast({
+            title: 'Error al eliminar el torneo',
+            description: err.response?.data?.detail,
+            variant: 'destructive',
+          });
+          setDeleteId(null);
         },
       }
     );
@@ -150,6 +179,7 @@ export default function AdminTournamentsPage() {
                 <TableHead>Estado</TableHead>
                 <TableHead>Parejas</TableHead>
                 <TableHead>Fechas</TableHead>
+                <TableHead className="w-16">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -168,11 +198,18 @@ export default function AdminTournamentsPage() {
                   <TableCell className="text-slate-500 text-sm">
                     {format(new Date(t.startDate), 'dd/MM/yy')} — {format(new Date(t.endDate), 'dd/MM/yy')}
                   </TableCell>
+                  <TableCell>
+                    <Button size="icon" variant="ghost"
+                      onClick={() => setDeleteId(t.tournamentId)}
+                      className="text-red-500 hover:text-red-600">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
               {tournaments.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-slate-400 py-8">
+                  <TableCell colSpan={6} className="text-center text-slate-400 py-8">
                     No hay torneos para este centro
                   </TableCell>
                 </TableRow>
@@ -181,6 +218,25 @@ export default function AdminTournamentsPage() {
           </Table>
         </div>
       )}
+
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar torneo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700">
+              {isDeleting ? 'Eliminando...' : 'Eliminar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {showCreate && (
         <Dialog open onOpenChange={() => setShowCreate(false)}>
@@ -191,10 +247,7 @@ export default function AdminTournamentsPage() {
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="space-y-2">
                 <Label>Centro</Label>
-                <Select
-                  value={selectedCenter}
-                  onValueChange={setSelectedCenter}
-                >
+                <Select value={selectedCenter} onValueChange={setSelectedCenter}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona un centro" />
                   </SelectTrigger>
@@ -217,11 +270,8 @@ export default function AdminTournamentsPage() {
                 <Label>Formato</Label>
                 <Select
                   value={form.format}
-                  onValueChange={v => setForm(p => ({ ...p, format: v as TournamentRequestFormat }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                  onValueChange={v => setForm(p => ({ ...p, format: v as TournamentRequestFormat }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {Object.entries(FORMAT_LABELS).map(([value, label]) => (
                       <SelectItem key={value} value={value}>{label}</SelectItem>

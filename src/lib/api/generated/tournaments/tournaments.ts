@@ -539,6 +539,67 @@ export function useGetTournamentById<TData = Awaited<ReturnType<typeof getTourna
 
 
 /**
+ * @summary Delete a tournament (admin only, soft-delete)
+ */
+export const deleteTournament = (
+    tournamentId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<void>(
+      {url: `/api/v1/tournaments/${tournamentId}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+export const getDeleteTournamentMutationOptions = <TError = ProblemDetail,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTournament>>, TError,{tournamentId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTournament>>, TError,{tournamentId: string}, TContext> => {
+
+const mutationKey = ['deleteTournament'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTournament>>, {tournamentId: string}> = (props) => {
+          const {tournamentId} = props ?? {};
+
+          return  deleteTournament(tournamentId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteTournamentMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTournament>>>
+
+    export type DeleteTournamentMutationError = ProblemDetail
+
+    /**
+ * @summary Delete a tournament (admin only, soft-delete)
+ */
+export const useDeleteTournament = <TError = ProblemDetail,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTournament>>, TError,{tournamentId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteTournament>>,
+        TError,
+        {tournamentId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteTournamentMutationOptions(options), queryClient);
+    }
+    /**
  * Returns matches ordered by round and group name.
  * @summary Get matches for a tournament (paginated)
  */

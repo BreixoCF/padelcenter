@@ -25,7 +25,7 @@ fieldId?: string;
 /**
  * Filter by booking status.
  */
-status?: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
+status?: string;
 /**
  * Zero-based page index.
  * @minimum 0
