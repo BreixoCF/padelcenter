@@ -198,6 +198,68 @@ export const useUpdateField = <TError = ProblemDetail,
       return useMutation(getUpdateFieldMutationOptions(options), queryClient);
     }
     /**
+ * Soft-deletes a field. Requires ADMIN role.
+ * @summary Delete a field (soft-delete)
+ */
+export const deleteField = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<void>(
+      {url: `/api/v1/fields/${id}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+export const getDeleteFieldMutationOptions = <TError = ProblemDetail,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteField>>, TError,{id: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteField>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteField'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteField>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteField(id,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteFieldMutationResult = NonNullable<Awaited<ReturnType<typeof deleteField>>>
+
+    export type DeleteFieldMutationError = ProblemDetail
+
+    /**
+ * @summary Delete a field (soft-delete)
+ */
+export const useDeleteField = <TError = ProblemDetail,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteField>>, TError,{id: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteField>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getDeleteFieldMutationOptions(options), queryClient);
+    }
+    /**
  * Returns the availability for a field on a given date, broken into fixed one-hour slots from 09:00 to 22:00 (13 slots). A slot is marked unavailable if a CONFIRMED booking overlaps that time range.
  * @summary Get field availability for a specific date
  */

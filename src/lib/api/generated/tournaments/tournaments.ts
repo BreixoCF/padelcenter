@@ -24,7 +24,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  MatchResponse,
+  GetTournamentMatches200Response,
+  GetTournamentMatchesParams,
   ProblemDetail,
   RegisterPairRequest,
   TournamentPairResponse,
@@ -538,17 +539,19 @@ export function useGetTournamentById<TData = Awaited<ReturnType<typeof getTourna
 
 
 /**
- * Returns all matches ordered by round and group name.
- * @summary Get all matches for a tournament
+ * Returns matches ordered by round and group name.
+ * @summary Get matches for a tournament (paginated)
  */
 export const getTournamentMatches = (
     tournamentId: string,
+    params?: GetTournamentMatchesParams,
  signal?: AbortSignal
 ) => {
 
 
-      return customInstance<MatchResponse[]>(
-      {url: `/api/v1/tournaments/${tournamentId}/matches`, method: 'GET', signal
+      return customInstance<GetTournamentMatches200Response>(
+      {url: `/api/v1/tournaments/${tournamentId}/matches`, method: 'GET',
+        params, signal
     },
       );
     }
@@ -556,23 +559,25 @@ export const getTournamentMatches = (
 
 
 
-export const getGetTournamentMatchesQueryKey = (tournamentId: string,) => {
+export const getGetTournamentMatchesQueryKey = (tournamentId: string,
+    params?: GetTournamentMatchesParams,) => {
     return [
-    `/api/v1/tournaments/${tournamentId}/matches`
+    `/api/v1/tournaments/${tournamentId}/matches`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetTournamentMatchesQueryOptions = <TData = Awaited<ReturnType<typeof getTournamentMatches>>, TError = ProblemDetail>(tournamentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentMatches>>, TError, TData>>, }
+export const getGetTournamentMatchesQueryOptions = <TData = Awaited<ReturnType<typeof getTournamentMatches>>, TError = ProblemDetail>(tournamentId: string,
+    params?: GetTournamentMatchesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentMatches>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetTournamentMatchesQueryKey(tournamentId);
+  const queryKey =  queryOptions?.queryKey ?? getGetTournamentMatchesQueryKey(tournamentId,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTournamentMatches>>> = ({ signal }) => getTournamentMatches(tournamentId, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTournamentMatches>>> = ({ signal }) => getTournamentMatches(tournamentId,params, signal);
 
 
 
@@ -586,7 +591,8 @@ export type GetTournamentMatchesQueryError = ProblemDetail
 
 
 export function useGetTournamentMatches<TData = Awaited<ReturnType<typeof getTournamentMatches>>, TError = ProblemDetail>(
- tournamentId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentMatches>>, TError, TData>> & Pick<
+ tournamentId: string,
+    params: undefined |  GetTournamentMatchesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentMatches>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTournamentMatches>>,
           TError,
@@ -596,7 +602,8 @@ export function useGetTournamentMatches<TData = Awaited<ReturnType<typeof getTou
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetTournamentMatches<TData = Awaited<ReturnType<typeof getTournamentMatches>>, TError = ProblemDetail>(
- tournamentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentMatches>>, TError, TData>> & Pick<
+ tournamentId: string,
+    params?: GetTournamentMatchesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentMatches>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTournamentMatches>>,
           TError,
@@ -606,19 +613,21 @@ export function useGetTournamentMatches<TData = Awaited<ReturnType<typeof getTou
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetTournamentMatches<TData = Awaited<ReturnType<typeof getTournamentMatches>>, TError = ProblemDetail>(
- tournamentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentMatches>>, TError, TData>>, }
+ tournamentId: string,
+    params?: GetTournamentMatchesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentMatches>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Get all matches for a tournament
+ * @summary Get matches for a tournament (paginated)
  */
 
 export function useGetTournamentMatches<TData = Awaited<ReturnType<typeof getTournamentMatches>>, TError = ProblemDetail>(
- tournamentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentMatches>>, TError, TData>>, }
+ tournamentId: string,
+    params?: GetTournamentMatchesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentMatches>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetTournamentMatchesQueryOptions(tournamentId,options)
+  const queryOptions = getGetTournamentMatchesQueryOptions(tournamentId,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

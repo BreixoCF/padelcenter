@@ -24,6 +24,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  GetMyTournaments200Response,
+  GetMyTournamentsParams,
   ProblemDetail,
   UserResponse
 } from '../models';
@@ -177,6 +179,100 @@ export function useGetMeProfile<TData = Awaited<ReturnType<typeof getMeProfile>>
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetMeProfileQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Returns a paginated list of tournaments where the authenticated user is registered as player1 or player2 in a CONFIRMED pair.
+ * @summary Get tournaments where current user is registered
+ */
+export const getMyTournaments = (
+    params?: GetMyTournamentsParams,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<GetMyTournaments200Response>(
+      {url: `/api/v1/me/tournaments`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getGetMyTournamentsQueryKey = (params?: GetMyTournamentsParams,) => {
+    return [
+    `/api/v1/me/tournaments`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMyTournamentsQueryOptions = <TData = Awaited<ReturnType<typeof getMyTournaments>>, TError = ProblemDetail>(params?: GetMyTournamentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTournaments>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyTournamentsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyTournaments>>> = ({ signal }) => getMyTournaments(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyTournaments>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMyTournamentsQueryResult = NonNullable<Awaited<ReturnType<typeof getMyTournaments>>>
+export type GetMyTournamentsQueryError = ProblemDetail
+
+
+export function useGetMyTournaments<TData = Awaited<ReturnType<typeof getMyTournaments>>, TError = ProblemDetail>(
+ params: undefined |  GetMyTournamentsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTournaments>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyTournaments>>,
+          TError,
+          Awaited<ReturnType<typeof getMyTournaments>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyTournaments<TData = Awaited<ReturnType<typeof getMyTournaments>>, TError = ProblemDetail>(
+ params?: GetMyTournamentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTournaments>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyTournaments>>,
+          TError,
+          Awaited<ReturnType<typeof getMyTournaments>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyTournaments<TData = Awaited<ReturnType<typeof getMyTournaments>>, TError = ProblemDetail>(
+ params?: GetMyTournamentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTournaments>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get tournaments where current user is registered
+ */
+
+export function useGetMyTournaments<TData = Awaited<ReturnType<typeof getMyTournaments>>, TError = ProblemDetail>(
+ params?: GetMyTournamentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTournaments>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyTournamentsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

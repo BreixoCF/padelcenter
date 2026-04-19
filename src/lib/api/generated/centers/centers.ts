@@ -30,7 +30,7 @@ import type {
   FieldResponse,
   GetCenterBookings200Response,
   GetCenterBookingsParams,
-  GetTournamentsByCenter200Response,
+  GetMyTournaments200Response,
   GetTournamentsByCenterParams,
   ListCenterFields200Response,
   ListCenterFieldsParams,
@@ -462,6 +462,68 @@ export function useGetCenterById<TData = Awaited<ReturnType<typeof getCenterById
 
 
 /**
+ * Soft-deletes a padel center. Requires ADMIN role.
+ * @summary Delete a center (soft-delete)
+ */
+export const deleteCenter = (
+    centerId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<void>(
+      {url: `/api/v1/centers/${centerId}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+export const getDeleteCenterMutationOptions = <TError = ProblemDetail,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCenter>>, TError,{centerId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteCenter>>, TError,{centerId: string}, TContext> => {
+
+const mutationKey = ['deleteCenter'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteCenter>>, {centerId: string}> = (props) => {
+          const {centerId} = props ?? {};
+
+          return  deleteCenter(centerId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteCenterMutationResult = NonNullable<Awaited<ReturnType<typeof deleteCenter>>>
+
+    export type DeleteCenterMutationError = ProblemDetail
+
+    /**
+ * @summary Delete a center (soft-delete)
+ */
+export const useDeleteCenter = <TError = ProblemDetail,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCenter>>, TError,{centerId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteCenter>>,
+        TError,
+        {centerId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteCenterMutationOptions(options), queryClient);
+    }
+    /**
  * Returns a paginated list of tournaments for the specified center.
  * @summary List tournaments for a center
  */
@@ -472,7 +534,7 @@ export const getTournamentsByCenter = (
 ) => {
 
 
-      return customInstance<GetTournamentsByCenter200Response>(
+      return customInstance<GetMyTournaments200Response>(
       {url: `/api/v1/centers/${centerId}/tournaments`, method: 'GET',
         params, signal
     },

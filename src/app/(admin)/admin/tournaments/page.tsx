@@ -1,3 +1,4 @@
+// TODO: Add delete tournament button when DELETE /api/v1/tournaments/{id} endpoint is available in the backend
 'use client';
 import { useState } from 'react';
 import { useListCenters, useGetTournamentsByCenter } from '@/lib/api/generated/centers/centers';

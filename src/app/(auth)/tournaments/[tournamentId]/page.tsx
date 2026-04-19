@@ -29,11 +29,11 @@ export default function TournamentDetailPage({
 
   const { data: tournament } = useGetTournamentById(params.tournamentId);
   const { data: pairs } = useGetTournamentPairs(params.tournamentId);
-  const { data: matches } = useGetTournamentMatches(params.tournamentId);
+  const { data: matchesData } = useGetTournamentMatches(params.tournamentId);
   const { mutate: registerPair, isPending } = useRegisterPair();
 
   const pairsList = pairs ?? [];
-  const matchesList = matches ?? [];
+  const matchesList = matchesData?.content ?? [];
 
   const handleRegister = () => {
     registerPair(
