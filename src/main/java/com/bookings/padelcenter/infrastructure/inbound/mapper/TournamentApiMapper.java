@@ -8,6 +8,7 @@ import com.bookings.padelcenter.domain.model.Tournament;
 import com.bookings.padelcenter.domain.model.TournamentFormat;
 import com.bookings.padelcenter.domain.model.TournamentPair;
 import com.padelcenter.infrastructure.web.generated.model.AuditableResponse;
+import com.padelcenter.infrastructure.web.generated.model.GetTournamentMatches200Response;
 import com.padelcenter.infrastructure.web.generated.model.GetTournamentsByCenter200Response;
 import com.padelcenter.infrastructure.web.generated.model.MatchResponse;
 import com.padelcenter.infrastructure.web.generated.model.MatchResultRequest;
@@ -112,6 +113,16 @@ public class TournamentApiMapper {
 
 	public List<TournamentPairResponse> toPairResponseList(List<TournamentPair> pairs) {
 		return pairs.stream().map(this::toPairResponse).toList();
+	}
+
+	public GetTournamentMatches200Response toMatchPagedResponse(PageResult<Match> pageResult) {
+		var response = new GetTournamentMatches200Response();
+		response.setContent(pageResult.content().stream().map(this::toMatchResponse).toList());
+		response.setTotalElements(pageResult.totalElements());
+		response.setTotalPages(pageResult.totalPages());
+		response.setCurrentPage(pageResult.page());
+		response.setPageSize(pageResult.size());
+		return response;
 	}
 
 	public List<MatchResponse> toMatchResponseList(List<Match> matches) {

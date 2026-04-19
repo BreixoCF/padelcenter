@@ -16,7 +16,7 @@ import com.bookings.padelcenter.application.update.OpenRegistrationUseCase;
 import com.bookings.padelcenter.application.update.RegisterPairUseCase;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.TournamentApiMapper;
 import com.padelcenter.infrastructure.web.generated.api.TournamentsApi;
-import com.padelcenter.infrastructure.web.generated.model.MatchResponse;
+import com.padelcenter.infrastructure.web.generated.model.GetTournamentMatches200Response;
 import com.padelcenter.infrastructure.web.generated.model.RegisterPairRequest;
 import com.padelcenter.infrastructure.web.generated.model.TournamentPairResponse;
 import com.padelcenter.infrastructure.web.generated.model.TournamentRequest;
@@ -97,8 +97,14 @@ public class TournamentController implements TournamentsApi {
 	}
 
 	@Override
-	public ResponseEntity<List<MatchResponse>> getTournamentMatches(UUID tournamentId) {
-		var matches = getTournamentMatchesUseCase.execute(new GetTournamentMatchesQuery(tournamentId));
-		return ResponseEntity.ok(tournamentApiMapper.toMatchResponseList(matches));
+	public ResponseEntity<GetTournamentMatches200Response> getTournamentMatches(
+			UUID tournamentId, Integer page, Integer size) {
+		var query = new GetTournamentMatchesQuery(
+				tournamentId,
+				page != null ? page : 0,
+				size != null ? size : 20
+		);
+		var pageResult = getTournamentMatchesUseCase.execute(query);
+		return ResponseEntity.ok(tournamentApiMapper.toMatchPagedResponse(pageResult));
 	}
 }
