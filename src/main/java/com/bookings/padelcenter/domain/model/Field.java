@@ -11,4 +11,16 @@ public record Field(
 	Boolean isAvailable,
 	Center center,
 	Auditable audit
-) {}
+) {
+	public Field delete(UUID deletedBy) {
+		return new Field(
+			this.fieldId,
+			this.name,
+			this.type,
+			this.pricePerHour,
+			this.isAvailable,
+			this.center,
+			this.audit.delete(deletedBy)
+		);
+	}
+}

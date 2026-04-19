@@ -11,4 +11,17 @@ public record Center(
 	String email,
 	User manager,
 	Auditable audit
-) {}
+) {
+	public Center delete(UUID deletedBy) {
+		return new Center(
+			this.centerId,
+			this.name,
+			this.address,
+			this.city,
+			this.phoneNumber,
+			this.email,
+			this.manager,
+			this.audit.delete(deletedBy)
+		);
+	}
+}

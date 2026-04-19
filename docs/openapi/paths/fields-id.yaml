@@ -59,3 +59,23 @@ put:
       $ref: '../components/responses/not-found.yaml'
     '500':
       $ref: '../components/responses/server-error.yaml'
+
+delete:
+  operationId: deleteField
+  summary: Delete a field (soft-delete)
+  description: Soft-deletes a field. Requires ADMIN role.
+  tags:
+    - Fields
+  security:
+    - bearerAuth: []
+  responses:
+    '204':
+      description: Field deleted.
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

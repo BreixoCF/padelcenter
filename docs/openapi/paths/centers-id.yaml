@@ -28,3 +28,23 @@ get:
       $ref: '../components/responses/not-found.yaml'
     '500':
       $ref: '../components/responses/server-error.yaml'
+
+delete:
+  operationId: deleteCenter
+  summary: Delete a center (soft-delete)
+  description: Soft-deletes a padel center. Requires ADMIN role.
+  tags:
+    - Centers
+  security:
+    - bearerAuth: []
+  responses:
+    '204':
+      description: Center deleted.
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

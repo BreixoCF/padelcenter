@@ -1,7 +1,9 @@
 package com.bookings.padelcenter.infrastructure.inbound.web;
 
+import com.bookings.padelcenter.application.command.DeleteCenterCommand;
 import com.bookings.padelcenter.application.create.CreateCenterUseCase;
 import com.bookings.padelcenter.application.create.CreateFieldUseCase;
+import com.bookings.padelcenter.application.delete.DeleteCenterUseCase;
 import com.bookings.padelcenter.application.query.GetAllCentersQuery;
 import com.bookings.padelcenter.application.query.GetCenterBookingsQuery;
 import com.bookings.padelcenter.application.query.GetCenterByIdQuery;
@@ -16,6 +18,7 @@ import com.bookings.padelcenter.infrastructure.inbound.mapper.BookingApiMapper;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.CenterApiMapper;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.FieldApiMapper;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.TournamentApiMapper;
+import com.bookings.padelcenter.infrastructure.security.AuthenticatedUserResolver;
 import com.padelcenter.infrastructure.web.generated.api.CentersApi;
 import com.padelcenter.infrastructure.web.generated.model.CenterRequest;
 import com.padelcenter.infrastructure.web.generated.model.CenterResponse;
@@ -41,6 +44,7 @@ public class CenterController implements CentersApi {
 	private final CreateCenterUseCase createCenterUseCase;
 	private final GetAllCentersUseCase getAllCentersUseCase;
 	private final GetCenterByIdUseCase getCenterByIdUseCase;
+	private final DeleteCenterUseCase deleteCenterUseCase;
 	private final CreateFieldUseCase createFieldUseCase;
 	private final GetFieldsByCenterUseCase getFieldsByCenterUseCase;
 	private final GetCenterBookingsUseCase getCenterBookingsUseCase;
@@ -49,6 +53,7 @@ public class CenterController implements CentersApi {
 	private final FieldApiMapper fieldApiMapper;
 	private final BookingApiMapper bookingApiMapper;
 	private final TournamentApiMapper tournamentApiMapper;
+	private final AuthenticatedUserResolver authResolver;
 
 	@Override
 	@PreAuthorize("hasRole('ADMIN')")
@@ -96,6 +101,14 @@ public class CenterController implements CentersApi {
 		var query = new GetTournamentsByCenterQuery(centerId, page != null ? page : 0, size != null ? size : 20);
 		var pageResult = getTournamentsByCenterUseCase.execute(query);
 		return ResponseEntity.ok(tournamentApiMapper.toPagedResponse(pageResult));
+	}
+
+	@Override
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Void> deleteCenter(UUID centerId) {
+		var command = new DeleteCenterCommand(centerId, authResolver.currentUser());
+		deleteCenterUseCase.execute(command);
+		return ResponseEntity.noContent().build();
 	}
 
 	@Override
