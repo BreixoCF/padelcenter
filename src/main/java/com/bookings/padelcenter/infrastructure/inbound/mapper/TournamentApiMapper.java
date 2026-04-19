@@ -74,6 +74,9 @@ public class TournamentApiMapper {
 		response.setPlayer1Id(pair.player1Id());
 		response.setPlayer2Id(pair.player2Id());
 		response.setStatus(TournamentPairResponse.StatusEnum.fromValue(pair.status().name()));
+		if (pair.registeredAt() != null) {
+			response.setRegisteredAt(pair.registeredAt().atOffset(ZoneOffset.UTC));
+		}
 		return response;
 	}
 

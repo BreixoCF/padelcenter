@@ -104,7 +104,8 @@ public class TournamentController implements TournamentsApi {
 	}
 
 	@Override
-	@PreAuthorize("@tournamentRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #tournamentId)")
+	@PreAuthorize("hasRole('ADMIN') or "
+			+ "@tournamentRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #tournamentId)")
 	public ResponseEntity<TournamentPairResponse> confirmPair(UUID tournamentId, UUID pairId) {
 		var pair = confirmPairUseCase.execute(new ConfirmPairCommand(tournamentId, pairId));
 		return ResponseEntity.ok(tournamentApiMapper.toPairResponse(pair));
