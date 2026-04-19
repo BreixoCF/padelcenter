@@ -5,7 +5,7 @@ import { useCreateTournament, useDeleteTournament } from '@/lib/api/generated/to
 import { TournamentRequestFormat } from '@/lib/api/generated/models/tournamentRequestFormat';
 import PageHeader from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import StatusBadge from '@/components/shared/StatusBadge';
 import {
   Table, TableBody, TableCell, TableHead,
   TableHeader, TableRow,
@@ -33,24 +33,6 @@ const FORMAT_LABELS: Record<string, string> = {
   ROUND_ROBIN: 'Round Robin',
   ELIMINATION: 'Eliminatoria',
   GROUPS_AND_ELIMINATION: 'Grupos + Eliminatoria',
-};
-
-const STATUS_VARIANTS: Record<string, any> = {
-  DRAFT: 'secondary',
-  REGISTRATION_OPEN: 'default',
-  REGISTRATION_CLOSED: 'outline',
-  IN_PROGRESS: 'default',
-  COMPLETED: 'secondary',
-  CANCELLED: 'destructive',
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  DRAFT: 'Borrador',
-  REGISTRATION_OPEN: 'Inscripción abierta',
-  REGISTRATION_CLOSED: 'Inscripción cerrada',
-  IN_PROGRESS: 'En curso',
-  COMPLETED: 'Finalizado',
-  CANCELLED: 'Cancelado',
 };
 
 export default function AdminTournamentsPage() {
@@ -173,29 +155,27 @@ export default function AdminTournamentsPage() {
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Formato</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Parejas</TableHead>
-                <TableHead>Fechas</TableHead>
-                <TableHead className="w-16">Acciones</TableHead>
+              <TableRow className="border-b border-zinc-100">
+                <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Nombre</TableHead>
+                <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Formato</TableHead>
+                <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Estado</TableHead>
+                <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Parejas</TableHead>
+                <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Fechas</TableHead>
+                <TableHead className="w-16 text-[11px] uppercase tracking-wide text-zinc-400">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {tournaments.map((t: any) => (
-                <TableRow key={t.tournamentId}>
+                <TableRow key={t.tournamentId} className="border-b border-zinc-50 hover:bg-zinc-50/50">
                   <TableCell className="font-medium">{t.name}</TableCell>
-                  <TableCell className="text-slate-500">
+                  <TableCell className="text-zinc-500">
                     {FORMAT_LABELS[t.format] ?? t.format}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={STATUS_VARIANTS[t.status] ?? 'outline'}>
-                      {STATUS_LABELS[t.status] ?? t.status}
-                    </Badge>
+                    <StatusBadge status={t.status} />
                   </TableCell>
                   <TableCell>{t.maxPairs}</TableCell>
-                  <TableCell className="text-slate-500 text-sm">
+                  <TableCell className="text-zinc-500 text-sm">
                     {format(new Date(t.startDate), 'dd/MM/yy')} — {format(new Date(t.endDate), 'dd/MM/yy')}
                   </TableCell>
                   <TableCell>

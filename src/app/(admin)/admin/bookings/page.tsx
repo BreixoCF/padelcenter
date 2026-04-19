@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useListCenters, useGetCenterBookings } from '@/lib/api/generated/centers/centers';
 import PageHeader from '@/components/shared/PageHeader';
-import { Badge } from '@/components/ui/badge';
+import StatusBadge from '@/components/shared/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -20,19 +20,6 @@ import { CalendarIcon, ChevronLeft, ChevronRight, CalendarX } from 'lucide-react
 import { GridSkeleton } from '@/components/shared/LoadingState';
 import EmptyState from '@/components/shared/EmptyState';
 
-const STATUS_LABELS: Record<string, string> = {
-  CONFIRMED: 'Confirmada',
-  CANCELLED: 'Cancelada',
-  COMPLETED: 'Completada',
-  PENDING: 'Pendiente',
-};
-
-const STATUS_VARIANTS: Record<string, any> = {
-  CONFIRMED: 'default',
-  CANCELLED: 'destructive',
-  COMPLETED: 'secondary',
-  PENDING: 'outline',
-};
 
 export default function AdminBookingsPage() {
   const [selectedCenter, setSelectedCenter] = useState('');
@@ -148,19 +135,19 @@ export default function AdminBookingsPage() {
           <div className="border rounded-lg overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Pista</TableHead>
-                  <TableHead>Usuario</TableHead>
-                  <TableHead>Horario</TableHead>
-                  <TableHead>Precio</TableHead>
-                  <TableHead>Estado</TableHead>
+                <TableRow className="border-b border-zinc-100">
+                  <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Pista</TableHead>
+                  <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Usuario</TableHead>
+                  <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Horario</TableHead>
+                  <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Precio</TableHead>
+                  <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Estado</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {bookings.map((b: any) => (
-                  <TableRow key={b.bookingId}>
+                  <TableRow key={b.bookingId} className="border-b border-zinc-50 hover:bg-zinc-50/50">
                     <TableCell className="font-medium">{b.fieldName ?? b.fieldId}</TableCell>
-                    <TableCell className="text-slate-500 text-sm">{b.userId}</TableCell>
+                    <TableCell className="text-zinc-500 text-sm">{b.userId}</TableCell>
                     <TableCell>
                       {format(new Date(b.startTime), 'HH:mm')}
                       {' — '}
@@ -168,9 +155,7 @@ export default function AdminBookingsPage() {
                     </TableCell>
                     <TableCell>{b.totalPrice}€</TableCell>
                     <TableCell>
-                      <Badge variant={STATUS_VARIANTS[b.status] ?? 'outline'}>
-                        {STATUS_LABELS[b.status] ?? b.status}
-                      </Badge>
+                      <StatusBadge status={b.status} />
                     </TableCell>
                   </TableRow>
                 ))}

@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useListCenters, useDeleteCenter } from '@/lib/api/generated/centers/centers';
 import PageHeader from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Table, TableBody, TableCell, TableHead,
   TableHeader, TableRow,
@@ -72,23 +71,25 @@ export default function AdminCentersPage() {
       <div className="border rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Ciudad</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Teléfono</TableHead>
-              <TableHead className="w-24">Acciones</TableHead>
+            <TableRow className="border-b border-zinc-100">
+              <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Nombre</TableHead>
+              <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Ciudad</TableHead>
+              <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Email</TableHead>
+              <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Teléfono</TableHead>
+              <TableHead className="w-24 text-[11px] uppercase tracking-wide text-zinc-400">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {centers.map((center: any) => (
-              <TableRow key={center.centerId}>
+              <TableRow key={center.centerId} className="border-b border-zinc-50 hover:bg-zinc-50/50">
                 <TableCell className="font-medium">{center.name}</TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{center.city}</Badge>
+                  <span className="bg-zinc-100 text-zinc-600 rounded-full px-2 py-0.5 text-xs font-medium">
+                    {center.city}
+                  </span>
                 </TableCell>
-                <TableCell className="text-slate-500">{center.email}</TableCell>
-                <TableCell className="text-slate-500">{center.phoneNumber}</TableCell>
+                <TableCell className="text-zinc-500">{center.email}</TableCell>
+                <TableCell className="text-zinc-500">{center.phoneNumber}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <Link href={`/admin/centers/${center.centerId}`}>
