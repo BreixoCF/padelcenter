@@ -25,7 +25,7 @@ import com.padelcenter.infrastructure.web.generated.model.CenterResponse;
 import com.padelcenter.infrastructure.web.generated.model.FieldRequest;
 import com.padelcenter.infrastructure.web.generated.model.FieldResponse;
 import com.padelcenter.infrastructure.web.generated.model.GetCenterBookings200Response;
-import com.padelcenter.infrastructure.web.generated.model.GetTournamentsByCenter200Response;
+import com.padelcenter.infrastructure.web.generated.model.GetMyTournaments200Response;
 import com.padelcenter.infrastructure.web.generated.model.ListCenterFields200Response;
 import com.padelcenter.infrastructure.web.generated.model.ListCenters200Response;
 import lombok.RequiredArgsConstructor;
@@ -96,7 +96,7 @@ public class CenterController implements CentersApi {
 	}
 
 	@Override
-	public ResponseEntity<GetTournamentsByCenter200Response> getTournamentsByCenter(
+	public ResponseEntity<GetMyTournaments200Response> getTournamentsByCenter(
 			UUID centerId, Integer page, Integer size) {
 		var query = new GetTournamentsByCenterQuery(centerId, page != null ? page : 0, size != null ? size : 20);
 		var pageResult = getTournamentsByCenterUseCase.execute(query);

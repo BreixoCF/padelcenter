@@ -30,4 +30,9 @@ public interface TournamentRepository {
 	 * in any pair (regardless of status) for the specified tournament.
 	 */
 	boolean existsPairWithPlayer(UUID tournamentId, UUID userId);
+
+	/**
+	 * Returns tournaments where the given user is registered in a CONFIRMED pair.
+	 */
+	PageResult<Tournament> findByPlayerId(UUID userId, int page, int size);
 }

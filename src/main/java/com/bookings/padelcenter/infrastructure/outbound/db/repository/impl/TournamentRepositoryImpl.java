@@ -9,6 +9,7 @@ import com.bookings.padelcenter.infrastructure.outbound.db.repository.Tournament
 import com.bookings.padelcenter.infrastructure.outbound.db.repository.TournamentPairJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,5 +70,15 @@ public class TournamentRepositoryImpl implements TournamentRepository {
 	@Transactional(readOnly = true)
 	public boolean existsPairWithPlayer(UUID tournamentId, UUID userId) {
 		return pairJpaRepository.existsByTournamentIdAndPlayer(tournamentId, userId);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PageResult<Tournament> findByPlayerId(UUID userId, int page, int size) {
+		var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startDate"));
+		var springPage = tournamentJpaRepository.findByPlayerId(userId, pageable);
+		var content = springPage.getContent().stream().map(mapper::toDomain).toList();
+		return new PageResult<>(content, springPage.getNumber(), springPage.getSize(),
+				springPage.getTotalElements(), springPage.getTotalPages());
 	}
 }
