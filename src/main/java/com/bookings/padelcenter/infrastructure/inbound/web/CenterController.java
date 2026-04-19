@@ -89,8 +89,9 @@ public class CenterController implements CentersApi {
 			+ "@centerRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #centerId)")
 	public ResponseEntity<GetCenterBookings200Response> getCenterBookings(
 			UUID centerId, LocalDate date, LocalDate startDate, LocalDate endDate,
-			UUID fieldId, Integer page, Integer size) {
-		var query = new GetCenterBookingsQuery(centerId, fieldId, date, startDate, endDate, page, size);
+			UUID fieldId, String status, Integer page, Integer size) {
+		var query = new GetCenterBookingsQuery(centerId, fieldId, date, startDate, endDate, status,
+				page != null ? page : 0, size != null ? size : 20);
 		var pageResult = getCenterBookingsUseCase.execute(query);
 		return ResponseEntity.ok(bookingApiMapper.toPagedCenterBookings(pageResult));
 	}

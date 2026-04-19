@@ -56,6 +56,7 @@ public interface BookingRepository {
 		UUID fieldId,
 		LocalDateTime dayStart,
 		LocalDateTime dayEnd,
+		String status,
 		int page,
 		int size
 	);

@@ -45,7 +45,7 @@ public class GetCenterBookingsUseCase implements QueryUseCase<GetCenterBookingsQ
 				query.centerId(), query.fieldId(), query.page(), query.size());
 
 		var result = bookingRepository.findByCenterWithFilters(
-				query.centerId(), query.fieldId(), dayStart, dayEnd, query.page(), query.size());
+				query.centerId(), query.fieldId(), dayStart, dayEnd, query.status(), query.page(), query.size());
 
 		log.debug("bookings.byCenter.done centerId={} found={}", query.centerId(), result.totalElements());
 

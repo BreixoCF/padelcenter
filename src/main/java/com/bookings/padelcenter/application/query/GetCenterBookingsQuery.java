@@ -9,6 +9,7 @@ public record GetCenterBookingsQuery(
 	LocalDate date,
 	LocalDate startDate,
 	LocalDate endDate,
+	String status,
 	int page,
 	int size
 ) {}

@@ -46,9 +46,9 @@ class GetCenterBookingsUseCaseTest {
 		var bookings = List.of(booking(), booking());
 		var page = new PageResult<>(bookings, 0, 20, 2L, 1);
 		given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(center));
-		given(bookingRepository.findByCenterWithFilters(CENTER_ID, null, null, null, 0, 20)).willReturn(page);
+		given(bookingRepository.findByCenterWithFilters(CENTER_ID, null, null, null, null, 0, 20)).willReturn(page);
 
-		var result = useCase.execute(new GetCenterBookingsQuery(CENTER_ID, null, null, null, null, 0, 20));
+		var result = useCase.execute(new GetCenterBookingsQuery(CENTER_ID, null, null, null, null, null, 0, 20));
 
 		assertThat(result.content()).hasSize(2);
 		assertThat(result.totalElements()).isEqualTo(2L);
@@ -64,10 +64,10 @@ class GetCenterBookingsUseCaseTest {
 		var page = new PageResult<>(bookings, 0, 20, 1L, 1);
 
 		given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(center));
-		given(bookingRepository.findByCenterWithFilters(CENTER_ID, null, expectedStart, expectedEnd, 0, 20))
+		given(bookingRepository.findByCenterWithFilters(CENTER_ID, null, expectedStart, expectedEnd, null, 0, 20))
 				.willReturn(page);
 
-		var result = useCase.execute(new GetCenterBookingsQuery(CENTER_ID, null, date, null, null, 0, 20));
+		var result = useCase.execute(new GetCenterBookingsQuery(CENTER_ID, null, date, null, null, null, 0, 20));
 
 		assertThat(result.content()).hasSize(1);
 	}
@@ -82,11 +82,11 @@ class GetCenterBookingsUseCaseTest {
 
 		given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(center));
 		given(bookingRepository.findByCenterWithFilters(
-				CENTER_ID, null, startDate.atStartOfDay(), endDate.atStartOfDay(), 0, 20))
+				CENTER_ID, null, startDate.atStartOfDay(), endDate.atStartOfDay(), null, 0, 20))
 				.willReturn(page);
 
 		var result = useCase.execute(
-				new GetCenterBookingsQuery(CENTER_ID, null, null, startDate, endDate, 0, 20));
+				new GetCenterBookingsQuery(CENTER_ID, null, null, startDate, endDate, null, 0, 20));
 
 		assertThat(result.content()).hasSize(3);
 	}
@@ -98,12 +98,29 @@ class GetCenterBookingsUseCaseTest {
 		var page = new PageResult<>(bookings, 0, 20, 1L, 1);
 
 		given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(center));
-		given(bookingRepository.findByCenterWithFilters(CENTER_ID, FIELD_ID, null, null, 0, 20))
+		given(bookingRepository.findByCenterWithFilters(CENTER_ID, FIELD_ID, null, null, null, 0, 20))
 				.willReturn(page);
 
-		var result = useCase.execute(new GetCenterBookingsQuery(CENTER_ID, FIELD_ID, null, null, null, 0, 20));
+		var result = useCase.execute(new GetCenterBookingsQuery(CENTER_ID, FIELD_ID, null, null, null, null, 0, 20));
 
 		assertThat(result.content()).hasSize(1);
+	}
+
+	@Test
+	@DisplayName("getCenterBookings_withStatusFilter_returnsFiltered")
+	void getCenterBookings_withStatusFilter_returnsFiltered() {
+		var bookings = List.of(booking());
+		var page = new PageResult<>(bookings, 0, 20, 1L, 1);
+
+		given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(center));
+		given(bookingRepository.findByCenterWithFilters(CENTER_ID, null, null, null, "CONFIRMED", 0, 20))
+				.willReturn(page);
+
+		var result = useCase.execute(
+				new GetCenterBookingsQuery(CENTER_ID, null, null, null, null, "CONFIRMED", 0, 20));
+
+		assertThat(result.content()).hasSize(1);
+		assertThat(result.content().get(0).status()).isEqualTo(BookingStatus.CONFIRMED);
 	}
 
 	@Test
@@ -112,7 +129,7 @@ class GetCenterBookingsUseCaseTest {
 		given(centerRepository.findById(CENTER_ID)).willReturn(Optional.empty());
 
 		assertThatThrownBy(() -> useCase.execute(
-				new GetCenterBookingsQuery(CENTER_ID, null, null, null, null, 0, 20)))
+				new GetCenterBookingsQuery(CENTER_ID, null, null, null, null, null, 0, 20)))
 				.isInstanceOf(CenterNotFoundException.class);
 	}
 
