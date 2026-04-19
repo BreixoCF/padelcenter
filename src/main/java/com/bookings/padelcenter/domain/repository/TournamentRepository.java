@@ -35,4 +35,6 @@ public interface TournamentRepository {
 	 * Returns tournaments where the given user is registered in a CONFIRMED pair.
 	 */
 	PageResult<Tournament> findByPlayerId(UUID userId, int page, int size);
+
+	void delete(UUID tournamentId, UUID deletedBy);
 }

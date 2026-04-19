@@ -49,6 +49,12 @@ public record Tournament(
 		return withStatus(TournamentStatus.IN_PROGRESS);
 	}
 
+	public Tournament delete(UUID deletedBy) {
+		return new Tournament(tournamentId, centerId, name, description, format,
+				TournamentStatus.CANCELLED, maxPairs, startDate, endDate,
+				audit.delete(deletedBy));
+	}
+
 	private Tournament withStatus(TournamentStatus newStatus) {
 		return new Tournament(tournamentId, centerId, name, description,
 				format, newStatus, maxPairs, startDate, endDate, audit);

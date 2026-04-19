@@ -3,6 +3,7 @@ package com.bookings.padelcenter.infrastructure.outbound.db.repository.impl;
 import com.bookings.padelcenter.domain.model.PageResult;
 import com.bookings.padelcenter.domain.model.Tournament;
 import com.bookings.padelcenter.domain.model.TournamentPair;
+import com.bookings.padelcenter.domain.model.TournamentStatus;
 import com.bookings.padelcenter.domain.repository.TournamentRepository;
 import com.bookings.padelcenter.infrastructure.outbound.db.mapper.TournamentPersistenceMapper;
 import com.bookings.padelcenter.infrastructure.outbound.db.repository.TournamentJpaRepository;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -70,6 +72,17 @@ public class TournamentRepositoryImpl implements TournamentRepository {
 	@Transactional(readOnly = true)
 	public boolean existsPairWithPlayer(UUID tournamentId, UUID userId) {
 		return pairJpaRepository.existsByTournamentIdAndPlayer(tournamentId, userId);
+	}
+
+	@Override
+	@Transactional
+	public void delete(UUID tournamentId, UUID deletedBy) {
+		tournamentJpaRepository.findById(tournamentId).ifPresent(entity -> {
+			entity.setDeletedBy(deletedBy);
+			entity.setDeletedAt(Instant.now());
+			entity.setStatus(TournamentStatus.CANCELLED.name());
+			tournamentJpaRepository.save(entity);
+		});
 	}
 
 	@Override

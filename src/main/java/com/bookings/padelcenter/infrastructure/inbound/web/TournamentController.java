@@ -2,9 +2,11 @@ package com.bookings.padelcenter.infrastructure.inbound.web;
 
 import com.bookings.padelcenter.application.command.CloseRegistrationCommand;
 import com.bookings.padelcenter.application.command.ConfirmPairCommand;
+import com.bookings.padelcenter.application.command.DeleteTournamentCommand;
 import com.bookings.padelcenter.application.command.OpenRegistrationCommand;
 import com.bookings.padelcenter.application.command.RegisterPairCommand;
 import com.bookings.padelcenter.application.create.CreateTournamentUseCase;
+import com.bookings.padelcenter.application.delete.DeleteTournamentUseCase;
 import com.bookings.padelcenter.application.query.GetTournamentByIdQuery;
 import com.bookings.padelcenter.application.query.GetTournamentMatchesQuery;
 import com.bookings.padelcenter.application.read.GetTournamentByIdUseCase;
@@ -15,6 +17,7 @@ import com.bookings.padelcenter.application.update.ConfirmPairUseCase;
 import com.bookings.padelcenter.application.update.OpenRegistrationUseCase;
 import com.bookings.padelcenter.application.update.RegisterPairUseCase;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.TournamentApiMapper;
+import com.bookings.padelcenter.infrastructure.security.AuthenticatedUserResolver;
 import com.padelcenter.infrastructure.web.generated.api.TournamentsApi;
 import com.padelcenter.infrastructure.web.generated.model.GetTournamentMatches200Response;
 import com.padelcenter.infrastructure.web.generated.model.RegisterPairRequest;
@@ -36,6 +39,7 @@ public class TournamentController implements TournamentsApi {
 
 	private final CreateTournamentUseCase createTournamentUseCase;
 	private final GetTournamentByIdUseCase getTournamentByIdUseCase;
+	private final DeleteTournamentUseCase deleteTournamentUseCase;
 	private final GetTournamentMatchesUseCase getTournamentMatchesUseCase;
 	private final GetTournamentPairsUseCase getTournamentPairsUseCase;
 	private final OpenRegistrationUseCase openRegistrationUseCase;
@@ -43,6 +47,7 @@ public class TournamentController implements TournamentsApi {
 	private final RegisterPairUseCase registerPairUseCase;
 	private final ConfirmPairUseCase confirmPairUseCase;
 	private final TournamentApiMapper tournamentApiMapper;
+	private final AuthenticatedUserResolver authResolver;
 
 	@Override
 	@PreAuthorize("hasRole('ADMIN')")
@@ -50,6 +55,15 @@ public class TournamentController implements TournamentsApi {
 		var command = tournamentApiMapper.toCommand(tournamentRequest);
 		var tournament = createTournamentUseCase.execute(command);
 		return ResponseEntity.status(HttpStatus.CREATED).body(tournamentApiMapper.toResponse(tournament));
+	}
+
+	@Override
+	@PreAuthorize("@tournamentRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #tournamentId)"
+			+ " or hasRole('ADMIN')")
+	public ResponseEntity<Void> deleteTournament(UUID tournamentId) {
+		var command = new DeleteTournamentCommand(tournamentId, authResolver.currentUser().userId());
+		deleteTournamentUseCase.execute(command);
+		return ResponseEntity.noContent().build();
 	}
 
 	@Override
