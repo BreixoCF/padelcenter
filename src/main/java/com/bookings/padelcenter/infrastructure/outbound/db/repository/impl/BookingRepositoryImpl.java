@@ -1,6 +1,7 @@
 package com.bookings.padelcenter.infrastructure.outbound.db.repository.impl;
 
 import com.bookings.padelcenter.domain.model.Booking;
+import com.bookings.padelcenter.domain.model.BookingStatus;
 import com.bookings.padelcenter.domain.model.PageResult;
 import com.bookings.padelcenter.domain.repository.BookingRepository;
 import com.bookings.padelcenter.infrastructure.outbound.db.entity.BookingEntity;
@@ -86,6 +87,18 @@ public class BookingRepositoryImpl implements BookingRepository {
 				springPage.getTotalElements(),
 				springPage.getTotalPages()
 		);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PageResult<Booking> findByUserIdAndStatus(UUID userId, String status, int page, int size) {
+		Integer statusId = status != null ? BookingStatus.valueOf(status).getId() : null;
+		var springPage = bookingJpaRepository.findByUserIdAndStatus(
+				userId, statusId, PageRequest.of(page, size, org.springframework.data.domain.Sort.by(
+						org.springframework.data.domain.Sort.Direction.DESC, "startTime")));
+		var content = springPage.getContent().stream().map(mapper::toDomain).toList();
+		return new PageResult<>(content, springPage.getNumber(), springPage.getSize(),
+				springPage.getTotalElements(), springPage.getTotalPages());
 	}
 
 	@Override

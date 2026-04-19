@@ -56,6 +56,9 @@ paths:
   /api/v1/me/tournaments:
     $ref: './paths/me-tournaments.yaml'
 
+  /api/v1/me/bookings:
+    $ref: './paths/me-bookings.yaml'
+
   # ── Users ────────────────────────────────────────────────────────────────
   /api/v1/users:
     $ref: './paths/users.yaml'

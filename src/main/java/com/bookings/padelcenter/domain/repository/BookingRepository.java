@@ -15,6 +15,8 @@ public interface BookingRepository {
 	List<Booking> findAll();
 	PageResult<Booking> findByUserId(UUID userId, int page, int size);
 
+	PageResult<Booking> findByUserIdAndStatus(UUID userId, String status, int page, int size);
+
 	/**
 	 * Returns true if any PENDING or CONFIRMED booking for the given field overlaps
 	 * the specified time range.

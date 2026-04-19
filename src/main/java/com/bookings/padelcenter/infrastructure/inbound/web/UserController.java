@@ -16,7 +16,7 @@ import com.bookings.padelcenter.infrastructure.inbound.mapper.UserApiMapper;
 import com.bookings.padelcenter.infrastructure.security.AuthenticatedUserResolver;
 import com.padelcenter.infrastructure.web.generated.api.UsersApi;
 import com.padelcenter.infrastructure.web.generated.model.CenterRoleRequest;
-import com.padelcenter.infrastructure.web.generated.model.GetUserBookings200Response;
+import com.padelcenter.infrastructure.web.generated.model.GetMyBookings200Response;
 import com.padelcenter.infrastructure.web.generated.model.ListUsers200Response;
 import com.padelcenter.infrastructure.web.generated.model.MessageResponse;
 import com.padelcenter.infrastructure.web.generated.model.PasswordUpdateRequest;
@@ -114,8 +114,8 @@ public class UserController implements UsersApi {
 	}
 
 	@Override
-	public ResponseEntity<GetUserBookings200Response> getUserBookings(UUID userId, Integer page, Integer size,
-	                                                                    String sort) {
+	public ResponseEntity<GetMyBookings200Response> getUserBookings(UUID userId, Integer page, Integer size,
+	                                                                 String sort) {
 		var pageResult = getBookingHistoryUseCase.execute(new GetBookingHistoryQuery(userId, page, size));
 		return ResponseEntity.ok(bookingMapper.toPagedBookingHistory(pageResult));
 	}

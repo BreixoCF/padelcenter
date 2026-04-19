@@ -12,7 +12,7 @@ import com.padelcenter.infrastructure.web.generated.model.BookingResponse;
 import com.padelcenter.infrastructure.web.generated.model.BookingUpdateRequest;
 import com.padelcenter.infrastructure.web.generated.model.CenterBookingSummary;
 import com.padelcenter.infrastructure.web.generated.model.GetCenterBookings200Response;
-import com.padelcenter.infrastructure.web.generated.model.GetUserBookings200Response;
+import com.padelcenter.infrastructure.web.generated.model.GetMyBookings200Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -51,15 +51,19 @@ public class BookingApiMapper {
 		return response;
 	}
 
-	public GetUserBookings200Response toPagedBookingHistory(PageResult<Booking> pageResult) {
+	public GetMyBookings200Response toPagedBookingHistory(PageResult<Booking> pageResult) {
 		var content = pageResult.content().stream().map(this::toResponse).toList();
-		return new GetUserBookings200Response(
+		return new GetMyBookings200Response(
 				content,
 				pageResult.totalElements(),
 				pageResult.totalPages(),
 				pageResult.page(),
 				pageResult.size()
 		);
+	}
+
+	public GetMyBookings200Response toMyBookingsPagedResponse(PageResult<Booking> pageResult) {
+		return toPagedBookingHistory(pageResult);
 	}
 
 	public UpdateBookingCommand toUpdateCommand(Long bookingId, BookingUpdateRequest request,

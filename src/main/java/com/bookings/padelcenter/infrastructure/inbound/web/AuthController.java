@@ -3,12 +3,16 @@ package com.bookings.padelcenter.infrastructure.inbound.web;
 import com.bookings.padelcenter.application.command.SyncUserCommand;
 import com.bookings.padelcenter.application.create.SyncUserUseCase;
 import com.bookings.padelcenter.application.query.GetCurrentUserQuery;
+import com.bookings.padelcenter.application.query.GetMyBookingsQuery;
 import com.bookings.padelcenter.application.query.GetMyTournamentsQuery;
 import com.bookings.padelcenter.application.read.GetCurrentUserUseCase;
+import com.bookings.padelcenter.application.read.GetMyBookingsUseCase;
 import com.bookings.padelcenter.application.read.GetMyTournamentsUseCase;
+import com.bookings.padelcenter.infrastructure.inbound.mapper.BookingApiMapper;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.TournamentApiMapper;
 import com.bookings.padelcenter.infrastructure.inbound.mapper.UserApiMapper;
 import com.padelcenter.infrastructure.web.generated.api.AuthApi;
+import com.padelcenter.infrastructure.web.generated.model.GetMyBookings200Response;
 import com.padelcenter.infrastructure.web.generated.model.GetMyTournaments200Response;
 import com.padelcenter.infrastructure.web.generated.model.UserResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +30,10 @@ public class AuthController implements AuthApi {
 	private final SyncUserUseCase syncUserUseCase;
 	private final GetCurrentUserUseCase getCurrentUserUseCase;
 	private final GetMyTournamentsUseCase getMyTournamentsUseCase;
+	private final GetMyBookingsUseCase getMyBookingsUseCase;
 	private final UserApiMapper userApiMapper;
 	private final TournamentApiMapper tournamentApiMapper;
+	private final BookingApiMapper bookingApiMapper;
 
 	@Override
 	public ResponseEntity<UserResponse> syncUser() {
@@ -47,6 +53,16 @@ public class AuthController implements AuthApi {
 		Jwt jwt = extractJwt();
 		var user = getCurrentUserUseCase.execute(new GetCurrentUserQuery(jwt.getSubject()));
 		return ResponseEntity.ok(userApiMapper.toResponse(user));
+	}
+
+	@Override
+	public ResponseEntity<GetMyBookings200Response> getMyBookings(Integer page, Integer size, String status) {
+		Jwt jwt = extractJwt();
+		var user = getCurrentUserUseCase.execute(new GetCurrentUserQuery(jwt.getSubject()));
+		var query = new GetMyBookingsQuery(
+				user.userId(), status, page != null ? page : 0, size != null ? size : 10);
+		var pageResult = getMyBookingsUseCase.execute(query);
+		return ResponseEntity.ok(bookingApiMapper.toMyBookingsPagedResponse(pageResult));
 	}
 
 	@Override

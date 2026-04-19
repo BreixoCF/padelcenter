@@ -16,6 +16,18 @@ public interface BookingJpaRepository extends JpaRepository<BookingEntity, Long>
 	Page<BookingEntity> findByUser_UserId(UUID userId, Pageable pageable);
 
 	@Query("""
+		SELECT b FROM BookingEntity b
+		WHERE b.user.userId = :userId
+		  AND (:status IS NULL OR b.status = :status)
+		ORDER BY b.startTime DESC
+		""")
+	Page<BookingEntity> findByUserIdAndStatus(
+		@Param("userId") UUID userId,
+		@Param("status") Integer status,
+		Pageable pageable
+	);
+
+	@Query("""
 		SELECT COUNT(b) > 0 FROM BookingEntity b
 		WHERE b.field.fieldId = :fieldId
 		  AND b.status IN (1, 2)
