@@ -14,7 +14,7 @@ import {
   AlertDialogFooter, AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Trash2, Plus, Eye } from 'lucide-react';
+import { Trash2, Plus, Eye, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/components/ui/use-toast';
 import { GridSkeleton } from '@/components/shared/LoadingState';
@@ -91,6 +91,11 @@ export default function AdminCentersPage() {
                 <TableCell className="text-slate-500">{center.phoneNumber}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
+                    <Link href={`/admin/centers/${center.centerId}`}>
+                      <Button size="icon" variant="ghost">
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                    </Link>
                     <Link href={`/centers/${center.centerId}`}>
                       <Button size="icon" variant="ghost">
                         <Eye className="h-4 w-4" />
