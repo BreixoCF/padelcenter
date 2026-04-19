@@ -29,23 +29,30 @@ public class SyncUserUseCase implements CommandUseCase<SyncUserCommand, User> {
 
 	@Override
 	public User execute(SyncUserCommand command) {
+		log.info("sync.start keycloakId={} email={}", command.keycloakId(), command.email());
+
 		// 1. Already synced — return as-is
+		log.info("sync.step1 findByKeycloakId={}", command.keycloakId());
 		var byKeycloak = userRepository.findByKeycloakId(command.keycloakId());
 		if (byKeycloak.isPresent()) {
-			log.debug("user.sync.found keycloakId={}", command.keycloakId());
+			log.info("sync.step1.found userId={}", byKeycloak.get().userId());
 			return byKeycloak.get();
 		}
+		log.info("sync.step1.notFound");
 
 		// 2. Pre-existing user with same email but no keycloakId — link accounts
+		log.info("sync.step2 findByEmail={}", command.email());
 		var byEmail = userRepository.findByEmail(command.email());
 		if (byEmail.isPresent()) {
-			log.info("user.sync.linked keycloakId={} email={}", command.keycloakId(), command.email());
+			log.info("sync.step2.found userId={} keycloakId={}", byEmail.get().userId(), byEmail.get().keycloakId());
 			var linked = byEmail.get().linkKeycloak(command.keycloakId());
+			log.info("sync.saving user={}", linked.email());
 			return userRepository.save(linked);
 		}
+		log.info("sync.step2.notFound");
 
 		// 3. Brand new user — create
-		log.info("user.sync.created keycloakId={} email={}", command.keycloakId(), command.email());
+		log.info("sync.step3 creating new user email={}", command.email());
 		var newUser = new User(
 				null,
 				command.keycloakId(),
@@ -57,6 +64,7 @@ public class SyncUserUseCase implements CommandUseCase<SyncUserCommand, User> {
 				Collections.emptySet(),
 				Auditable.newAudit()
 		);
+		log.info("sync.saving user={}", newUser.email());
 		return userRepository.save(newUser);
 	}
 }

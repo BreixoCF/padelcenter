@@ -157,6 +157,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(DataIntegrityViolationException.class)
 	public ProblemDetail handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+		log.error("Data integrity violation: {}", ex.getMostSpecificCause().getMessage(), ex);
 		String detailedMessage = extractPostgresDetail(ex);
 		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, detailedMessage);
 		problem.setTitle("Data Integrity Violation");
