@@ -26,7 +26,9 @@ public class MatchController implements MatchesApi {
 	public ResponseEntity<MatchResponse> reportMatchResult(UUID matchId, MatchResultRequest matchResultRequest) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		UUID reportedBy = authResolver.resolveUserId(authentication);
-		var command = tournamentApiMapper.toCommand(matchId, reportedBy, matchResultRequest);
+		boolean isAdmin = authentication.getAuthorities().stream()
+				.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+		var command = tournamentApiMapper.toCommand(matchId, reportedBy, isAdmin, matchResultRequest);
 		var match = reportMatchResultUseCase.execute(command);
 		return ResponseEntity.ok(tournamentApiMapper.toMatchResponse(match));
 	}

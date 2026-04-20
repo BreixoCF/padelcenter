@@ -52,7 +52,7 @@ class ReportMatchResultUseCaseTest {
 				new com.bookings.padelcenter.domain.model.MatchResult(
 						pairAId, 6, 3, player1OfPairA, Instant.now()));
 
-		var command = new ReportMatchResultCommand(matchId, pairAId, 6, 3, player1OfPairA);
+		var command = new ReportMatchResultCommand(matchId, pairAId, 6, 3, player1OfPairA, false);
 
 		given(matchRepository.findById(matchId)).willReturn(Optional.of(match));
 		given(tournamentRepository.findPairById(pairAId)).willReturn(Optional.of(pairA));
@@ -78,7 +78,7 @@ class ReportMatchResultUseCaseTest {
 		var match = buildMatch(matchId, pairAId, pairBId, MatchStatus.SCHEDULED);
 		var pairA = buildPair(pairAId, UUID.randomUUID(), UUID.randomUUID());
 		var pairB = buildPair(pairBId, UUID.randomUUID(), UUID.randomUUID());
-		var command = new ReportMatchResultCommand(matchId, pairAId, 6, 3, outsider);
+		var command = new ReportMatchResultCommand(matchId, pairAId, 6, 3, outsider, false);
 
 		given(matchRepository.findById(matchId)).willReturn(Optional.of(match));
 		given(tournamentRepository.findPairById(pairAId)).willReturn(Optional.of(pairA));
@@ -93,7 +93,7 @@ class ReportMatchResultUseCaseTest {
 	@DisplayName("should throw MatchNotFoundException when match does not exist")
 	void execute_matchNotFound_throwsMatchNotFoundException() {
 		var matchId = UUID.randomUUID();
-		var command = new ReportMatchResultCommand(matchId, UUID.randomUUID(), 6, 3, UUID.randomUUID());
+		var command = new ReportMatchResultCommand(matchId, UUID.randomUUID(), 6, 3, UUID.randomUUID(), false);
 
 		given(matchRepository.findById(matchId)).willReturn(Optional.empty());
 

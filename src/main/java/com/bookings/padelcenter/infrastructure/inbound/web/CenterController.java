@@ -113,7 +113,7 @@ public class CenterController implements CentersApi {
 	}
 
 	@Override
-	@PreAuthorize("@centerRoleEvaluator.isAdminOf("
+	@PreAuthorize("hasRole('ADMIN') or @centerRoleEvaluator.isAdminOf("
 			+ "@authResolver.resolveUserId(authentication), #centerId)")
 	public ResponseEntity<FieldResponse> createField(UUID centerId, FieldRequest fieldRequest) {
 		var command = fieldApiMapper.toCommand(centerId, fieldRequest);

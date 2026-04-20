@@ -44,7 +44,7 @@ public class ReportMatchResultUseCase implements CommandUseCase<ReportMatchResul
 				.orElseThrow(() -> new InvalidMatchResultException(
 						"Match pair B not found: " + match.pairBId()));
 
-		if (!match.isReportableBy(command.reportedBy(), pairA, pairB)) {
+		if (!command.isAdmin() && !match.isReportableBy(command.reportedBy(), pairA, pairB)) {
 			throw new InvalidMatchResultException(
 					"User " + command.reportedBy() + " is not a player in this match");
 		}

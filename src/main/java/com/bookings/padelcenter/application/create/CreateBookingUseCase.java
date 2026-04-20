@@ -33,7 +33,7 @@ public class CreateBookingUseCase implements CommandUseCase<CreateBookingCommand
 			command.fieldId(), command.userId(),
 			command.startTime(), command.endTime());
 
-		var user = userRepository.findById(command.userId())
+		var user = userRepository.findByKeycloakId(command.userId().toString())
 				.orElseThrow(() -> new UserNotFoundException(command.userId()));
 
 		var field = fieldRepository.findById(command.fieldId())

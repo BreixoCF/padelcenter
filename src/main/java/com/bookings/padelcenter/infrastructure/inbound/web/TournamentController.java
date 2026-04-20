@@ -73,14 +73,16 @@ public class TournamentController implements TournamentsApi {
 	}
 
 	@Override
-	@PreAuthorize("@tournamentRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #tournamentId)")
+	@PreAuthorize("hasRole('ADMIN') or "
+			+ "@tournamentRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #tournamentId)")
 	public ResponseEntity<TournamentResponse> openRegistration(UUID tournamentId) {
 		var tournament = openRegistrationUseCase.execute(new OpenRegistrationCommand(tournamentId));
 		return ResponseEntity.ok(tournamentApiMapper.toResponse(tournament));
 	}
 
 	@Override
-	@PreAuthorize("@tournamentRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #tournamentId)")
+	@PreAuthorize("hasRole('ADMIN') or "
+			+ "@tournamentRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #tournamentId)")
 	public ResponseEntity<TournamentResponse> closeRegistration(UUID tournamentId) {
 		var tournament = closeRegistrationUseCase.execute(new CloseRegistrationCommand(tournamentId));
 		return ResponseEntity.ok(tournamentApiMapper.toResponse(tournament));

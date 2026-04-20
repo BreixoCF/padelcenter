@@ -37,13 +37,14 @@ public class TournamentApiMapper {
 		);
 	}
 
-	public ReportMatchResultCommand toCommand(UUID matchId, UUID reportedBy, MatchResultRequest request) {
+	public ReportMatchResultCommand toCommand(UUID matchId, UUID reportedBy, boolean isAdmin, MatchResultRequest request) {
 		return new ReportMatchResultCommand(
 				matchId,
 				request.getWinnerPairId(),
 				request.getScoreA(),
 				request.getScoreB(),
-				reportedBy
+				reportedBy,
+				isAdmin
 		);
 	}
 

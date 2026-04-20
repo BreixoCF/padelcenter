@@ -7,5 +7,6 @@ public record ReportMatchResultCommand(
 	UUID winnerPairId,
 	int scoreA,
 	int scoreB,
-	UUID reportedBy
+	UUID reportedBy,
+	boolean isAdmin
 ) {}
