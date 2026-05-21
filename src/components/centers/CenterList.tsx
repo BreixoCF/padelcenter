@@ -5,9 +5,10 @@ import { GridSkeleton } from '@/components/shared/LoadingState';
 import ErrorState from '@/components/shared/ErrorState';
 import EmptyState from '@/components/shared/EmptyState';
 import { Building2 } from 'lucide-react';
+import type { CenterResponse } from '@/lib/api/generated/models';
 
 interface CenterListProps {
-  initialData?: { content: any[] };
+  initialData?: { content: CenterResponse[] };
 }
 
 export default function CenterList({ initialData }: CenterListProps) {
@@ -27,7 +28,7 @@ export default function CenterList({ initialData }: CenterListProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {centers.map((center: any) => (
+      {centers.map((center) => (
         <CenterCard key={center.centerId} center={center} />
       ))}
     </div>

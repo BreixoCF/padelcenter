@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/auth/store';
+import AppShell from '@/components/layout/AppShell';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -14,5 +15,5 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   }, [isAuthenticated, router]);
 
   if (!isAuthenticated) return null;
-  return <>{children}</>;
+  return <AppShell>{children}</AppShell>;
 }

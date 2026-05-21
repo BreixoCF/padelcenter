@@ -26,9 +26,14 @@ import type {
 import type {
   GetMyBookings200Response,
   GetMyBookingsParams,
+  GetMyMatches200Response,
+  GetMyMatchesParams,
   GetMyTournaments200Response,
   GetMyTournamentsParams,
+  LoginRequest,
+  LoginResponse,
   ProblemDetail,
+  TokenResponse,
   UserResponse
 } from '../models';
 
@@ -38,28 +43,28 @@ import { customInstance } from '../../client';
 
 
 /**
- * Called by the frontend immediately after a successful Keycloak login. Reads the authenticated JWT, finds or creates a matching local User record, and returns it. Idempotent — safe to call on every login.
- * @summary Sync authenticated Keycloak user into the local database
+ * Issues a new short-lived access token using the httpOnly refresh token cookie. No request body required.
+ * @summary Refresh access token
  */
-export const syncUser = (
+export const refreshToken = (
 
  signal?: AbortSignal
 ) => {
 
 
-      return customInstance<UserResponse>(
-      {url: `/api/v1/auth/sync`, method: 'POST', signal
+      return customInstance<TokenResponse>(
+      {url: `/api/v1/auth/refresh`, method: 'POST', signal
     },
       );
     }
 
 
 
-export const getSyncUserMutationOptions = <TError = ProblemDetail,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof syncUser>>, TError,void, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof syncUser>>, TError,void, TContext> => {
+export const getRefreshTokenMutationOptions = <TError = ProblemDetail,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError,void, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError,void, TContext> => {
 
-const mutationKey = ['syncUser'];
+const mutationKey = ['refreshToken'];
 const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -69,10 +74,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof syncUser>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof refreshToken>>, void> = () => {
 
 
-          return  syncUser()
+          return  refreshToken()
         }
 
 
@@ -82,22 +87,148 @@ const {mutation: mutationOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type SyncUserMutationResult = NonNullable<Awaited<ReturnType<typeof syncUser>>>
+    export type RefreshTokenMutationResult = NonNullable<Awaited<ReturnType<typeof refreshToken>>>
 
-    export type SyncUserMutationError = ProblemDetail
+    export type RefreshTokenMutationError = ProblemDetail
 
     /**
- * @summary Sync authenticated Keycloak user into the local database
+ * @summary Refresh access token
  */
-export const useSyncUser = <TError = ProblemDetail,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof syncUser>>, TError,void, TContext>, }
+export const useRefreshToken = <TError = ProblemDetail,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError,void, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof syncUser>>,
+        Awaited<ReturnType<typeof refreshToken>>,
         TError,
         void,
         TContext
       > => {
-      return useMutation(getSyncUserMutationOptions(options), queryClient);
+      return useMutation(getRefreshTokenMutationOptions(options), queryClient);
+    }
+    /**
+ * Clears the httpOnly refresh token cookie, invalidating the session.
+ * @summary Logout
+ */
+export const logout = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<void>(
+      {url: `/api/v1/auth/logout`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+export const getLogoutMutationOptions = <TError = ProblemDetail,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext> => {
+
+const mutationKey = ['logout'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logout>>, void> = () => {
+
+
+          return  logout()
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LogoutMutationResult = NonNullable<Awaited<ReturnType<typeof logout>>>
+
+    export type LogoutMutationError = ProblemDetail
+
+    /**
+ * @summary Logout
+ */
+export const useLogout = <TError = ProblemDetail,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof logout>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getLogoutMutationOptions(options), queryClient);
+    }
+    /**
+ * Validates credentials against the local user database. Returns a short-lived JWT access token and sets a httpOnly refresh token cookie.
+ * @summary Authenticate with email and password
+ */
+export const login = (
+    loginRequest: LoginRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<LoginResponse>(
+      {url: `/api/v1/auth/login`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: loginRequest, signal
+    },
+      );
+    }
+
+
+
+export const getLoginMutationOptions = <TError = ProblemDetail,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: LoginRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: LoginRequest}, TContext> => {
+
+const mutationKey = ['login'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof login>>, {data: LoginRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  login(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LoginMutationResult = NonNullable<Awaited<ReturnType<typeof login>>>
+    export type LoginMutationBody = LoginRequest
+    export type LoginMutationError = ProblemDetail
+
+    /**
+ * @summary Authenticate with email and password
+ */
+export const useLogin = <TError = ProblemDetail,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: LoginRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof login>>,
+        TError,
+        {data: LoginRequest},
+        TContext
+      > => {
+      return useMutation(getLoginMutationOptions(options), queryClient);
     }
     /**
  * Returns the local User record for the authenticated principal. Requires that the user has previously called `POST /api/v1/auth/sync` to create a local record. Returns 404 if the user has not been synced yet.
@@ -275,6 +406,100 @@ export function useGetMyTournaments<TData = Awaited<ReturnType<typeof getMyTourn
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetMyTournamentsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Returns a paginated list of matches the authenticated user has played, enriched with tournament name and pair team names.
+ * @summary Get match history for the current user
+ */
+export const getMyMatches = (
+    params?: GetMyMatchesParams,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<GetMyMatches200Response>(
+      {url: `/api/v1/me/matches`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getGetMyMatchesQueryKey = (params?: GetMyMatchesParams,) => {
+    return [
+    `/api/v1/me/matches`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMyMatchesQueryOptions = <TData = Awaited<ReturnType<typeof getMyMatches>>, TError = ProblemDetail>(params?: GetMyMatchesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyMatches>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyMatchesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyMatches>>> = ({ signal }) => getMyMatches(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyMatches>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMyMatchesQueryResult = NonNullable<Awaited<ReturnType<typeof getMyMatches>>>
+export type GetMyMatchesQueryError = ProblemDetail
+
+
+export function useGetMyMatches<TData = Awaited<ReturnType<typeof getMyMatches>>, TError = ProblemDetail>(
+ params: undefined |  GetMyMatchesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyMatches>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyMatches>>,
+          TError,
+          Awaited<ReturnType<typeof getMyMatches>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyMatches<TData = Awaited<ReturnType<typeof getMyMatches>>, TError = ProblemDetail>(
+ params?: GetMyMatchesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyMatches>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyMatches>>,
+          TError,
+          Awaited<ReturnType<typeof getMyMatches>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyMatches<TData = Awaited<ReturnType<typeof getMyMatches>>, TError = ProblemDetail>(
+ params?: GetMyMatchesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyMatches>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get match history for the current user
+ */
+
+export function useGetMyMatches<TData = Awaited<ReturnType<typeof getMyMatches>>, TError = ProblemDetail>(
+ params?: GetMyMatchesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyMatches>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyMatchesQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

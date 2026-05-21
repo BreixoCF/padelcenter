@@ -8,4 +8,6 @@
 export interface RegisterPairRequest {
   player1Id: string;
   player2Id: string;
+  /** Optional team name for the pair */
+  teamName?: string;
 }

@@ -16,12 +16,28 @@ interface Match {
   result?: MatchResult;
 }
 
+interface Pair {
+  pairId: string;
+  teamName?: string;
+}
+
 interface BracketViewProps {
   matches: Match[];
+  pairs?: Pair[];
   format: string;
 }
 
-export default function BracketView({ matches, format }: BracketViewProps) {
+export default function BracketView({ matches, pairs = [], format }: BracketViewProps) {
+  const nameMap: Record<string, string> = {};
+  for (const p of pairs) {
+    if (p.pairId && p.teamName) nameMap[p.pairId] = p.teamName;
+  }
+
+  const pairLabel = (id?: string) => {
+    if (!id) return 'Por determinar';
+    return nameMap[id] || id.slice(0, 8);
+  };
+
   const rounds = matches.reduce((acc, m) => {
     if (!acc[m.round]) acc[m.round] = [];
     acc[m.round].push(m);
@@ -37,16 +53,12 @@ export default function BracketView({ matches, format }: BracketViewProps) {
           <div key={m.matchId}
             className="border rounded-lg p-3 flex items-center justify-between">
             <div className="text-sm">
-              <span className="font-mono text-slate-400 text-xs">
-                {m.pairAId?.slice(0, 8) ?? 'TBD'}
-              </span>
+              <span className="font-medium text-slate-700">{pairLabel(m.pairAId)}</span>
               <span className="mx-2 text-slate-300">vs</span>
-              <span className="font-mono text-slate-400 text-xs">
-                {m.pairBId?.slice(0, 8) ?? 'TBD'}
-              </span>
+              <span className="font-medium text-slate-700">{pairLabel(m.pairBId)}</span>
             </div>
             {m.result ? (
-              <span className="text-sm font-medium">
+              <span className="text-sm font-semibold tabular-nums">
                 {m.result.scoreA} — {m.result.scoreB}
               </span>
             ) : (
@@ -54,6 +66,9 @@ export default function BracketView({ matches, format }: BracketViewProps) {
             )}
           </div>
         ))}
+        {matches.length === 0 && (
+          <p className="text-sm text-slate-500 py-4 text-center">Aún no hay partidos generados</p>
+        )}
       </div>
     );
   }
@@ -74,23 +89,23 @@ export default function BracketView({ matches, format }: BracketViewProps) {
             </p>
             <div className="flex flex-col justify-around gap-4 flex-1">
               {rounds[round].map(m => (
-                <div key={m.matchId} className="border rounded-lg p-3 w-48 bg-white">
-                  <div className={`text-xs p-1.5 rounded mb-1 ${
+                <div key={m.matchId} className="border rounded-lg p-3 w-52 bg-white">
+                  <div className={`text-xs p-1.5 rounded mb-1 truncate ${
                     m.result?.winnerPairId === m.pairAId
                       ? 'bg-green-50 font-medium text-green-800'
                       : 'text-slate-600'
                   }`}>
-                    {m.pairAId ? m.pairAId.slice(0, 8) : 'Por determinar'}
+                    {pairLabel(m.pairAId)}
                   </div>
-                  <div className={`text-xs p-1.5 rounded ${
+                  <div className={`text-xs p-1.5 rounded truncate ${
                     m.result?.winnerPairId === m.pairBId
                       ? 'bg-green-50 font-medium text-green-800'
                       : 'text-slate-600'
                   }`}>
-                    {m.pairBId ? m.pairBId.slice(0, 8) : 'Por determinar'}
+                    {pairLabel(m.pairBId)}
                   </div>
                   {m.result && (
-                    <div className="text-xs text-center text-slate-400 mt-1">
+                    <div className="text-xs text-center text-slate-400 mt-1 tabular-nums">
                       {m.result.scoreA} — {m.result.scoreB}
                     </div>
                   )}
@@ -99,6 +114,9 @@ export default function BracketView({ matches, format }: BracketViewProps) {
             </div>
           </div>
         ))}
+        {roundNumbers.length === 0 && (
+          <p className="text-sm text-slate-500 py-4">Aún no hay cuadro generado</p>
+        )}
       </div>
     </div>
   );

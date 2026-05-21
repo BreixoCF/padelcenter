@@ -16,7 +16,11 @@ export default function BookingCard({ booking, onCancel }: BookingCardProps) {
     <div className="border-b border-zinc-100 py-3 px-0">
       <div className="flex items-start justify-between">
         <div>
-          <p className="font-medium text-sm">{booking.field?.name ?? 'Pista'}</p>
+          <p className="font-medium text-sm">
+            {booking.field?.center?.name
+              ? `${booking.field.center.name} · ${booking.field.name}`
+              : (booking.field?.name ?? 'Pista')}
+          </p>
           <div className="flex items-center gap-3 text-sm text-zinc-500 mt-0.5">
             <span>{format(start, 'd MMM yyyy', { locale: es })}</span>
             <span>{format(start, 'HH:mm')} — {format(end, 'HH:mm')}</span>

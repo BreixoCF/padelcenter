@@ -70,11 +70,6 @@ export default function DashboardPage() {
       <PageHeader
         title={`Hola, ${user?.firstName}`}
         description="Tu actividad en PadelCenter"
-        action={
-          <Link href="/centers">
-            <Button size="sm">Nueva reserva</Button>
-          </Link>
-        }
       />
 
       <Tabs defaultValue="bookings">

@@ -37,30 +37,16 @@ export default function RegisterPage() {
     try {
       await apiClient.post('/api/v1/users', form);
 
-      const params = new URLSearchParams({
-        grant_type: 'password',
-        client_id: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID!,
-        username: form.email,
+      const { data } = await apiClient.post('/api/v1/auth/login', {
+        email: form.email,
         password: form.password,
       });
-      const tokenRes = await fetch(
-        `${process.env.NEXT_PUBLIC_KEYCLOAK_URL}/realms/${process.env.NEXT_PUBLIC_KEYCLOAK_REALM}/protocol/openid-connect/token`,
-        {
-          method: 'POST',
-          body: params,
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        }
-      );
-      if (!tokenRes.ok) throw new Error('Login failed');
-      const { access_token } = await tokenRes.json();
-      useAuthStore.getState().setAccessToken(access_token);
-
-      const { data: user } = await apiClient.post('/api/v1/auth/sync');
-      useAuthStore.getState().setUser(user);
+      useAuthStore.getState().setAccessToken(data.accessToken);
+      useAuthStore.getState().setUser(data.user);
 
       router.replace('/centers');
-    } catch (error: any) {
-      const detail = error.response?.data?.detail;
+    } catch (error: unknown) {
+      const detail = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
       toast({
         title: 'Error al crear la cuenta',
         description: detail ?? 'Comprueba los datos e inténtalo de nuevo',

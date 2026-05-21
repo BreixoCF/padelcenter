@@ -28,6 +28,7 @@ import type {
   GetTournamentMatchesParams,
   ProblemDetail,
   RegisterPairRequest,
+  RoundRobinStanding,
   TournamentPairResponse,
   TournamentRequest,
   TournamentResponse
@@ -600,6 +601,99 @@ export const useDeleteTournament = <TError = ProblemDetail,
       return useMutation(getDeleteTournamentMutationOptions(options), queryClient);
     }
     /**
+ * Returns the league-style standings table for a ROUND_ROBIN tournament, sorted by wins descending then set difference descending.
+ * @summary Get Round Robin standings for a tournament
+ */
+export const getTournamentStandings = (
+    tournamentId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<RoundRobinStanding[]>(
+      {url: `/api/v1/tournaments/${tournamentId}/standings`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getGetTournamentStandingsQueryKey = (tournamentId: string,) => {
+    return [
+    `/api/v1/tournaments/${tournamentId}/standings`
+    ] as const;
+    }
+
+
+export const getGetTournamentStandingsQueryOptions = <TData = Awaited<ReturnType<typeof getTournamentStandings>>, TError = ProblemDetail>(tournamentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentStandings>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTournamentStandingsQueryKey(tournamentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTournamentStandings>>> = ({ signal }) => getTournamentStandings(tournamentId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(tournamentId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTournamentStandings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTournamentStandingsQueryResult = NonNullable<Awaited<ReturnType<typeof getTournamentStandings>>>
+export type GetTournamentStandingsQueryError = ProblemDetail
+
+
+export function useGetTournamentStandings<TData = Awaited<ReturnType<typeof getTournamentStandings>>, TError = ProblemDetail>(
+ tournamentId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentStandings>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTournamentStandings>>,
+          TError,
+          Awaited<ReturnType<typeof getTournamentStandings>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTournamentStandings<TData = Awaited<ReturnType<typeof getTournamentStandings>>, TError = ProblemDetail>(
+ tournamentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentStandings>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTournamentStandings>>,
+          TError,
+          Awaited<ReturnType<typeof getTournamentStandings>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTournamentStandings<TData = Awaited<ReturnType<typeof getTournamentStandings>>, TError = ProblemDetail>(
+ tournamentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentStandings>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Round Robin standings for a tournament
+ */
+
+export function useGetTournamentStandings<TData = Awaited<ReturnType<typeof getTournamentStandings>>, TError = ProblemDetail>(
+ tournamentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTournamentStandings>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTournamentStandingsQueryOptions(tournamentId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
  * Returns matches ordered by round and group name.
  * @summary Get matches for a tournament (paginated)
  */

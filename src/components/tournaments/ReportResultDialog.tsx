@@ -13,13 +13,15 @@ interface ReportResultDialogProps {
   matchId: string;
   pairAId: string;
   pairBId: string;
+  pairAName?: string;
+  pairBName?: string;
   onClose: () => void;
   onSubmit: (data: { winnerPairId: string; scoreA: number; scoreB: number }) => void;
   isPending: boolean;
 }
 
 export default function ReportResultDialog({
-  matchId, pairAId, pairBId, onClose, onSubmit, isPending,
+  matchId: _matchId, pairAId, pairBId, pairAName, pairBName, onClose, onSubmit, isPending,
 }: ReportResultDialogProps) {
   const [form, setForm] = useState({
     winnerPairId: pairAId,
@@ -41,20 +43,20 @@ export default function ReportResultDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={pairAId}>Pareja A</SelectItem>
-                <SelectItem value={pairBId}>Pareja B</SelectItem>
+                <SelectItem value={pairAId}>{pairAName || 'Pareja A'}</SelectItem>
+                <SelectItem value={pairBId}>{pairBName || 'Pareja B'}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>Sets pareja A</Label>
+              <Label>Sets {pairAName || 'pareja A'}</Label>
               <Input type="number" min={0} max={3}
                 value={form.scoreA}
                 onChange={e => setForm(p => ({ ...p, scoreA: parseInt(e.target.value) || 0 }))} />
             </div>
             <div className="space-y-2">
-              <Label>Sets pareja B</Label>
+              <Label>Sets {pairBName || 'pareja B'}</Label>
               <Input type="number" min={0} max={3}
                 value={form.scoreB}
                 onChange={e => setForm(p => ({ ...p, scoreB: parseInt(e.target.value) || 0 }))} />

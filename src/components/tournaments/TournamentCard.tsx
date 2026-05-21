@@ -6,6 +6,7 @@ import { es } from 'date-fns/locale';
 import { Calendar, Users } from 'lucide-react';
 import Link from 'next/link';
 import StatusBadge from '@/components/shared/StatusBadge';
+import type { TournamentResponse } from '@/lib/api/generated/models';
 
 const FORMAT_LABELS: Record<string, string> = {
   ROUND_ROBIN: 'Round Robin',
@@ -13,7 +14,7 @@ const FORMAT_LABELS: Record<string, string> = {
   GROUPS_AND_ELIMINATION: 'Grupos + Eliminatoria',
 };
 
-export default function TournamentCard({ tournament }: { tournament: any }) {
+export default function TournamentCard({ tournament }: { tournament: TournamentResponse }) {
   return (
     <Card className="flex flex-col border border-zinc-100 hover:border-zinc-300 transition-colors">
       <CardHeader className="pb-2">
@@ -37,13 +38,15 @@ export default function TournamentCard({ tournament }: { tournament: any }) {
           <Users className="h-3.5 w-3.5 text-zinc-400" />
           <span>Máx. {tournament.maxPairs} parejas</span>
         </div>
-        {tournament.status === 'REGISTRATION_OPEN' && (
-          <Link href={`/tournaments/${tournament.tournamentId}`} className="block mt-3">
-            <Button size="sm" className="w-full">
-              Ver e inscribirse
-            </Button>
-          </Link>
-        )}
+        <Link href={`/tournaments/${tournament.tournamentId}`} className="block mt-3">
+          <Button
+            size="sm"
+            className="w-full"
+            variant={tournament.status === 'REGISTRATION_OPEN' ? 'default' : 'outline'}
+          >
+            {tournament.status === 'REGISTRATION_OPEN' ? 'Ver e inscribirse' : 'Ver torneo'}
+          </Button>
+        </Link>
       </CardContent>
     </Card>
   );

@@ -5,6 +5,7 @@
  * OpenAPI spec version: v0
  */
 import type { AuditableResponse } from './auditableResponse';
+import type { UserCenterRoleResponse } from './userCenterRoleResponse';
 
 /**
  * Full user representation returned by all user read and write operations.
@@ -20,5 +21,7 @@ export interface UserResponse {
   email: string;
   /** User's contact phone number. Optional. */
   phoneNumber?: string;
+  /** Roles the user holds within padel centers. */
+  centerRoles?: UserCenterRoleResponse[];
   audit?: AuditableResponse;
 }

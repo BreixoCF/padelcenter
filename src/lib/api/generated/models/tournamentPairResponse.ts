@@ -11,6 +11,8 @@ export interface TournamentPairResponse {
   tournamentId: string;
   player1Id: string;
   player2Id: string;
+  /** Team name chosen by the pair */
+  teamName?: string;
   status: TournamentPairResponseStatus;
   registeredAt: string;
 }

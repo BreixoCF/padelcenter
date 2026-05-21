@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/auth/store';
 import { apiClient } from '@/lib/api/client';
-import { getKeycloak } from '@/lib/auth/keycloak';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,25 +22,9 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const params = new URLSearchParams({
-        grant_type: 'password',
-        client_id: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID!,
-        username: email,
-        password,
-      });
-      const tokenRes = await fetch(
-        `${process.env.NEXT_PUBLIC_KEYCLOAK_URL}/realms/${process.env.NEXT_PUBLIC_KEYCLOAK_REALM}/protocol/openid-connect/token`,
-        {
-          method: 'POST',
-          body: params,
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        }
-      );
-      if (!tokenRes.ok) throw new Error('Credenciales incorrectas');
-      const { access_token } = await tokenRes.json();
-      setAccessToken(access_token);
-      const { data: user } = await apiClient.post('/api/v1/auth/sync');
-      setUser(user);
+      const { data } = await apiClient.post('/api/v1/auth/login', { email, password });
+      setAccessToken(data.accessToken);
+      setUser(data.user);
       router.replace('/centers');
     } catch {
       toast({
@@ -52,18 +35,6 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleGoogle = () => {
-    getKeycloak();
-    const params = new URLSearchParams({
-      client_id: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID!,
-      response_type: 'code',
-      scope: 'openid email profile',
-      redirect_uri: `${window.location.origin}/auth/callback`,
-      kc_idp_hint: 'google',
-    });
-    window.location.href = `${process.env.NEXT_PUBLIC_KEYCLOAK_URL}/realms/${process.env.NEXT_PUBLIC_KEYCLOAK_REALM}/protocol/openid-connect/auth?${params}`;
   };
 
   return (
@@ -100,19 +71,6 @@ export default function LoginPage() {
               {isLoading ? 'Entrando...' : 'Iniciar sesión'}
             </Button>
           </form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-2 text-slate-500">o continúa con</span>
-            </div>
-          </div>
-
-          <Button variant="outline" className="w-full" onClick={handleGoogle}>
-            Continuar con Google
-          </Button>
 
           <p className="text-center text-sm text-slate-500 mt-2">
             ¿No tienes cuenta?{' '}
