@@ -1,3 +1,5 @@
 package com.bookings.padelcenter.application.query;
 
-public record GetCurrentUserQuery(String keycloakId) {}
+import java.util.UUID;
+
+public record GetCurrentUserQuery(UUID userId) {}

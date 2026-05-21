@@ -1,6 +1,6 @@
 package com.bookings.padelcenter.config;
 
-import com.bookings.padelcenter.infrastructure.inbound.security.JwtAuthenticatedUserResolver;
+import com.bookings.padelcenter.infrastructure.security.AuthenticatedUserResolver;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +18,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	@Value("${app.timezone:UTC}")
 	private String timezone;
 
-	private final JwtAuthenticatedUserResolver jwtAuthenticatedUserResolver;
+	private final AuthenticatedUserResolver authResolver;
 
 	@PostConstruct
 	void setDefaultTimezone() {
@@ -27,6 +27,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-		resolvers.add(jwtAuthenticatedUserResolver);
+		resolvers.add(authResolver);
 	}
 }

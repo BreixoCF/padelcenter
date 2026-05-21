@@ -77,7 +77,6 @@ class CreateBookingUseCaseTest {
 
 		user = new User(
 			userId,
-			null,
 			"John",
 			"Doe",
 			"john.doe@example.com",

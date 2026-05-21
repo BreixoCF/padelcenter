@@ -7,8 +7,10 @@ import com.bookings.padelcenter.application.command.OpenRegistrationCommand;
 import com.bookings.padelcenter.application.command.RegisterPairCommand;
 import com.bookings.padelcenter.application.create.CreateTournamentUseCase;
 import com.bookings.padelcenter.application.delete.DeleteTournamentUseCase;
+import com.bookings.padelcenter.application.query.GetRoundRobinStandingsQuery;
 import com.bookings.padelcenter.application.query.GetTournamentByIdQuery;
 import com.bookings.padelcenter.application.query.GetTournamentMatchesQuery;
+import com.bookings.padelcenter.application.read.GetRoundRobinStandingsUseCase;
 import com.bookings.padelcenter.application.read.GetTournamentByIdUseCase;
 import com.bookings.padelcenter.application.read.GetTournamentMatchesUseCase;
 import com.bookings.padelcenter.application.read.GetTournamentPairsUseCase;
@@ -20,6 +22,7 @@ import com.bookings.padelcenter.infrastructure.inbound.mapper.TournamentApiMappe
 import com.bookings.padelcenter.infrastructure.security.AuthenticatedUserResolver;
 import com.padelcenter.infrastructure.web.generated.api.TournamentsApi;
 import com.padelcenter.infrastructure.web.generated.model.GetTournamentMatches200Response;
+import com.padelcenter.infrastructure.web.generated.model.RoundRobinStanding;
 import com.padelcenter.infrastructure.web.generated.model.RegisterPairRequest;
 import com.padelcenter.infrastructure.web.generated.model.TournamentPairResponse;
 import com.padelcenter.infrastructure.web.generated.model.TournamentRequest;
@@ -37,6 +40,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TournamentController implements TournamentsApi {
 
+	private final GetRoundRobinStandingsUseCase getRoundRobinStandingsUseCase;
 	private final CreateTournamentUseCase createTournamentUseCase;
 	private final GetTournamentByIdUseCase getTournamentByIdUseCase;
 	private final DeleteTournamentUseCase deleteTournamentUseCase;
@@ -93,7 +97,8 @@ public class TournamentController implements TournamentsApi {
 		var command = new RegisterPairCommand(
 				tournamentId,
 				registerPairRequest.getPlayer1Id(),
-				registerPairRequest.getPlayer2Id()
+				registerPairRequest.getPlayer2Id(),
+				registerPairRequest.getTeamName()
 		);
 		var pair = registerPairUseCase.execute(command);
 		return ResponseEntity.status(HttpStatus.CREATED).body(tournamentApiMapper.toPairResponse(pair));
@@ -111,6 +116,12 @@ public class TournamentController implements TournamentsApi {
 	public ResponseEntity<TournamentPairResponse> confirmPair(UUID tournamentId, UUID pairId) {
 		var pair = confirmPairUseCase.execute(new ConfirmPairCommand(tournamentId, pairId));
 		return ResponseEntity.ok(tournamentApiMapper.toPairResponse(pair));
+	}
+
+	@Override
+	public ResponseEntity<List<RoundRobinStanding>> getTournamentStandings(UUID tournamentId) {
+		var standings = getRoundRobinStandingsUseCase.execute(new GetRoundRobinStandingsQuery(tournamentId));
+		return ResponseEntity.ok(standings.stream().map(tournamentApiMapper::toStandingResponse).toList());
 	}
 
 	@Override

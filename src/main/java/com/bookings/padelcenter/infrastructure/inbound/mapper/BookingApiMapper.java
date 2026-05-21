@@ -62,10 +62,6 @@ public class BookingApiMapper {
 		);
 	}
 
-	public GetMyBookings200Response toMyBookingsPagedResponse(PageResult<Booking> pageResult) {
-		return toPagedBookingHistory(pageResult);
-	}
-
 	public UpdateBookingCommand toUpdateCommand(Long bookingId, BookingUpdateRequest request,
 	                                             AuthenticatedUser authenticatedUser) {
 		return new UpdateBookingCommand(

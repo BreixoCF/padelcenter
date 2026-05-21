@@ -1,0 +1,12 @@
+type: object
+description: Successful login result containing the access token and authenticated user.
+required:
+  - accessToken
+  - user
+properties:
+  accessToken:
+    type: string
+    description: Short-lived JWT access token. Include in Authorization Bearer header.
+    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  user:
+    $ref: './user-response.yaml'

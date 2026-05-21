@@ -117,7 +117,7 @@ class GetFieldAvailabilityUseCaseTest {
 	}
 
 	private Booking bookingAt(LocalDateTime start, LocalDateTime end) {
-		var user = new User(UUID.randomUUID(), null, "Test", "User", "test@example.com",
+		var user = new User(UUID.randomUUID(), "Test", "User", "test@example.com",
 				"hash", "600000001", Set.of(), Auditable.newAudit());
 		return new Booking(1L, user, field, start, end,
 				BigDecimal.valueOf(25), Instant.now(), BookingStatus.CONFIRMED, Auditable.newAudit());

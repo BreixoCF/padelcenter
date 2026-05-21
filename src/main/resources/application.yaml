@@ -8,15 +8,12 @@ spring:
   threads:
     virtual:
       enabled: true
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/padelcenter-dev}
-          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8180/realms/padelcenter-dev/protocol/openid-connect/certs}
-
 app:
   timezone: UTC
+  jwt:
+    secret: ${JWT_SECRET:padelcenter-dev-secret-key-change-in-production-min32chars!!}
+    access-token-expiry: ${JWT_ACCESS_TOKEN_EXPIRY:900}
+    refresh-token-expiry: ${JWT_REFRESH_TOKEN_EXPIRY:604800}
 
 management:
   endpoints:

@@ -53,7 +53,9 @@ public class RegisterPairUseCase implements CommandUseCase<RegisterPairCommand, 
 		}
 
 		var pair = new TournamentPair(null, command.tournamentId(),
-				command.player1Id(), command.player2Id(), PairStatus.PENDING, Instant.now());
+				command.player1Id(), command.player2Id(),
+				command.teamName() != null ? command.teamName() : "",
+				PairStatus.PENDING, Instant.now());
 
 		var saved = tournamentRepository.savePair(pair);
 		log.info("tournament.pair.registered tournamentId={} pairId={}",

@@ -135,7 +135,7 @@ class GetCenterBookingsUseCaseTest {
 
 	private Booking booking() {
 		var field = new Field(FIELD_ID, "Pista 1", "Indoor", BigDecimal.valueOf(25), true, center, Auditable.newAudit());
-		var user = new User(UUID.randomUUID(), null, "Test", "User", "test@test.com",
+		var user = new User(UUID.randomUUID(), "Test", "User", "test@test.com",
 				"hash", "600000000", java.util.Set.of(), Auditable.newAudit());
 		return new Booking(1L, user, field,
 				LocalDateTime.of(2025, 6, 20, 10, 0),

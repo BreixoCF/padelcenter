@@ -20,8 +20,6 @@ public class UserEntity extends AuditableEntity<UUID> {
 	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "user_id")
 	private UUID userId;
-	@Column(name = "keycloak_id", unique = true)
-	private String keycloakId;
 	private String firstName;
 	private String lastName;
 	private String email;

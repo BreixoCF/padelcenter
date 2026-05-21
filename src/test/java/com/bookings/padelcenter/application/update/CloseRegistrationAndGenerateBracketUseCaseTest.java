@@ -105,7 +105,7 @@ class CloseRegistrationAndGenerateBracketUseCaseTest {
 	private List<TournamentPair> buildConfirmedPairs(int n, UUID tournamentId) {
 		return IntStream.range(0, n)
 				.mapToObj(i -> new TournamentPair(UUID.randomUUID(), tournamentId,
-						UUID.randomUUID(), UUID.randomUUID(), PairStatus.CONFIRMED, Instant.now()))
+						UUID.randomUUID(), UUID.randomUUID(), "", PairStatus.CONFIRMED, Instant.now()))
 				.toList();
 	}
 

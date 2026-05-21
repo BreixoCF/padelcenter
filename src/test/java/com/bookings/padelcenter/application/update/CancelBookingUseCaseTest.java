@@ -58,7 +58,6 @@ class CancelBookingUseCaseTest {
 		UUID userId = UUID.randomUUID();
 		user = new User(
 			userId,
-			null,
 			"John",
 			"Doe",
 			"john.doe@example.com",

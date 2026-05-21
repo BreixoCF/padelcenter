@@ -48,11 +48,11 @@ class RegisterPairUseCaseTest {
 		var tournamentId = UUID.randomUUID();
 		var player1Id = UUID.randomUUID();
 		var player2Id = UUID.randomUUID();
-		var command = new RegisterPairCommand(tournamentId, player1Id, player2Id);
+		var command = new RegisterPairCommand(tournamentId, player1Id, player2Id, "Team A");
 
 		var tournament = buildTournament(tournamentId, TournamentStatus.REGISTRATION_OPEN);
 		var savedPair = new TournamentPair(UUID.randomUUID(), tournamentId,
-				player1Id, player2Id, PairStatus.PENDING, Instant.now());
+				player1Id, player2Id, "", PairStatus.PENDING, Instant.now());
 
 		given(tournamentRepository.findById(tournamentId)).willReturn(Optional.of(tournament));
 		given(userRepository.findById(player1Id)).willReturn(Optional.of(buildUser(player1Id)));
@@ -72,7 +72,7 @@ class RegisterPairUseCaseTest {
 	@DisplayName("should throw InvalidTournamentStatusException when tournament is not open")
 	void execute_tournamentNotOpen_throwsInvalidTournamentStatusException() {
 		var tournamentId = UUID.randomUUID();
-		var command = new RegisterPairCommand(tournamentId, UUID.randomUUID(), UUID.randomUUID());
+		var command = new RegisterPairCommand(tournamentId, UUID.randomUUID(), UUID.randomUUID(), "");
 		var tournament = buildTournament(tournamentId, TournamentStatus.DRAFT);
 
 		given(tournamentRepository.findById(tournamentId)).willReturn(Optional.of(tournament));
@@ -89,7 +89,7 @@ class RegisterPairUseCaseTest {
 		var tournamentId = UUID.randomUUID();
 		var player1Id = UUID.randomUUID();
 		var player2Id = UUID.randomUUID();
-		var command = new RegisterPairCommand(tournamentId, player1Id, player2Id);
+		var command = new RegisterPairCommand(tournamentId, player1Id, player2Id, "");
 		var tournament = buildTournament(tournamentId, TournamentStatus.REGISTRATION_OPEN);
 
 		given(tournamentRepository.findById(tournamentId)).willReturn(Optional.of(tournament));
@@ -106,7 +106,7 @@ class RegisterPairUseCaseTest {
 	@DisplayName("should throw TournamentNotFoundException when tournament does not exist")
 	void execute_tournamentNotFound_throwsTournamentNotFoundException() {
 		var tournamentId = UUID.randomUUID();
-		var command = new RegisterPairCommand(tournamentId, UUID.randomUUID(), UUID.randomUUID());
+		var command = new RegisterPairCommand(tournamentId, UUID.randomUUID(), UUID.randomUUID(), "");
 
 		given(tournamentRepository.findById(tournamentId)).willReturn(Optional.empty());
 
@@ -121,7 +121,7 @@ class RegisterPairUseCaseTest {
 	}
 
 	private User buildUser(UUID userId) {
-		return new User(userId, null, "First", "Last", "user@test.com",
+		return new User(userId, "First", "Last", "user@test.com",
 				"hash", "000000000", Set.of(), Auditable.newAudit());
 	}
 }

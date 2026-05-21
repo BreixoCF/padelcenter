@@ -1,0 +1,32 @@
+parameters:
+  - name: tournamentId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+
+get:
+  operationId: getTournamentStandings
+  summary: Get Round Robin standings for a tournament
+  description: >
+    Returns the league-style standings table for a ROUND_ROBIN tournament,
+    sorted by wins descending then set difference descending.
+  tags:
+    - Tournaments
+  security: []
+  responses:
+    '200':
+      description: Standings table.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/round-robin-standing.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '422':
+      $ref: '../components/responses/unprocessable.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

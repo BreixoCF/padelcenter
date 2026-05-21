@@ -1,0 +1,28 @@
+type: object
+required:
+  - pairId
+  - teamName
+  - played
+  - wins
+  - losses
+  - setsFor
+  - setsAgainst
+  - setDifference
+properties:
+  pairId:
+    type: string
+    format: uuid
+  teamName:
+    type: string
+  played:
+    type: integer
+  wins:
+    type: integer
+  losses:
+    type: integer
+  setsFor:
+    type: integer
+  setsAgainst:
+    type: integer
+  setDifference:
+    type: integer

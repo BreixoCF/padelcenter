@@ -171,6 +171,7 @@ class BracketGeneratorServiceTest {
 						tournamentId,
 						UUID.randomUUID(),
 						UUID.randomUUID(),
+						"",
 						PairStatus.CONFIRMED,
 						Instant.now()
 				))

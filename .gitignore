@@ -86,4 +86,11 @@ nb-configuration.xml
 ## Miscellaneous
 ##############################
 *.log
-.claude/settings.local.json
+
+##############################
+## Claude / AI
+##############################
+.claude/
+.agents/
+CLAUDE.md
+skills-lock.json

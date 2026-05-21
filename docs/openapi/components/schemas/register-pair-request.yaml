@@ -9,3 +9,7 @@ properties:
   player2Id:
     type: string
     format: uuid
+  teamName:
+    type: string
+    description: Optional team name for the pair
+    example: "Los Cañoneros"

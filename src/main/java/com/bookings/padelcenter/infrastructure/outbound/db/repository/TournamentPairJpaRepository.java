@@ -21,4 +21,17 @@ public interface TournamentPairJpaRepository extends JpaRepository<TournamentPai
 		@Param("tournamentId") UUID tournamentId,
 		@Param("userId") UUID userId
 	);
+
+	@Query("""
+		SELECT p FROM TournamentPairEntity p
+		WHERE p.player1Id = :userId OR p.player2Id = :userId
+		""")
+	List<TournamentPairEntity> findByPlayer(@Param("userId") UUID userId);
+
+	@Query("""
+		SELECT COUNT(p) FROM TournamentPairEntity p
+		WHERE p.tournamentId = :tournamentId
+		  AND p.status <> 'REJECTED'
+		""")
+	long countActiveByTournamentId(@Param("tournamentId") UUID tournamentId);
 }

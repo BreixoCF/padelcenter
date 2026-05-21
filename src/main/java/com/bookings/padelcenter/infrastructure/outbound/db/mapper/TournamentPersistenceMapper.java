@@ -68,6 +68,7 @@ public class TournamentPersistenceMapper {
 		entity.setTournamentId(pair.tournamentId());
 		entity.setPlayer1Id(pair.player1Id());
 		entity.setPlayer2Id(pair.player2Id());
+		entity.setTeamName(pair.teamName() != null ? pair.teamName() : "");
 		entity.setStatus(pair.status().name());
 		entity.setRegisteredAt(pair.registeredAt());
 		return entity;
@@ -79,6 +80,7 @@ public class TournamentPersistenceMapper {
 				entity.getTournamentId(),
 				entity.getPlayer1Id(),
 				entity.getPlayer2Id(),
+				entity.getTeamName(),
 				PairStatus.valueOf(entity.getStatus()),
 				entity.getRegisteredAt()
 		);

@@ -19,6 +19,9 @@ properties:
   player2Id:
     type: string
     format: uuid
+  teamName:
+    type: string
+    description: Team name chosen by the pair
   status:
     type: string
     enum:

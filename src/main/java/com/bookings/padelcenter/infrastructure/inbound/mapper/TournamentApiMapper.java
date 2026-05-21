@@ -2,12 +2,15 @@ package com.bookings.padelcenter.infrastructure.inbound.mapper;
 
 import com.bookings.padelcenter.application.command.CreateTournamentCommand;
 import com.bookings.padelcenter.application.command.ReportMatchResultCommand;
+import com.bookings.padelcenter.application.dto.MatchHistoryItem;
 import com.bookings.padelcenter.domain.model.Match;
 import com.bookings.padelcenter.domain.model.PageResult;
+import com.bookings.padelcenter.domain.model.RoundRobinStanding;
 import com.bookings.padelcenter.domain.model.Tournament;
 import com.bookings.padelcenter.domain.model.TournamentFormat;
 import com.bookings.padelcenter.domain.model.TournamentPair;
 import com.padelcenter.infrastructure.web.generated.model.AuditableResponse;
+import com.padelcenter.infrastructure.web.generated.model.GetMyMatches200Response;
 import com.padelcenter.infrastructure.web.generated.model.GetMyTournaments200Response;
 import com.padelcenter.infrastructure.web.generated.model.GetTournamentMatches200Response;
 import com.padelcenter.infrastructure.web.generated.model.MatchResponse;
@@ -74,10 +77,62 @@ public class TournamentApiMapper {
 		response.setTournamentId(pair.tournamentId());
 		response.setPlayer1Id(pair.player1Id());
 		response.setPlayer2Id(pair.player2Id());
+		response.setTeamName(pair.teamName());
 		response.setStatus(TournamentPairResponse.StatusEnum.fromValue(pair.status().name()));
 		if (pair.registeredAt() != null) {
 			response.setRegisteredAt(pair.registeredAt().atOffset(ZoneOffset.UTC));
 		}
+		return response;
+	}
+
+	public com.padelcenter.infrastructure.web.generated.model.RoundRobinStanding toStandingResponse(RoundRobinStanding standing) {
+		var response = new com.padelcenter.infrastructure.web.generated.model.RoundRobinStanding();
+		response.setPairId(standing.pairId());
+		response.setTeamName(standing.teamName());
+		response.setPlayed(standing.played());
+		response.setWins(standing.wins());
+		response.setLosses(standing.losses());
+		response.setSetsFor(standing.setsFor());
+		response.setSetsAgainst(standing.setsAgainst());
+		response.setSetDifference(standing.setDifference());
+		return response;
+	}
+
+	public com.padelcenter.infrastructure.web.generated.model.MatchHistoryItem toMatchHistoryItemResponse(MatchHistoryItem item) {
+		var response = new com.padelcenter.infrastructure.web.generated.model.MatchHistoryItem();
+		var match = item.match();
+		response.setMatchId(match.matchId());
+		response.setTournamentId(match.tournamentId());
+		response.setTournamentName(item.tournamentName());
+		response.setPairAId(match.pairAId());
+		response.setPairBId(match.pairBId());
+		response.setPairAName(item.pairAName());
+		response.setPairBName(item.pairBName());
+		response.setRound(match.round());
+		response.setGroupName(match.groupName());
+		response.setStatus(com.padelcenter.infrastructure.web.generated.model.MatchHistoryItem.StatusEnum.fromValue(match.status().name()));
+		if (match.scheduledAt() != null) {
+			response.setScheduledAt(match.scheduledAt().atOffset(ZoneOffset.UTC));
+		}
+		if (match.result() != null) {
+			var result = new MatchResultResponse();
+			result.setWinnerPairId(match.result().winnerPairId());
+			result.setScoreA(match.result().scoreA());
+			result.setScoreB(match.result().scoreB());
+			result.setReportedBy(match.result().reportedBy());
+			result.setReportedAt(match.result().reportedAt().atOffset(ZoneOffset.UTC));
+			response.setResult(result);
+		}
+		return response;
+	}
+
+	public GetMyMatches200Response toMatchHistoryPagedResponse(PageResult<MatchHistoryItem> pageResult) {
+		var response = new GetMyMatches200Response();
+		response.setContent(pageResult.content().stream().map(this::toMatchHistoryItemResponse).toList());
+		response.setTotalElements(pageResult.totalElements());
+		response.setTotalPages(pageResult.totalPages());
+		response.setCurrentPage(pageResult.page());
+		response.setPageSize(pageResult.size());
 		return response;
 	}
 
@@ -117,16 +172,6 @@ public class TournamentApiMapper {
 
 	public List<TournamentPairResponse> toPairResponseList(List<TournamentPair> pairs) {
 		return pairs.stream().map(this::toPairResponse).toList();
-	}
-
-	public GetMyTournaments200Response toMyTournamentsPagedResponse(PageResult<Tournament> pageResult) {
-		var response = new GetMyTournaments200Response();
-		response.setContent(pageResult.content().stream().map(this::toResponse).toList());
-		response.setTotalElements(pageResult.totalElements());
-		response.setTotalPages(pageResult.totalPages());
-		response.setCurrentPage(pageResult.page());
-		response.setPageSize(pageResult.size());
-		return response;
 	}
 
 	public GetTournamentMatches200Response toMatchPagedResponse(PageResult<Match> pageResult) {

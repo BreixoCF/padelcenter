@@ -38,7 +38,7 @@ class GetBookingByIdUseCaseTest {
 	private GetBookingByIdUseCase getBookingByIdUseCase;
 
 	private Booking buildBooking(Long id) {
-		var user = new User(UUID.randomUUID(), null, "John", "Doe", "j@test.com",
+		var user = new User(UUID.randomUUID(), "John", "Doe", "j@test.com",
 				"hash", null, Set.of(), Auditable.newAudit());
 		var center = new Center(UUID.randomUUID(), "C", "A", "City",
 				null, null, null, Auditable.newAudit());

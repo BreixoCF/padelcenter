@@ -29,5 +29,10 @@ properties:
     nullable: true
     description: User's contact phone number. Optional.
     example: "+34600123456"
+  centerRoles:
+    type: array
+    description: Roles the user holds within padel centers.
+    items:
+      $ref: './user-center-role-response.yaml'
   audit:
     $ref: './auditable-response.yaml'

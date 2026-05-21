@@ -27,6 +27,9 @@ public class TournamentPairEntity {
 	@Column(name = "player2_id", nullable = false)
 	private UUID player2Id;
 
+	@Column(name = "team_name", nullable = false)
+	private String teamName;
+
 	@Column(nullable = false)
 	private String status;
 

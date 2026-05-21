@@ -5,6 +5,7 @@ import com.bookings.padelcenter.domain.model.PageResult;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -23,4 +24,6 @@ public interface MatchRepository {
 	PageResult<Match> findByTournamentId(UUID tournamentId, int page, int size);
 
 	List<Match> findByTournamentIdAndRound(UUID tournamentId, int round);
+
+	List<Match> findByPairIdIn(List<UUID> pairIds);
 }

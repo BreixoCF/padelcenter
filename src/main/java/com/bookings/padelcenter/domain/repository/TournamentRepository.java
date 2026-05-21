@@ -37,4 +37,8 @@ public interface TournamentRepository {
 	PageResult<Tournament> findByPlayerId(UUID userId, int page, int size);
 
 	void delete(UUID tournamentId, UUID deletedBy);
+
+	long countActivePairs(UUID tournamentId);
+
+	List<TournamentPair> findPairsByUserId(UUID userId);
 }

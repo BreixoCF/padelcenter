@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -58,6 +59,14 @@ public class MatchRepositoryImpl implements MatchRepository {
 	@Transactional(readOnly = true)
 	public List<Match> findByTournamentIdAndRound(UUID tournamentId, int round) {
 		return matchJpaRepository.findByTournamentIdAndRound(tournamentId, round)
+				.stream().map(mapper::toDomain).toList();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<Match> findByPairIdIn(List<UUID> pairIds) {
+		if (pairIds.isEmpty()) return List.of();
+		return matchJpaRepository.findByPairIdIn(pairIds)
 				.stream().map(mapper::toDomain).toList();
 	}
 }

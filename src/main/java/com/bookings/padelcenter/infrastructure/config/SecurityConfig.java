@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -20,6 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
 	private final CorsConfigurationSource corsConfigurationSource;
+	private final NimbusJwtDecoder jwtDecoder;
 
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -27,7 +28,7 @@ public class SecurityConfig {
 				.cors(cors -> cors.configurationSource(corsConfigurationSource))
 				.csrf(AbstractHttpConfigurer::disable)
 				.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+				.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder)))
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(
 								"/actuator/health",
@@ -37,7 +38,10 @@ public class SecurityConfig {
 								"/swagger-ui/**",
 								"/swagger-ui.html"
 						).permitAll()
-						.requestMatchers(HttpMethod.POST, "/api/v1/auth/sync").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
 						.anyRequest().authenticated()
 				)
 				.build();

@@ -1,0 +1,19 @@
+type: object
+description: A user's role within a specific padel center.
+required:
+  - centerId
+  - role
+properties:
+  centerId:
+    type: string
+    format: uuid
+    description: The center this role applies to.
+    example: "123e4567-e89b-12d3-a456-426614174000"
+  role:
+    type: string
+    description: Role granted within the center.
+    enum:
+      - ADMIN
+      - MANAGER
+      - USER
+    example: "ADMIN"

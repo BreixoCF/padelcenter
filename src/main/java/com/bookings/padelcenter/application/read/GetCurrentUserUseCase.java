@@ -1,7 +1,7 @@
 package com.bookings.padelcenter.application.read;
 
 import com.bookings.padelcenter.application.query.GetCurrentUserQuery;
-import com.bookings.padelcenter.domain.exception.ResourceNotFoundException;
+import com.bookings.padelcenter.domain.exception.UserNotFoundException;
 import com.bookings.padelcenter.domain.model.User;
 import com.bookings.padelcenter.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +18,9 @@ public class GetCurrentUserUseCase {
 
     @Transactional(readOnly = true)
     public User execute(GetCurrentUserQuery query) {
-        User user = userRepository.findByKeycloakId(query.keycloakId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "User not synced — call POST /auth/sync first"));
-        log.info("user.me.resolved keycloakId={} userId={}", query.keycloakId(), user.userId());
+        User user = userRepository.findById(query.userId())
+                .orElseThrow(() -> new UserNotFoundException(query.userId()));
+        log.info("user.me.resolved userId={}", user.userId());
         return user;
     }
 }

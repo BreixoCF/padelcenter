@@ -8,16 +8,17 @@ public record TournamentPair(
 	UUID tournamentId,
 	UUID player1Id,
 	UUID player2Id,
+	String teamName,
 	PairStatus status,
 	Instant registeredAt
 ) {
 	public TournamentPair confirm() {
 		return new TournamentPair(pairId, tournamentId, player1Id, player2Id,
-				PairStatus.CONFIRMED, registeredAt);
+				teamName, PairStatus.CONFIRMED, registeredAt);
 	}
 
 	public TournamentPair reject() {
 		return new TournamentPair(pairId, tournamentId, player1Id, player2Id,
-				PairStatus.REJECTED, registeredAt);
+				teamName, PairStatus.REJECTED, registeredAt);
 	}
 }

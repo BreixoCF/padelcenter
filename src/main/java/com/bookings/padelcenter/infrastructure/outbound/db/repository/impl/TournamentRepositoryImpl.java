@@ -87,6 +87,20 @@ public class TournamentRepositoryImpl implements TournamentRepository {
 
 	@Override
 	@Transactional(readOnly = true)
+	public long countActivePairs(UUID tournamentId) {
+		return pairJpaRepository.countActiveByTournamentId(tournamentId);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<TournamentPair> findPairsByUserId(UUID userId) {
+		return pairJpaRepository.findByPlayer(userId).stream()
+				.map(mapper::toPairDomain)
+				.toList();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
 	public PageResult<Tournament> findByPlayerId(UUID userId, int page, int size) {
 		var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startDate"));
 		var springPage = tournamentJpaRepository.findByPlayerId(userId, pageable);

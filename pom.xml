@@ -149,7 +149,12 @@
 					<argLine>
 						-XX:+EnableDynamicAgentLoading
 						-Dnet.bytebuddy.experimental=true
+						-Dapi.version=1.43
 					</argLine>
+					<environmentVariables>
+						<DOCKER_HOST>tcp://127.0.0.1:2375</DOCKER_HOST>
+						<TESTCONTAINERS_HOST_OVERRIDE>127.0.0.1</TESTCONTAINERS_HOST_OVERRIDE>
+					</environmentVariables>
 				</configuration>
 			</plugin>
 			<!-- OpenAPI code generation from docs/openapi/index.yaml -->

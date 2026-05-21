@@ -4,22 +4,25 @@ import com.bookings.padelcenter.application.command.CreateUserCommand;
 import com.bookings.padelcenter.application.command.UpdateUserCommand;
 import com.bookings.padelcenter.domain.model.Auditable;
 import com.bookings.padelcenter.domain.model.User;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.Collections;
 
 @Component
+@RequiredArgsConstructor
 public class UserCommandMapper {
+
+	private final PasswordEncoder passwordEncoder;
 
 	public User toDomain(CreateUserCommand command) {
 		return new User(
 				null,
-				null,
 				command.firstName(),
 				command.lastName(),
 				command.email(),
-				command.password(),
+				passwordEncoder.encode(command.password()),
 				command.phoneNumber(),
 				Collections.emptySet(),
 				Auditable.newAudit()
@@ -29,7 +32,6 @@ public class UserCommandMapper {
 	public User updateFromCommand(UpdateUserCommand command, User user) {
 		return new User(
 				user.userId(),
-				user.keycloakId(),
 				command.firstName(),
 				command.lastName(),
 				command.email(),

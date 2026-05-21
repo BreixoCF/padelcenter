@@ -1,7 +1,7 @@
 package com.bookings.padelcenter.application.read;
 
 import com.bookings.padelcenter.application.query.GetCurrentUserQuery;
-import com.bookings.padelcenter.domain.exception.ResourceNotFoundException;
+import com.bookings.padelcenter.domain.exception.UserNotFoundException;
 import com.bookings.padelcenter.domain.model.Auditable;
 import com.bookings.padelcenter.domain.model.User;
 import com.bookings.padelcenter.domain.repository.UserRepository;
@@ -32,35 +32,33 @@ class GetCurrentUserUseCaseTest {
     private GetCurrentUserUseCase getCurrentUserUseCase;
 
     @Test
-    @DisplayName("execute_syncedUser_returnsUser")
-    void execute_syncedUser_returnsUser() {
-        var keycloakId = "kc-sub-abc123";
+    @DisplayName("execute_existingUser_returnsUser")
+    void execute_existingUser_returnsUser() {
         var userId = UUID.randomUUID();
-        var user = new User(userId, keycloakId, "John", "Doe",
+        var user = new User(userId, "John", "Doe",
                 "john@example.com", "", "600123456", Set.of(), Auditable.newAudit());
-        var query = new GetCurrentUserQuery(keycloakId);
+        var query = new GetCurrentUserQuery(userId);
 
-        when(userRepository.findByKeycloakId(keycloakId)).thenReturn(Optional.of(user));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         var result = getCurrentUserUseCase.execute(query);
 
         assertThat(result).isEqualTo(user);
-        assertThat(result.keycloakId()).isEqualTo(keycloakId);
-        verify(userRepository).findByKeycloakId(keycloakId);
+        assertThat(result.userId()).isEqualTo(userId);
+        verify(userRepository).findById(userId);
     }
 
     @Test
-    @DisplayName("execute_unsyncedUser_throwsResourceNotFoundException")
-    void execute_unsyncedUser_throwsResourceNotFoundException() {
-        var keycloakId = "kc-sub-unknown";
-        var query = new GetCurrentUserQuery(keycloakId);
+    @DisplayName("execute_unknownUser_throwsUserNotFoundException")
+    void execute_unknownUser_throwsUserNotFoundException() {
+        var userId = UUID.randomUUID();
+        var query = new GetCurrentUserQuery(userId);
 
-        when(userRepository.findByKeycloakId(keycloakId)).thenReturn(Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> getCurrentUserUseCase.execute(query))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("not synced");
+                .isInstanceOf(UserNotFoundException.class);
 
-        verify(userRepository).findByKeycloakId(keycloakId);
+        verify(userRepository).findById(userId);
     }
 }

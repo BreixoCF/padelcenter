@@ -108,6 +108,6 @@ class ReportMatchResultUseCaseTest {
 
 	private TournamentPair buildPair(UUID pairId, UUID player1Id, UUID player2Id) {
 		return new TournamentPair(pairId, UUID.randomUUID(), player1Id, player2Id,
-				PairStatus.CONFIRMED, Instant.now());
+				"", PairStatus.CONFIRMED, Instant.now());
 	}
 }

@@ -8,7 +8,6 @@ import com.padelcenter.infrastructure.web.generated.model.MatchResponse;
 import com.padelcenter.infrastructure.web.generated.model.MatchResultRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,9 +23,8 @@ public class MatchController implements MatchesApi {
 
 	@Override
 	public ResponseEntity<MatchResponse> reportMatchResult(UUID matchId, MatchResultRequest matchResultRequest) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		UUID reportedBy = authResolver.resolveUserId(authentication);
-		boolean isAdmin = authentication.getAuthorities().stream()
+		UUID reportedBy = authResolver.currentUser().userId();
+		boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
 				.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 		var command = tournamentApiMapper.toCommand(matchId, reportedBy, isAdmin, matchResultRequest);
 		var match = reportMatchResultUseCase.execute(command);

@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
-import static java.util.Optional.ofNullable;
-
 @Component
 @RequiredArgsConstructor
 public class UserPersistenceMapper {
@@ -22,8 +20,6 @@ public class UserPersistenceMapper {
 		if (user.userId() != null) {
 			entity.setUserId(user.userId());
 		}
-
-		entity.setKeycloakId(user.keycloakId());
 		entity.setFirstName(user.firstName());
 		entity.setLastName(user.lastName());
 		entity.setEmail(user.email());
@@ -40,30 +36,28 @@ public class UserPersistenceMapper {
 	}
 
 	public User toDomain(UserEntity entity) {
-		return ofNullable(entity).map(e -> {
-			var centerRoles = entity.getCenterRoles()
-					.stream()
-					.map(centerRolePersistenceMapper::toDomain)
-					.collect(Collectors.toSet());
-			var auditable = new Auditable(
-					entity.getCreatedBy(),
-					entity.getCreatedAt(),
-					entity.getModifiedBy(),
-					entity.getModifiedAt(),
-					entity.getDeletedBy(),
-					entity.getDeletedAt()
-			);
-			return new User(
-					entity.getUserId(),
-					entity.getKeycloakId(),
-					entity.getFirstName(),
-					entity.getLastName(),
-					entity.getEmail(),
-					entity.getPasswordHash(),
-					entity.getPhoneNumber(),
-					centerRoles,
-					auditable
-			);
-		}).orElse(null);
+		if (entity == null) return null;
+		var centerRoles = entity.getCenterRoles()
+				.stream()
+				.map(centerRolePersistenceMapper::toDomain)
+				.collect(Collectors.toSet());
+		var auditable = new Auditable(
+				entity.getCreatedBy(),
+				entity.getCreatedAt(),
+				entity.getModifiedBy(),
+				entity.getModifiedAt(),
+				entity.getDeletedBy(),
+				entity.getDeletedAt()
+		);
+		return new User(
+				entity.getUserId(),
+				entity.getFirstName(),
+				entity.getLastName(),
+				entity.getEmail(),
+				entity.getPasswordHash(),
+				entity.getPhoneNumber(),
+				centerRoles,
+				auditable
+		);
 	}
 }

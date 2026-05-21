@@ -58,12 +58,6 @@ public class UserRepositoryImpl implements UserRepository {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<User> findByKeycloakId(String keycloakId) {
-		return userJpaRepository.findByKeycloakId(keycloakId).map(mapper::toDomain);
-	}
-
-	@Override
-	@Transactional(readOnly = true)
 	public boolean existsByEmail(String email) {
 		return userJpaRepository.existsByEmail(email);
 	}

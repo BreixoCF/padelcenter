@@ -9,18 +9,6 @@ spring:
     baseline-on-migrate: true
     # V2__sample_data.sql was moved to test resources; allow local DBs that had it applied
     ignore-migration-patterns:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/padelcenter-dev}
-          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8180/realms/padelcenter-dev/protocol/openid-connect/certs}
-
-keycloak:
-  realm: padelcenter-dev
-  auth-server-url: http://localhost:8180
-  client-id: padelcenter-web
-
 logging:
   level:
     com.bookings.padelcenter: INFO

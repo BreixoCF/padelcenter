@@ -14,6 +14,7 @@ import com.padelcenter.infrastructure.web.generated.model.AuditableResponse;
 import com.padelcenter.infrastructure.web.generated.model.CenterRoleRequest;
 import com.padelcenter.infrastructure.web.generated.model.MessageResponse;
 import com.padelcenter.infrastructure.web.generated.model.PasswordUpdateRequest;
+import com.padelcenter.infrastructure.web.generated.model.UserCenterRoleResponse;
 import com.padelcenter.infrastructure.web.generated.model.UserRequest;
 import com.padelcenter.infrastructure.web.generated.model.UserResponse;
 import com.padelcenter.infrastructure.web.generated.model.UserUpdateRequest;
@@ -39,12 +40,20 @@ public class UserApiMapper {
 	}
 
 	public UserResponse toResponse(User user) {
+		List<UserCenterRoleResponse> roles = user.centerRoles() == null ? List.of() :
+			user.centerRoles().stream()
+				.map(cr -> new UserCenterRoleResponse()
+					.centerId(cr.centerId())
+					.role(UserCenterRoleResponse.RoleEnum.fromValue(cr.role().name())))
+				.toList();
+
 		return new UserResponse()
 				.userId(user.userId())
 				.firstName(user.firstName())
 				.lastName(user.lastName())
 				.email(user.email())
 				.phoneNumber(user.phoneNumber())
+				.centerRoles(roles)
 				.audit(toAuditResponse(user.audit()));
 	}
 
