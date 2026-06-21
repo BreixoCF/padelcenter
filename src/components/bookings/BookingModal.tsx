@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/auth/store';
 import { useCreateBooking } from '@/hooks/useCenters';
+import { useUpdateBooking } from '@/lib/api/generated/bookings/bookings';
 import {
   Dialog,
   DialogContent,
@@ -21,12 +22,20 @@ interface BookingModalProps {
   fieldId: string;
   pricePerHour?: number;
   onClose: () => void;
+  existingBooking?: { bookingId: number };
+}
+
+function buttonLabel(isPending: boolean, isEditMode: boolean, isAuthenticated: boolean): string {
+  if (isPending) return isEditMode ? 'Guardando...' : 'Reservando...';
+  if (!isAuthenticated) return 'Iniciar sesión para reservar';
+  return isEditMode ? 'Confirmar cambio' : 'Confirmar reserva';
 }
 
 export default function BookingModal({
   fieldId,
   pricePerHour = 0,
   onClose,
+  existingBooking,
 }: BookingModalProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
@@ -34,7 +43,11 @@ export default function BookingModal({
   const [date, setDate] = useState<Date>(new Date());
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
 
-  const { mutate: createBooking, isPending } = useCreateBooking();
+  const isEditMode = !!existingBooking;
+
+  const { mutate: createBooking, isPending: isCreating } = useCreateBooking();
+  const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking();
+  const isPending = isCreating || isUpdating;
 
   const handleBook = () => {
     if (!isAuthenticated) {
@@ -42,6 +55,36 @@ export default function BookingModal({
       return;
     }
     if (!selectedSlot) return;
+
+    if (isEditMode) {
+      updateBooking(
+        {
+          bookingId: existingBooking.bookingId,
+          data: {
+            startTime: selectedSlot.start,
+            endTime: selectedSlot.end,
+            totalPrice: pricePerHour,
+          },
+        },
+        {
+          onSuccess: () => {
+            toast({
+              title: 'Reserva modificada',
+              description: `Nueva hora: ${format(new Date(selectedSlot.start), 'HH:mm')} — ${format(new Date(selectedSlot.end), 'HH:mm')}`,
+            });
+            onClose();
+          },
+          onError: (error: any) => {
+            toast({
+              title: 'Error al modificar',
+              description: error.response?.data?.detail ?? 'Inténtalo de nuevo',
+              variant: 'destructive',
+            });
+          },
+        }
+      );
+      return;
+    }
 
     createBooking(
       {
@@ -76,7 +119,7 @@ export default function BookingModal({
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Selecciona fecha y hora</DialogTitle>
+          <DialogTitle>{isEditMode ? 'Modificar reserva' : 'Selecciona fecha y hora'}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -113,11 +156,7 @@ export default function BookingModal({
               Cancelar
             </Button>
             <Button onClick={handleBook} disabled={!selectedSlot || isPending}>
-              {isPending
-                ? 'Reservando...'
-                : isAuthenticated
-                  ? 'Confirmar reserva'
-                  : 'Iniciar sesión para reservar'}
+              {buttonLabel(isPending, isEditMode, isAuthenticated)}
             </Button>
           </div>
         </DialogFooter>

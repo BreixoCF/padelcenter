@@ -1,7 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/lib/auth/store';
 import { useUpdateUser, useUpdatePassword } from '@/lib/api/generated/users/users';
+import { useGetMeProfile } from '@/lib/api/generated/auth/auth';
 import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,8 +27,20 @@ export default function ProfilePage() {
     newPassword: '',
   });
 
+  const { data: serverProfile } = useGetMeProfile();
   const { mutate: updateUser, isPending: isUpdating } = useUpdateUser();
   const { mutate: updatePassword, isPending: isChangingPass } = useUpdatePassword();
+
+  useEffect(() => {
+    if (serverProfile) {
+      setProfile({
+        firstName: serverProfile.firstName,
+        lastName: serverProfile.lastName,
+        email: serverProfile.email,
+        phoneNumber: serverProfile.phoneNumber ?? '',
+      });
+    }
+  }, [serverProfile]);
 
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();

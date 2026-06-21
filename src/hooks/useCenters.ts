@@ -14,6 +14,3 @@ export {
   useGetUserBookings as useUserBookings,
 } from '@/lib/api/generated/bookings/bookings';
 
-export {
-  useGetMeProfile as useCurrentUser,
-} from '@/lib/api/generated/auth/auth';

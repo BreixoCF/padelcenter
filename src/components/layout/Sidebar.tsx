@@ -17,6 +17,7 @@ import {
   BookOpen,
   ShieldCheck,
   Swords,
+  Users,
 } from 'lucide-react';
 
 interface NavItem {
@@ -40,6 +41,7 @@ const adminNav: NavItem[] = [
   { href: '/admin/fields', label: 'Pistas', icon: Layers },
   { href: '/admin/bookings', label: 'Reservas', icon: BookOpen },
   { href: '/admin/tournaments', label: 'Torneos', icon: Trophy },
+  { href: '/admin/users', label: 'Usuarios', icon: Users },
 ];
 
 function NavLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {

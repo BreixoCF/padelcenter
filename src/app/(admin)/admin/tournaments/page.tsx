@@ -1,7 +1,12 @@
 'use client';
 import { useState } from 'react';
 import { useListCenters, useGetTournamentsByCenter } from '@/lib/api/generated/centers/centers';
-import { useCreateTournament, useDeleteTournament } from '@/lib/api/generated/tournaments/tournaments';
+import {
+  useCreateTournament,
+  useDeleteTournament,
+  useOpenRegistration,
+  useCloseRegistration,
+} from '@/lib/api/generated/tournaments/tournaments';
 import { TournamentRequestFormat } from '@/lib/api/generated/models/tournamentRequestFormat';
 import PageHeader from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -25,7 +30,7 @@ import {
   Select, SelectContent, SelectItem,
   SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, PlayCircle, StopCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
 
@@ -62,6 +67,8 @@ export default function AdminTournamentsPage() {
   );
   const { mutate: createTournament, isPending } = useCreateTournament();
   const { mutate: deleteTournament, isPending: isDeleting } = useDeleteTournament();
+  const { mutate: openRegistration } = useOpenRegistration();
+  const { mutate: closeRegistration } = useCloseRegistration();
 
   const centers = centersData?.content ?? [];
   const tournaments = tournamentsData?.content ?? [];
@@ -96,6 +103,30 @@ export default function AdminTournamentsPage() {
             description: err.response?.data?.detail,
             variant: 'destructive',
           });
+        },
+      }
+    );
+  };
+
+  const handleOpenRegistration = (tournamentId: string) => {
+    openRegistration(
+      { tournamentId },
+      {
+        onSuccess: () => { toast({ title: 'Inscripción abierta' }); refetch(); },
+        onError: (err: any) => {
+          toast({ title: 'Error', description: err.response?.data?.detail, variant: 'destructive' });
+        },
+      }
+    );
+  };
+
+  const handleCloseRegistration = (tournamentId: string) => {
+    closeRegistration(
+      { tournamentId },
+      {
+        onSuccess: () => { toast({ title: 'Inscripción cerrada y cuadro generado' }); refetch(); },
+        onError: (err: any) => {
+          toast({ title: 'Error', description: err.response?.data?.detail, variant: 'destructive' });
         },
       }
     );
@@ -161,7 +192,7 @@ export default function AdminTournamentsPage() {
                 <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Estado</TableHead>
                 <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Parejas</TableHead>
                 <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Fechas</TableHead>
-                <TableHead className="w-16 text-[11px] uppercase tracking-wide text-zinc-400">Acciones</TableHead>
+                <TableHead className="text-[11px] uppercase tracking-wide text-zinc-400">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -179,11 +210,29 @@ export default function AdminTournamentsPage() {
                     {format(new Date(t.startDate), 'dd/MM/yy')} — {format(new Date(t.endDate), 'dd/MM/yy')}
                   </TableCell>
                   <TableCell>
-                    <Button size="icon" variant="ghost"
-                      onClick={() => setDeleteId(t.tournamentId)}
-                      className="text-red-500 hover:text-red-600">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      {t.status === 'DRAFT' && (
+                        <Button size="sm" variant="outline"
+                          onClick={() => handleOpenRegistration(t.tournamentId)}
+                          className="text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50 gap-1">
+                          <PlayCircle className="h-3.5 w-3.5" />
+                          Abrir insc.
+                        </Button>
+                      )}
+                      {t.status === 'REGISTRATION_OPEN' && (
+                        <Button size="sm" variant="outline"
+                          onClick={() => handleCloseRegistration(t.tournamentId)}
+                          className="text-amber-600 hover:text-amber-700 border-amber-200 hover:bg-amber-50 gap-1">
+                          <StopCircle className="h-3.5 w-3.5" />
+                          Cerrar insc.
+                        </Button>
+                      )}
+                      <Button size="icon" variant="ghost"
+                        onClick={() => setDeleteId(t.tournamentId)}
+                        className="text-red-500 hover:text-red-600">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

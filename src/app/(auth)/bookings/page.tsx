@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { useAuthStore } from '@/lib/auth/store';
-import { useGetUserBookings, useCancelBooking } from '@/lib/api/generated/bookings/bookings';
+import { useGetMyBookings } from '@/lib/api/generated/auth/auth';
+import { useCancelBooking } from '@/lib/api/generated/bookings/bookings';
 import PageHeader from '@/components/shared/PageHeader';
 import BookingCard from '@/components/bookings/BookingCard';
 import { GridSkeleton } from '@/components/shared/LoadingState';
@@ -20,6 +20,7 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { CalendarX } from 'lucide-react';
+import BookingModal from '@/components/bookings/BookingModal';
 
 const STATUS_OPTIONS = [
   { value: 'ALL', label: 'Todas' },
@@ -29,18 +30,18 @@ const STATUS_OPTIONS = [
 ];
 
 export default function BookingsPage() {
-  const { user } = useAuthStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(0);
   const [status, setStatus] = useState('ALL');
   const [cancelId, setCancelId] = useState<number | null>(null);
+  const [editBooking, setEditBooking] = useState<{
+    bookingId: number;
+    fieldId: string;
+    pricePerHour: number;
+  } | null>(null);
 
-  const { data, isLoading } = useGetUserBookings(
-    user?.userId ?? '',
-    { page, size: 10 },
-    { query: { enabled: !!user?.userId } }
-  );
+  const { data, isLoading } = useGetMyBookings({ page, size: 10 });
 
   const { mutate: cancelBooking, isPending } = useCancelBooking();
 
@@ -55,7 +56,7 @@ export default function BookingsPage() {
       {
         onSuccess: () => {
           toast({ title: 'Reserva cancelada' });
-          queryClient.invalidateQueries({ queryKey: [`/api/v1/users/${user?.userId}/bookings`] });
+          queryClient.invalidateQueries({ queryKey: ['/api/v1/me/bookings'] });
           setCancelId(null);
         },
         onError: (err: any) => {
@@ -105,6 +106,13 @@ export default function BookingsPage() {
               <BookingCard
                 key={booking.bookingId}
                 booking={booking}
+                onEdit={booking.status === 'CONFIRMED'
+                  ? () => setEditBooking({
+                      bookingId: booking.bookingId,
+                      fieldId: booking.field?.fieldId ?? '',
+                      pricePerHour: booking.totalPrice,
+                    })
+                  : undefined}
                 onCancel={booking.status === 'CONFIRMED'
                   ? () => setCancelId(booking.bookingId)
                   : undefined}
@@ -130,6 +138,18 @@ export default function BookingsPage() {
             </div>
           )}
         </>
+      )}
+
+      {editBooking && (
+        <BookingModal
+          fieldId={editBooking.fieldId}
+          pricePerHour={editBooking.pricePerHour}
+          existingBooking={{ bookingId: editBooking.bookingId }}
+          onClose={() => {
+            setEditBooking(null);
+            queryClient.invalidateQueries({ queryKey: ['/api/v1/me/bookings'] });
+          }}
+        />
       )}
 
       <AlertDialog open={!!cancelId} onOpenChange={() => setCancelId(null)}>
