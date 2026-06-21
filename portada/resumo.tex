@@ -1,0 +1,39 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{empty}
+\begin{abstract}
+  La digitalización de los clubes deportivos es una necesidad creciente en el
+  contexto del auge del pádel en España. Sin embargo, la mayoría de los centros
+  deportivos siguen gestionando sus reservas de forma manual o con herramientas
+  genéricas que no cubren sus necesidades específicas. PadelCenter es una
+  aplicación web diseñada para resolver este problema, ofreciendo una plataforma
+  integral para la gestión de reservas de pistas de pádel y la organización de
+  torneos.
+
+  El sistema se ha construido siguiendo principios de arquitectura hexagonal,
+  separando el dominio de negocio de los detalles tecnológicos, lo que facilita
+  el mantenimiento y la evolución del sistema. El backend está desarrollado en
+  Java~21 con Spring Boot~3, empleando un enfoque \textit{contract-first} basado
+  en OpenAPI~3 para definir el contrato de la API antes de implementar cualquier
+  lógica. El frontend es una aplicación Next.js~14 con App Router, TypeScript y
+  React Query, con clientes HTTP generados automáticamente a partir de la
+  especificación OpenAPI mediante Orval.
+
+  Las funcionalidades principales incluyen autenticación segura mediante JWT, la
+  gestión de centros deportivos y pistas, la creación y consulta de reservas con
+  control de conflictos, y la organización de torneos con generación automática
+  de emparejamientos. La estrategia de pruebas abarca tests unitarios con
+  Mockito, tests de integración con Testcontainers y tests de arquitectura con
+  ArchUnit.
+
+  El resultado es un sistema funcional, bien estructurado y extensible, que
+  demuestra la aplicabilidad de las prácticas modernas de ingeniería del software
+  en el ámbito de la gestión deportiva.
+\end{abstract}
+
+\clearpage
+\pagestyle{empty}
+\input{portada/palabras_chave}
+\pagestyle{fancy}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
