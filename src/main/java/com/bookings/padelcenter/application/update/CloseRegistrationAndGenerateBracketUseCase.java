@@ -13,6 +13,7 @@ import com.bookings.padelcenter.domain.repository.TournamentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ public class CloseRegistrationAndGenerateBracketUseCase
 
 	@NonNull
 	@Override
+	@PreAuthorize("hasRole('ADMIN') or @tournamentRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #command.tournamentId)")
 	public Tournament execute(CloseRegistrationCommand command) {
 		var tournament = tournamentRepository.findById(command.tournamentId())
 				.orElseThrow(() -> new TournamentNotFoundException(command.tournamentId()));

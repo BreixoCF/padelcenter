@@ -12,11 +12,11 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class GetTournamentPairsUseCase {
 
 	private final TournamentRepository tournamentRepository;
 
-	@Transactional(readOnly = true)
 	public List<TournamentPair> execute(UUID tournamentId) {
 		tournamentRepository.findById(tournamentId)
 				.orElseThrow(() -> new TournamentNotFoundException(tournamentId));

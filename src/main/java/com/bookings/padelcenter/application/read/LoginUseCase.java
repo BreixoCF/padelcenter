@@ -1,7 +1,7 @@
-package com.bookings.padelcenter.application.create;
+package com.bookings.padelcenter.application.read;
 
-import com.bookings.padelcenter.application.command.LoginCommand;
-import com.bookings.padelcenter.application.shared.CommandUseCase;
+import com.bookings.padelcenter.application.query.LoginQuery;
+import com.bookings.padelcenter.application.shared.QueryUseCase;
 import com.bookings.padelcenter.domain.exception.UnauthorizedException;
 import com.bookings.padelcenter.domain.model.User;
 import com.bookings.padelcenter.domain.repository.UserRepository;
@@ -13,17 +13,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class LoginUseCase implements CommandUseCase<LoginCommand, User> {
+public class LoginUseCase implements QueryUseCase<LoginQuery, User> {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public User execute(LoginCommand command) {
-        var user = userRepository.findByEmail(command.email())
+    public User execute(LoginQuery query) {
+        var user = userRepository.findByEmail(query.email())
             .orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
 
-        if (!passwordEncoder.matches(command.password(), user.passwordHash())) {
+        if (!passwordEncoder.matches(query.password(), user.passwordHash())) {
             throw new UnauthorizedException("Invalid credentials");
         }
 

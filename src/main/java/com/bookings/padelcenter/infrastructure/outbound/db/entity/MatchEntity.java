@@ -14,7 +14,6 @@ import java.util.UUID;
 public class MatchEntity extends AuditableEntity<UUID> {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "match_id")
 	private UUID matchId;
 

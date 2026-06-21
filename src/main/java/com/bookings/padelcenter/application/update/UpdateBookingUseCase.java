@@ -8,6 +8,7 @@ import com.bookings.padelcenter.domain.model.Booking;
 import com.bookings.padelcenter.domain.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ public class UpdateBookingUseCase implements CommandUseCase<UpdateBookingCommand
 	private final BookingRepository bookingRepository;
 
 	@Override
+	@PreAuthorize("@bookingOwnerEvaluator.isOwner(@authResolver.resolveUserId(authentication), #command.bookingId)")
 	public Booking execute(UpdateBookingCommand command) {
 		log.debug("booking.update.start bookingId={} start={} end={}",
 			command.bookingId(), command.startTime(), command.endTime());

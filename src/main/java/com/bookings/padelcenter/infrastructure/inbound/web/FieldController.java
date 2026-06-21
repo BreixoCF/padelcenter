@@ -22,7 +22,6 @@ import com.padelcenter.infrastructure.web.generated.model.ListCenterFields200Res
 import com.padelcenter.infrastructure.web.generated.model.UpdateFieldAvailabilityRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -61,7 +60,6 @@ public class FieldController implements FieldsApi {
 	}
 
 	@Override
-	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> deleteField(UUID id) {
 		var command = new DeleteFieldCommand(id, authResolver.currentUser());
 		deleteFieldUseCase.execute(command);
@@ -69,7 +67,6 @@ public class FieldController implements FieldsApi {
 	}
 
 	@Override
-	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<FieldResponse> updateFieldAvailability(
 			UUID fieldId, UpdateFieldAvailabilityRequest updateFieldAvailabilityRequest) {
 		var command = new UpdateFieldAvailabilityCommand(fieldId, updateFieldAvailabilityRequest.getAvailable());
@@ -78,7 +75,6 @@ public class FieldController implements FieldsApi {
 	}
 
 	@Override
-	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<FieldResponse> updateField(UUID id, FieldUpdateRequest fieldUpdateRequest) {
 		var command = new UpdateFieldCommand(
 				id,

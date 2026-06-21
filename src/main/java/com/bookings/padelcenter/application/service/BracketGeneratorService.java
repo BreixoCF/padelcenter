@@ -7,6 +7,7 @@ import com.bookings.padelcenter.domain.model.Tournament;
 import com.bookings.padelcenter.domain.model.TournamentPair;
 import org.springframework.stereotype.Service;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -112,7 +113,7 @@ public class BracketGeneratorService {
 
 	private Match buildMatch(UUID tournamentId, UUID pairAId, UUID pairBId,
 	                          int round, String groupName) {
-		return new Match(null, tournamentId, pairAId, pairBId, round, groupName,
+		return new Match(UuidCreator.getTimeOrderedEpoch(), tournamentId, pairAId, pairBId, round, groupName,
 				MatchStatus.SCHEDULED, null, null, Auditable.newAudit());
 	}
 

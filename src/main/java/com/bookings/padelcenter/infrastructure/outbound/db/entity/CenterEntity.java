@@ -13,7 +13,6 @@ import java.util.UUID;
 public class CenterEntity extends AuditableEntity<UUID> {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "center_id")
 	private UUID centerId;
 

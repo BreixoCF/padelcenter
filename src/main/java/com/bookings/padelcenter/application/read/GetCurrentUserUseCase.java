@@ -12,11 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class GetCurrentUserUseCase {
 
     private final UserRepository userRepository;
 
-    @Transactional(readOnly = true)
     public User execute(GetCurrentUserQuery query) {
         User user = userRepository.findById(query.userId())
                 .orElseThrow(() -> new UserNotFoundException(query.userId()));

@@ -8,6 +8,7 @@ import com.bookings.padelcenter.domain.repository.FieldRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class UpdateFieldAvailabilityUseCase implements CommandUseCase<UpdateFiel
 
 	@NonNull
 	@Override
+	@PreAuthorize("hasRole('ADMIN')")
 	public Field execute(UpdateFieldAvailabilityCommand command) {
 		var existing = fieldRepository.findById(command.fieldId())
 				.orElseThrow(() -> new FieldNotFoundException(command.fieldId()));

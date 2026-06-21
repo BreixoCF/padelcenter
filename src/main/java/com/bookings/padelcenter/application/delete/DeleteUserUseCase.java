@@ -20,7 +20,7 @@ public class DeleteUserUseCase implements CommandUseCase<DeleteUserCommand, User
 	private final UserRepository userRepository;
 
 	@Override
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("@authResolver.resolveUserId(authentication).equals(#command.userId) or hasRole('ADMIN')")
 	public User execute(DeleteUserCommand command) {
 		log.debug("user.delete.start userId={} deletedBy={}",
 			command.userId(), command.authenticatedUser().userId());

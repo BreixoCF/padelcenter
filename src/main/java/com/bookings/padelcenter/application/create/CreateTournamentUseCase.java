@@ -8,9 +8,11 @@ import com.bookings.padelcenter.domain.model.Tournament;
 import com.bookings.padelcenter.domain.model.TournamentStatus;
 import com.bookings.padelcenter.domain.repository.CenterRepository;
 import com.bookings.padelcenter.domain.repository.TournamentRepository;
+import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,12 +27,13 @@ public class CreateTournamentUseCase implements CommandUseCase<CreateTournamentC
 
 	@NonNull
 	@Override
+	@PreAuthorize("hasRole('ADMIN')")
 	public Tournament execute(CreateTournamentCommand command) {
 		centerRepository.findById(command.centerId())
 				.orElseThrow(() -> new CenterNotFoundException(command.centerId()));
 
 		var tournament = new Tournament(
-				null,
+				UuidCreator.getTimeOrderedEpoch(),
 				command.centerId(),
 				command.name(),
 				command.description(),

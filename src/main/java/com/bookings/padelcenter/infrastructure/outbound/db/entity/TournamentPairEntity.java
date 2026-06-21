@@ -14,7 +14,6 @@ import java.util.UUID;
 public class TournamentPairEntity {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "pair_id")
 	private UUID pairId;
 

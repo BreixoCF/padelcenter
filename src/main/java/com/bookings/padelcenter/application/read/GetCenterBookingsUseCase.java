@@ -10,6 +10,7 @@ import com.bookings.padelcenter.domain.repository.CenterRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ public class GetCenterBookingsUseCase implements QueryUseCase<GetCenterBookingsQ
 
 	@NonNull
 	@Override
+	@PreAuthorize("hasRole('ADMIN') or @centerRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #query.centerId)")
 	public PageResult<Booking> execute(GetCenterBookingsQuery query) {
 		centerRepository.findById(query.centerId())
 				.orElseThrow(() -> new CenterNotFoundException(query.centerId()));

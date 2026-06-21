@@ -9,6 +9,7 @@ import com.bookings.padelcenter.domain.model.User;
 import com.bookings.padelcenter.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ public class UpdateUserUseCase implements CommandUseCase<UpdateUserCommand, User
 	private final UserCommandMapper userCommandMapper;
 
 	@Override
+	@PreAuthorize("@authResolver.resolveUserId(authentication).equals(#command.userId) or hasRole('ADMIN')")
 	public User execute(UpdateUserCommand command) {
 		log.debug("user.update.start userId={} email={}",
 			command.userId(), command.email());

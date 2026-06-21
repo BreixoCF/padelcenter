@@ -4,6 +4,7 @@ import com.bookings.padelcenter.application.command.CreateUserCommand;
 import com.bookings.padelcenter.application.command.UpdateUserCommand;
 import com.bookings.padelcenter.domain.model.Auditable;
 import com.bookings.padelcenter.domain.model.User;
+import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,7 @@ public class UserCommandMapper {
 
 	public User toDomain(CreateUserCommand command) {
 		return new User(
-				null,
+				UuidCreator.getTimeOrderedEpoch(),
 				command.firstName(),
 				command.lastName(),
 				command.email(),

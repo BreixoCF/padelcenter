@@ -5,6 +5,7 @@ import com.bookings.padelcenter.domain.exception.TournamentNotFoundException;
 import com.bookings.padelcenter.domain.repository.TournamentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ public class DeleteTournamentUseCase {
 
 	private final TournamentRepository tournamentRepository;
 
+	@PreAuthorize("@tournamentRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #command.tournamentId) or hasRole('ADMIN')")
 	public void execute(DeleteTournamentCommand command) {
 		log.debug("tournament.delete.start tournamentId={} deletedBy={}",
 			command.tournamentId(), command.deletedBy());

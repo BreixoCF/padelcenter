@@ -2,6 +2,7 @@ package com.bookings.padelcenter.infrastructure.inbound.web;
 
 import com.bookings.padelcenter.AbstractIntegrationTest;
 import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -22,6 +24,15 @@ class BookingControllerIT extends AbstractIntegrationTest {
 	private static final String BOOKINGS_URL = "/api/v1/bookings";
 	private static final String USERS_URL    = "/api/v1/users";
 	private static final String CENTERS_URL  = "/api/v1/centers";
+
+	@BeforeEach
+	void seedRegularUser() {
+		jdbcTemplate.update("""
+				INSERT INTO users (user_id, first_name, last_name, email, password_hash, created_at)
+				VALUES (?, 'Regular', 'User', 'regular@test.com', 'dummyhash', NOW())
+				ON CONFLICT (user_id) DO NOTHING
+				""", REGULAR_USER_ID);
+	}
 
 	// ── helpers ───────────────────────────────────────────────────────────────
 
@@ -104,6 +115,12 @@ class BookingControllerIT extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.bookingId", notNullValue()))
 				.andExpect(jsonPath("$.field.fieldId").value(fieldId.toString()))
 				.andExpect(jsonPath("$.status").value("CONFIRMED"));
+
+		// status = 2 → CONFIRMED
+		int count = jdbcTemplate.queryForObject(
+				"SELECT COUNT(*) FROM bookings WHERE field_id = ? AND status = 2 AND deleted_at IS NULL",
+				Integer.class, fieldId);
+		assertEquals(1, count);
 	}
 
 	// ── GET /api/v1/bookings/{id} ─────────────────────────────────────────────
@@ -198,5 +215,11 @@ class BookingControllerIT extends AbstractIntegrationTest {
 		mockMvc.perform(patch(BOOKINGS_URL + "/" + bookingId + "/cancel")
 						.with(otherUserJwt))
 				.andExpect(status().isForbidden());
+
+		// Booking must remain CONFIRMED (status = 2) — cancel was rejected
+		int status = jdbcTemplate.queryForObject(
+				"SELECT status FROM bookings WHERE booking_id = ?",
+				Integer.class, bookingId);
+		assertEquals(2, status);
 	}
 }

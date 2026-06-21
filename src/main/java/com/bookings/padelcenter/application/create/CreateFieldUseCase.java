@@ -7,6 +7,7 @@ import com.bookings.padelcenter.domain.model.Auditable;
 import com.bookings.padelcenter.domain.model.Field;
 import com.bookings.padelcenter.domain.repository.CenterRepository;
 import com.bookings.padelcenter.domain.repository.FieldRepository;
+import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,7 +31,7 @@ public class CreateFieldUseCase implements CommandUseCase<CreateFieldCommand, Fi
 			var center = centerRepository.findById(command.centerId())
 					.orElseThrow(() -> new CenterNotFoundException(command.centerId()));
 			var fieldToCreate = new Field(
-					null,
+					UuidCreator.getTimeOrderedEpoch(),
 					command.name(),
 					command.type(),
 					command.pricePerHour(),

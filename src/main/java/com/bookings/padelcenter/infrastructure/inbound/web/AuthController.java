@@ -1,7 +1,7 @@
 package com.bookings.padelcenter.infrastructure.inbound.web;
 
-import com.bookings.padelcenter.application.command.LoginCommand;
-import com.bookings.padelcenter.application.create.LoginUseCase;
+import com.bookings.padelcenter.application.query.LoginQuery;
+import com.bookings.padelcenter.application.read.LoginUseCase;
 import com.bookings.padelcenter.application.query.GetCurrentUserQuery;
 import com.bookings.padelcenter.application.query.GetMyBookingsQuery;
 import com.bookings.padelcenter.application.query.GetMyMatchesQuery;
@@ -58,7 +58,7 @@ public class AuthController implements AuthApi {
 
 	@Override
 	public ResponseEntity<LoginResponse> login(LoginRequest loginRequest) {
-		var user = loginUseCase.execute(new LoginCommand(loginRequest.getEmail(), loginRequest.getPassword()));
+		var user = loginUseCase.execute(new LoginQuery(loginRequest.getEmail(), loginRequest.getPassword()));
 		var accessToken = jwtService.generateAccessToken(user);
 		var refreshToken = jwtService.generateRefreshToken(user.userId());
 

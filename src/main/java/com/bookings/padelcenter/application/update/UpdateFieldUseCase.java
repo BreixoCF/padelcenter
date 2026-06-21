@@ -6,17 +6,19 @@ import com.bookings.padelcenter.domain.model.Field;
 import com.bookings.padelcenter.domain.repository.FieldRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class UpdateFieldUseCase {
 
     private final FieldRepository fieldRepository;
 
-    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public Field execute(UpdateFieldCommand command) {
         var existing = fieldRepository.findById(command.fieldId())
                 .orElseThrow(() -> new FieldNotFoundException(command.fieldId()));

@@ -31,7 +31,6 @@ import com.padelcenter.infrastructure.web.generated.model.ListCenters200Response
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -56,7 +55,6 @@ public class CenterController implements CentersApi {
 	private final AuthenticatedUserResolver authResolver;
 
 	@Override
-	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<CenterResponse> createCenter(CenterRequest centerRequest) {
 		var command = centerApiMapper.toCommand(centerRequest);
 		var center = createCenterUseCase.execute(command);
@@ -85,8 +83,6 @@ public class CenterController implements CentersApi {
 	}
 
 	@Override
-	@PreAuthorize("hasRole('ADMIN') or "
-			+ "@centerRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #centerId)")
 	public ResponseEntity<GetCenterBookings200Response> getCenterBookings(
 			UUID centerId, LocalDate date, LocalDate startDate, LocalDate endDate,
 			UUID fieldId, String status, Integer page, Integer size) {
@@ -105,7 +101,6 @@ public class CenterController implements CentersApi {
 	}
 
 	@Override
-	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> deleteCenter(UUID centerId) {
 		var command = new DeleteCenterCommand(centerId, authResolver.currentUser());
 		deleteCenterUseCase.execute(command);
@@ -113,8 +108,6 @@ public class CenterController implements CentersApi {
 	}
 
 	@Override
-	@PreAuthorize("hasRole('ADMIN') or @centerRoleEvaluator.isAdminOf("
-			+ "@authResolver.resolveUserId(authentication), #centerId)")
 	public ResponseEntity<FieldResponse> createField(UUID centerId, FieldRequest fieldRequest) {
 		var command = fieldApiMapper.toCommand(centerId, fieldRequest);
 		var field = createFieldUseCase.execute(command);

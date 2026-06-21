@@ -12,6 +12,7 @@ import com.bookings.padelcenter.domain.model.TournamentPair;
 import com.bookings.padelcenter.domain.model.TournamentStatus;
 import com.bookings.padelcenter.domain.repository.TournamentRepository;
 import com.bookings.padelcenter.domain.repository.UserRepository;
+import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -52,7 +53,7 @@ public class RegisterPairUseCase implements CommandUseCase<RegisterPairCommand, 
 			throw new PlayerAlreadyInPairException(command.player2Id());
 		}
 
-		var pair = new TournamentPair(null, command.tournamentId(),
+		var pair = new TournamentPair(UuidCreator.getTimeOrderedEpoch(), command.tournamentId(),
 				command.player1Id(), command.player2Id(),
 				command.teamName() != null ? command.teamName() : "",
 				PairStatus.PENDING, Instant.now());

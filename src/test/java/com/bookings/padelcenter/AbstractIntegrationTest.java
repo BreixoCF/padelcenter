@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -32,11 +33,11 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 public abstract class AbstractIntegrationTest {
 
 	/** Fixed UUID used as the authenticated admin subject in JWT mocks. */
-	static final UUID ADMIN_USER_ID =
+	protected static final UUID ADMIN_USER_ID =
 			UUID.fromString("00000000-0000-0000-0000-000000000001");
 
 	/** Fixed UUID used as the authenticated regular user subject in JWT mocks. */
-	static final UUID REGULAR_USER_ID =
+	protected static final UUID REGULAR_USER_ID =
 			UUID.fromString("00000000-0000-0000-0000-000000000002");
 
 	@Container
@@ -58,6 +59,9 @@ public abstract class AbstractIntegrationTest {
 
 	@Autowired
 	protected ObjectMapper objectMapper;
+
+	@Autowired
+	protected JdbcTemplate jdbcTemplate;
 
 	/**
 	 * Returns a {@code RequestPostProcessor} that sets a mock JWT for an ADMIN user.

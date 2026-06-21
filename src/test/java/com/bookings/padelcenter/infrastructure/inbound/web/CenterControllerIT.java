@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -39,6 +40,11 @@ class CenterControllerIT extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.centerId", notNullValue()))
 				.andExpect(jsonPath("$.name").value("Padel BCN"))
 				.andExpect(jsonPath("$.city").value("Barcelona"));
+
+		int count = jdbcTemplate.queryForObject(
+				"SELECT COUNT(*) FROM centers WHERE name = ? AND deleted_at IS NULL",
+				Integer.class, "Padel BCN");
+		assertEquals(1, count);
 	}
 
 	@Test
@@ -49,6 +55,11 @@ class CenterControllerIT extends AbstractIntegrationTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(VALID_CENTER_JSON))
 				.andExpect(status().isForbidden());
+
+		int count = jdbcTemplate.queryForObject(
+				"SELECT COUNT(*) FROM centers WHERE name = ?",
+				Integer.class, "Padel BCN");
+		assertEquals(0, count);
 	}
 
 	@Test
@@ -97,7 +108,7 @@ class CenterControllerIT extends AbstractIntegrationTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content").isArray())
 				.andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))))
-				.andExpect(jsonPath("$.page").value(0))
-				.andExpect(jsonPath("$.size").value(20));
+				.andExpect(jsonPath("$.currentPage").value(0))
+				.andExpect(jsonPath("$.pageSize").value(20));
 	}
 }

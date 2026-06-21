@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -57,6 +58,11 @@ class FieldControllerIT extends AbstractIntegrationTest {
 	void listFields_returnsPaginatedResult() throws Exception {
 		seedField();
 
+		int count = jdbcTemplate.queryForObject(
+				"SELECT COUNT(*) FROM fields WHERE name = ? AND deleted_at IS NULL",
+				Integer.class, "Court 1");
+		assertEquals(1, count);
+
 		mockMvc.perform(get(FIELDS_URL)
 						.with(adminJwt())
 						.param("page", "0")
@@ -64,8 +70,8 @@ class FieldControllerIT extends AbstractIntegrationTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content").isArray())
 				.andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))))
-				.andExpect(jsonPath("$.page").value(0))
-				.andExpect(jsonPath("$.size").value(20));
+				.andExpect(jsonPath("$.currentPage").value(0))
+				.andExpect(jsonPath("$.pageSize").value(20));
 	}
 
 	// ── GET /api/v1/fields/{id} ───────────────────────────────────────────────

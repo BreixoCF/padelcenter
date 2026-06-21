@@ -30,7 +30,6 @@ import com.padelcenter.infrastructure.web.generated.model.TournamentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -54,7 +53,6 @@ public class TournamentController implements TournamentsApi {
 	private final AuthenticatedUserResolver authResolver;
 
 	@Override
-	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<TournamentResponse> createTournament(TournamentRequest tournamentRequest) {
 		var command = tournamentApiMapper.toCommand(tournamentRequest);
 		var tournament = createTournamentUseCase.execute(command);
@@ -62,8 +60,6 @@ public class TournamentController implements TournamentsApi {
 	}
 
 	@Override
-	@PreAuthorize("@tournamentRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #tournamentId)"
-			+ " or hasRole('ADMIN')")
 	public ResponseEntity<Void> deleteTournament(UUID tournamentId) {
 		var command = new DeleteTournamentCommand(tournamentId, authResolver.currentUser().userId());
 		deleteTournamentUseCase.execute(command);
@@ -77,16 +73,12 @@ public class TournamentController implements TournamentsApi {
 	}
 
 	@Override
-	@PreAuthorize("hasRole('ADMIN') or "
-			+ "@tournamentRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #tournamentId)")
 	public ResponseEntity<TournamentResponse> openRegistration(UUID tournamentId) {
 		var tournament = openRegistrationUseCase.execute(new OpenRegistrationCommand(tournamentId));
 		return ResponseEntity.ok(tournamentApiMapper.toResponse(tournament));
 	}
 
 	@Override
-	@PreAuthorize("hasRole('ADMIN') or "
-			+ "@tournamentRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #tournamentId)")
 	public ResponseEntity<TournamentResponse> closeRegistration(UUID tournamentId) {
 		var tournament = closeRegistrationUseCase.execute(new CloseRegistrationCommand(tournamentId));
 		return ResponseEntity.ok(tournamentApiMapper.toResponse(tournament));
@@ -111,8 +103,6 @@ public class TournamentController implements TournamentsApi {
 	}
 
 	@Override
-	@PreAuthorize("hasRole('ADMIN') or "
-			+ "@tournamentRoleEvaluator.isAdminOf(@authResolver.resolveUserId(authentication), #tournamentId)")
 	public ResponseEntity<TournamentPairResponse> confirmPair(UUID tournamentId, UUID pairId) {
 		var pair = confirmPairUseCase.execute(new ConfirmPairCommand(tournamentId, pairId));
 		return ResponseEntity.ok(tournamentApiMapper.toPairResponse(pair));
