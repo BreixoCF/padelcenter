@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.util.UUID;
+
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -209,5 +211,47 @@ class UserControllerIT extends AbstractIntegrationTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(json))
 				.andExpect(status().isBadRequest());
+	}
+
+	// ── PUT /api/v1/users/{id} with existing center_role ────────────────────────
+
+	@Test
+	@DisplayName("PUT /api/v1/users/{id} — user with existing center role returns 200, not 409")
+	void updateUser_withExistingCenterRole_returns200() throws Exception {
+		String body = mockMvc.perform(post(BASE_URL)
+						.with(adminJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(VALID_USER_JSON))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+
+		String userId = JsonPath.read(body, "$.userId");
+
+		UUID centerId = UUID.randomUUID();
+		jdbcTemplate.update(
+				"INSERT INTO centers (center_id, name, address, city, email) VALUES (?, ?, ?, ?, ?)",
+				centerId, "Padel BCN", "Calle Mayor 1", "Barcelona", "bcn-" + centerId + "@padel.com");
+		jdbcTemplate.update(
+				"INSERT INTO center_roles (user_id, center_id, role_name) VALUES (?, ?, ?)",
+				UUID.fromString(userId), centerId, "USER");
+
+		mockMvc.perform(put(BASE_URL + "/" + userId)
+						.with(adminJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "firstName": "Jane",
+								  "lastName":  "Doe",
+								  "email":     "john.doe@example.com",
+								  "phoneNumber": "600123456"
+								}
+								"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.firstName").value("Jane"));
+
+		int count = jdbcTemplate.queryForObject(
+				"SELECT COUNT(*) FROM center_roles WHERE user_id = ? AND center_id = ?",
+				Integer.class, UUID.fromString(userId), centerId);
+		assertEquals(1, count);
 	}
 }

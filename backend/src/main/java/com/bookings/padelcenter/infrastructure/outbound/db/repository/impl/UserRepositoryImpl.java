@@ -38,8 +38,12 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
+	@Transactional
 	public User save(User user) {
-		var entity = mapper.toEntity(user);
+		var existingEntity = user.userId() != null
+				? userJpaRepository.findById(user.userId()).orElse(null)
+				: null;
+		var entity = mapper.toEntity(user, existingEntity);
 		var saved = userJpaRepository.save(entity);
 		return mapper.toDomain(saved);
 	}

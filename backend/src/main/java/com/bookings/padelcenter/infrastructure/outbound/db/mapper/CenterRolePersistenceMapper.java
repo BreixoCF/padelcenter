@@ -14,8 +14,8 @@ public class CenterRolePersistenceMapper {
 
 	private final AuditablePersistenceMapper auditablePersistenceMapper;
 
-	public CenterRoleEntity toEntity(CenterRole centerRole, UserEntity userEntity) {
-		var entity = new CenterRoleEntity();
+	public CenterRoleEntity toEntity(CenterRole centerRole, UserEntity userEntity, CenterRoleEntity existingEntity) {
+		var entity = existingEntity != null ? existingEntity : new CenterRoleEntity();
 		entity.setUser(userEntity);
 		if (centerRole.centerId() != null) {
 			var centerEntity = new CenterEntity();
