@@ -42,6 +42,12 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/v1/centers/*").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/v1/centers/*/tournaments").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/v1/tournaments/*").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/v1/tournaments/*/pairs").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/v1/tournaments/*/matches").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/v1/tournaments/*/standings").permitAll()
 						.anyRequest().authenticated()
 				)
 				.build();
