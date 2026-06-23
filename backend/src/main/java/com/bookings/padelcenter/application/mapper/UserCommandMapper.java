@@ -31,12 +31,15 @@ public class UserCommandMapper {
 	}
 
 	public User updateFromCommand(UpdateUserCommand command, User user) {
+		var passwordHash = command.password() == null || command.password().isBlank()
+				? user.passwordHash()
+				: passwordEncoder.encode(command.password());
 		return new User(
 				user.userId(),
 				command.firstName(),
 				command.lastName(),
 				command.email(),
-				command.password(),
+				passwordHash,
 				command.phoneNumber(),
 				user.centerRoles(),
 				user.audit().update(command.authenticatedUser().userId())
