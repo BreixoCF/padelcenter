@@ -1,0 +1,15 @@
+type: object
+description: Generic confirmation response for operations that do not return a full resource.
+required:
+  - id
+  - message
+properties:
+  id:
+    type: string
+    format: uuid
+    description: Identifier of the resource that was affected by the operation.
+    example: "123e4567-e89b-12d3-a456-426614174000"
+  message:
+    type: string
+    description: Human-readable confirmation message describing the result of the operation.
+    example: "Password updated successfully"

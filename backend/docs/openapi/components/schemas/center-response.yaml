@@ -1,0 +1,38 @@
+type: object
+description: Full padel center representation returned on create and list operations.
+required:
+  - centerId
+  - name
+  - address
+  - city
+properties:
+  centerId:
+    type: string
+    format: uuid
+    description: Unique identifier of the center.
+    example: "aabbccdd-1234-5678-abcd-ef0123456789"
+  name:
+    type: string
+    description: Name of the padel center.
+    example: "Padel Center Barcelona"
+  address:
+    type: string
+    description: Street address of the center.
+    example: "Calle Principal 123"
+  city:
+    type: string
+    description: City where the center is located.
+    example: "Barcelona"
+  phoneNumber:
+    type: string
+    nullable: true
+    description: Contact phone number of the center. Optional.
+    example: "933123456"
+  email:
+    type: string
+    format: email
+    nullable: true
+    description: Contact email address of the center. Optional. Unique within the system.
+    example: "barcelona@padelcenter.com"
+  audit:
+    $ref: './auditable-response.yaml'

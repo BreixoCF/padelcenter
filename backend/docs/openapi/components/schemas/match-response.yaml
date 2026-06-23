@@ -1,0 +1,40 @@
+type: object
+required:
+  - matchId
+  - tournamentId
+  - round
+  - status
+properties:
+  matchId:
+    type: string
+    format: uuid
+  tournamentId:
+    type: string
+    format: uuid
+  pairAId:
+    type: string
+    format: uuid
+    description: Nullable — TBD until assigned in elimination rounds
+  pairBId:
+    type: string
+    format: uuid
+    description: Nullable — TBD until assigned in elimination rounds
+  round:
+    type: integer
+    example: 1
+  groupName:
+    type: string
+    description: Nullable — only set for GROUPS_AND_ELIMINATION group phase
+    example: "A"
+  status:
+    type: string
+    enum:
+      - SCHEDULED
+      - IN_PROGRESS
+      - COMPLETED
+      - CANCELLED
+  scheduledAt:
+    type: string
+    format: date-time
+  result:
+    $ref: './match-result-response.yaml'

@@ -1,0 +1,26 @@
+post:
+  operationId: login
+  summary: Authenticate with email and password
+  description: >
+    Validates credentials against the local user database.
+    Returns a short-lived JWT access token and sets a httpOnly refresh token cookie.
+  tags:
+    - Auth
+  security: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/login-request.yaml'
+  responses:
+    '200':
+      description: Login successful.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/login-response.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

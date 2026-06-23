@@ -1,0 +1,45 @@
+parameters:
+  - name: tournamentId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+    description: Unique identifier of the tournament.
+
+get:
+  operationId: getTournamentById
+  summary: Get tournament details
+  tags:
+    - Tournaments
+  security: []
+  responses:
+    '200':
+      description: Tournament details.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/tournament-response.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'
+
+delete:
+  operationId: deleteTournament
+  summary: Delete a tournament (admin only, soft-delete)
+  tags:
+    - Tournaments
+  security:
+    - bearerAuth: []
+  responses:
+    '204':
+      description: Tournament deleted.
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

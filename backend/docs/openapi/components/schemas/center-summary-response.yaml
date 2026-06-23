@@ -1,0 +1,28 @@
+type: object
+description: >
+  Lightweight center representation embedded inside other resources
+  (e.g. FieldResponse, BookingResponse). Contains only identifying
+  display information — no audit metadata.
+required:
+  - centerId
+  - name
+  - address
+  - city
+properties:
+  centerId:
+    type: string
+    format: uuid
+    description: Unique identifier of the center.
+    example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  name:
+    type: string
+    description: Name of the padel center.
+    example: "Padel Center Barcelona"
+  address:
+    type: string
+    description: Street address of the center.
+    example: "Calle Principal 123"
+  city:
+    type: string
+    description: City where the center is located.
+    example: "Barcelona"

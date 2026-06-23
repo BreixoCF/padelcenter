@@ -1,0 +1,44 @@
+type: object
+required:
+  - matchId
+  - tournamentId
+  - tournamentName
+  - round
+  - status
+properties:
+  matchId:
+    type: string
+    format: uuid
+  tournamentId:
+    type: string
+    format: uuid
+  tournamentName:
+    type: string
+  pairAId:
+    type: string
+    format: uuid
+  pairBId:
+    type: string
+    format: uuid
+  pairAName:
+    type: string
+    description: Team name of pair A
+  pairBName:
+    type: string
+    description: Team name of pair B
+  round:
+    type: integer
+  groupName:
+    type: string
+  status:
+    type: string
+    enum:
+      - SCHEDULED
+      - IN_PROGRESS
+      - COMPLETED
+      - CANCELLED
+  scheduledAt:
+    type: string
+    format: date-time
+  result:
+    $ref: './match-result-response.yaml'

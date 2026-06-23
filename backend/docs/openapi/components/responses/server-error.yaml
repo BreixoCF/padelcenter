@@ -1,0 +1,13 @@
+description: >
+  Internal Server Error — an unexpected condition prevented the server from
+  fulfilling the request. Consult application logs for details.
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/problem-detail.yaml'
+    example:
+      type: "about:blank"
+      title: "Internal Server Error"
+      status: 500
+      detail: "An internal server error occurred. Please try again later."
+      timestamp: "2025-04-15T10:30:00Z"

@@ -1,0 +1,12 @@
+post:
+  operationId: logout
+  summary: Logout
+  description: Clears the httpOnly refresh token cookie, invalidating the session.
+  tags:
+    - Auth
+  security: []
+  responses:
+    '204':
+      description: Logged out successfully.
+    '500':
+      $ref: '../components/responses/server-error.yaml'

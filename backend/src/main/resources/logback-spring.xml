@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Registra los conversores de Spring Boot -->
+    <conversionRule conversionWord="clr"
+        converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <conversionRule conversionWord="wEx"
+        converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+
+    <!-- ======================== -->
+    <!-- PERFIL LOCAL: texto plano con colores -->
+    <!-- ======================== -->
+    <springProfile name="local">
+        <appender name="CONSOLE_COLOR"
+                  class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p){highlight} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx</pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_COLOR"/>
+        </root>
+
+        <logger name="com.bookings.padelcenter"
+                level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE_COLOR"/>
+        </logger>
+        <logger name="org.springframework.security"
+                level="WARN" additivity="false">
+            <appender-ref ref="CONSOLE_COLOR"/>
+        </logger>
+        <logger name="org.hibernate.SQL"
+                level="WARN" additivity="false">
+            <appender-ref ref="CONSOLE_COLOR"/>
+        </logger>
+        <logger name="com.zaxxer.hikari"
+                level="WARN" additivity="false">
+            <appender-ref ref="CONSOLE_COLOR"/>
+        </logger>
+    </springProfile>
+
+    <!-- ======================== -->
+    <!-- RESTO DE PERFILES: JSON estructurado -->
+    <!-- ======================== -->
+    <springProfile name="!local">
+        <appender name="CONSOLE_JSON"
+                  class="ch.qos.logback.core.ConsoleAppender">
+            <encoder
+              class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>{"app":"padelcenter"}</customFields>
+                <fieldNames>
+                    <timestamp>timestamp</timestamp>
+                    <message>message</message>
+                    <logger>logger</logger>
+                    <thread>thread</thread>
+                    <level>level</level>
+                </fieldNames>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </root>
+
+        <logger name="com.bookings.padelcenter"
+                level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </logger>
+        <logger name="org.springframework.security"
+                level="WARN" additivity="false">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </logger>
+        <logger name="org.hibernate.SQL"
+                level="WARN" additivity="false">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </logger>
+        <logger name="com.zaxxer.hikari"
+                level="WARN" additivity="false">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </logger>
+    </springProfile>
+
+</configuration>

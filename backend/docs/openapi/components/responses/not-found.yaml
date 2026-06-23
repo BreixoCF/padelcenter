@@ -1,0 +1,11 @@
+description: The requested resource does not exist or has been soft-deleted.
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/problem-detail.yaml'
+    example:
+      type: "about:blank"
+      title: "Resource Not Found"
+      status: 404
+      detail: "User with ID 123e4567-e89b-12d3-a456-426614174000 not found"
+      timestamp: "2025-04-15T10:30:00Z"

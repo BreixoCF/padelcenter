@@ -1,0 +1,30 @@
+type: object
+description: >
+  Payload for updating an existing booking's time slot and price.
+  Dates must be provided in ISO 8601 date-time format (fix I-3).
+required:
+  - startTime
+  - endTime
+  - totalPrice
+properties:
+  startTime:
+    type: string
+    format: date-time
+    description: >
+      Updated ISO 8601 date-time for the booking start.
+      Format: "YYYY-MM-DDTHH:MM:SS".
+    example: "2025-06-15T11:00:00"
+  endTime:
+    type: string
+    format: date-time
+    description: >
+      Updated ISO 8601 date-time for the booking end.
+      Must be strictly after the updated startTime.
+    example: "2025-06-15T12:00:00"
+  totalPrice:
+    type: number
+    format: double
+    exclusiveMinimum: true
+    minimum: 0
+    description: Updated total price for the rescheduled slot. Must be greater than 0.
+    example: 30.00

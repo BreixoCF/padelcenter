@@ -1,0 +1,17 @@
+type: object
+required:
+  - winnerPairId
+  - scoreA
+  - scoreB
+properties:
+  winnerPairId:
+    type: string
+    format: uuid
+  scoreA:
+    type: integer
+    minimum: 0
+    example: 6
+  scoreB:
+    type: integer
+    minimum: 0
+    example: 3

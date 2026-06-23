@@ -1,0 +1,38 @@
+type: object
+description: Full user representation returned by all user read and write operations.
+required:
+  - userId
+  - firstName
+  - lastName
+  - email
+properties:
+  userId:
+    type: string
+    format: uuid
+    description: Unique identifier of the user.
+    example: "123e4567-e89b-12d3-a456-426614174000"
+  firstName:
+    type: string
+    description: User's first name.
+    example: "Ana"
+  lastName:
+    type: string
+    description: User's last name.
+    example: "García"
+  email:
+    type: string
+    format: email
+    description: User's email address. Unique within the system.
+    example: "ana.garcia@example.com"
+  phoneNumber:
+    type: string
+    nullable: true
+    description: User's contact phone number. Optional.
+    example: "+34600123456"
+  centerRoles:
+    type: array
+    description: Roles the user holds within padel centers.
+    items:
+      $ref: './user-center-role-response.yaml'
+  audit:
+    $ref: './auditable-response.yaml'

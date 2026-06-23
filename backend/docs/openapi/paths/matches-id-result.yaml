@@ -1,0 +1,41 @@
+parameters:
+  - name: matchId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+
+post:
+  operationId: reportMatchResult
+  summary: Report match result
+  description: >
+    Reports the result of a completed match.
+    The caller must be one of the four players in the match.
+  tags:
+    - Matches
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/match-result-request.yaml'
+  responses:
+    '200':
+      description: Match result recorded.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/match-response.yaml'
+    '400':
+      $ref: '../components/responses/bad-request.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '422':
+      $ref: '../components/responses/unprocessable.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

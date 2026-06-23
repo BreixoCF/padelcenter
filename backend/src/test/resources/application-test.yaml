@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    # URL / username / password injected by AbstractIntegrationTest via @DynamicPropertySource
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # jwk-set-uri skips OIDC discovery at startup; keys fetched lazily (never during tests)
+          jwk-set-uri: http://localhost:9999/.well-known/jwks.json

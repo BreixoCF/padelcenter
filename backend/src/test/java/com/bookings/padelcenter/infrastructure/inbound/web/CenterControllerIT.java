@@ -1,0 +1,114 @@
+package com.bookings.padelcenter.infrastructure.inbound.web;
+
+import com.bookings.padelcenter.AbstractIntegrationTest;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.jdbc.Sql;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@Sql(scripts = "/db/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@DisplayName("CenterController Integration Tests")
+class CenterControllerIT extends AbstractIntegrationTest {
+
+	private static final String CENTERS_URL = "/api/v1/centers";
+
+	private static final String VALID_CENTER_JSON = """
+			{
+			  "name":        "Padel BCN",
+			  "address":     "Calle Mayor 1",
+			  "city":        "Barcelona",
+			  "phoneNumber": "933000001",
+			  "email":       "bcn@padel.com"
+			}
+			""";
+
+	// ── POST /api/v1/centers ──────────────────────────────────────────────────
+
+	@Test
+	@DisplayName("POST /api/v1/centers — admin creates center returns 201")
+	void createCenter_asAdmin_returns201() throws Exception {
+		mockMvc.perform(post(CENTERS_URL)
+						.with(adminJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(VALID_CENTER_JSON))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.centerId", notNullValue()))
+				.andExpect(jsonPath("$.name").value("Padel BCN"))
+				.andExpect(jsonPath("$.city").value("Barcelona"));
+
+		int count = jdbcTemplate.queryForObject(
+				"SELECT COUNT(*) FROM centers WHERE name = ? AND deleted_at IS NULL",
+				Integer.class, "Padel BCN");
+		assertEquals(1, count);
+	}
+
+	@Test
+	@DisplayName("POST /api/v1/centers — regular user returns 403")
+	void createCenter_asUser_returns403() throws Exception {
+		mockMvc.perform(post(CENTERS_URL)
+						.with(userJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(VALID_CENTER_JSON))
+				.andExpect(status().isForbidden());
+
+		int count = jdbcTemplate.queryForObject(
+				"SELECT COUNT(*) FROM centers WHERE name = ?",
+				Integer.class, "Padel BCN");
+		assertEquals(0, count);
+	}
+
+	@Test
+	@DisplayName("POST /api/v1/centers/{id}/fields — regular user returns 403")
+	void createField_asUser_returns403() throws Exception {
+		// Create center as admin first
+		String centerBody = mockMvc.perform(post(CENTERS_URL)
+						.with(adminJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(VALID_CENTER_JSON))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+
+		String centerId = com.jayway.jsonpath.JsonPath.read(centerBody, "$.centerId");
+
+		mockMvc.perform(post(CENTERS_URL + "/" + centerId + "/fields")
+						.with(userJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "name":         "Court 1",
+								  "type":         "Indoor",
+								  "pricePerHour": 25.00,
+								  "isAvailable":  true
+								}
+								"""))
+				.andExpect(status().isForbidden());
+	}
+
+	// ── GET /api/v1/centers ───────────────────────────────────────────────────
+
+	@Test
+	@DisplayName("GET /api/v1/centers — returns paginated result")
+	void listCenters_returnsPaginatedResult() throws Exception {
+		// Seed a center
+		mockMvc.perform(post(CENTERS_URL)
+						.with(adminJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(VALID_CENTER_JSON))
+				.andExpect(status().isCreated());
+
+		mockMvc.perform(get(CENTERS_URL)
+						.with(adminJwt())
+						.param("page", "0")
+						.param("size", "20"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content").isArray())
+				.andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))))
+				.andExpect(jsonPath("$.currentPage").value(0))
+				.andExpect(jsonPath("$.pageSize").value(20));
+	}
+}

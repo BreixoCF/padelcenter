@@ -1,0 +1,52 @@
+parameters:
+  - name: id
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+    description: Unique identifier of the user whose center roles are being updated.
+    example: "123e4567-e89b-12d3-a456-426614174000"
+
+patch:
+  operationId: updateUserRoles
+  summary: Replace a user's center-role assignments
+  description: >
+    Replaces the full set of center-role assignments for the specified user.
+    The supplied array becomes the new complete role set (not a partial merge).
+    Each entry must include centerId (UUID, required) and role (enum, required)
+    (fix I-8 — both fields are now validated).
+    Requires ADMIN role.
+  tags:
+    - Users
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '../components/schemas/center-role-request.yaml'
+          minItems: 0
+        example:
+          - centerId: "aabbccdd-1234-5678-abcd-ef0123456789"
+            role: "MANAGER"
+          - centerId: "11223344-aaaa-bbbb-cccc-ddeeff001122"
+            role: "USER"
+  responses:
+    '200':
+      description: User roles updated successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/user-response.yaml'
+    '400':
+      $ref: '../components/responses/bad-request.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

@@ -1,0 +1,41 @@
+type: object
+description: Summary of a booking as shown in the center admin dashboard.
+required:
+  - bookingId
+  - fieldId
+  - fieldName
+  - userId
+  - startTime
+  - endTime
+  - totalPrice
+  - status
+properties:
+  bookingId:
+    type: integer
+    format: int64
+    example: 1
+  fieldId:
+    type: string
+    format: uuid
+  fieldName:
+    type: string
+    example: "Pista 1"
+  userId:
+    type: string
+    format: uuid
+  startTime:
+    type: string
+    format: date-time
+  endTime:
+    type: string
+    format: date-time
+  totalPrice:
+    type: number
+    format: double
+  status:
+    type: string
+    enum:
+      - PENDING
+      - CONFIRMED
+      - CANCELLED
+      - COMPLETED

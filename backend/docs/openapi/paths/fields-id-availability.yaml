@@ -1,0 +1,77 @@
+parameters:
+  - name: fieldId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+    description: Unique identifier of the field.
+    example: "f1e2d3c4-b5a6-7890-fedc-ba9876543210"
+
+get:
+  operationId: getFieldAvailability
+  summary: Get field availability for a specific date
+  description: >
+    Returns the availability for a field on a given date, broken into
+    fixed one-hour slots from 09:00 to 22:00 (13 slots). A slot is
+    marked unavailable if a CONFIRMED booking overlaps that time range.
+  tags:
+    - Fields
+  parameters:
+    - name: date
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date
+      description: The date for which to check availability (ISO 8601).
+      example: "2025-06-20"
+  responses:
+    '200':
+      description: Field availability for the requested date.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/field-availability.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'
+
+patch:
+  operationId: updateFieldAvailability
+  summary: Update field availability (admin only)
+  description: >
+    Enables or disables a field (e.g. for maintenance or weather reasons)
+    without deleting it. Requires global ADMIN role.
+  tags:
+    - Fields
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            available:
+              type: boolean
+              example: false
+          required:
+            - available
+  responses:
+    '200':
+      description: Field updated with new availability status.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/field-response.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

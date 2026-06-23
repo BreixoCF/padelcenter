@@ -1,0 +1,21 @@
+get:
+  operationId: getMeProfile
+  summary: Get the currently authenticated user's profile
+  description: >
+    Returns the User record for the authenticated principal, resolved by the
+    `sub` claim of the JWT. Returns 404 if no user exists with that id.
+  tags:
+    - Auth
+  responses:
+    '200':
+      description: Authenticated user's profile.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/user-response.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

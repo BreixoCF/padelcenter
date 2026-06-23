@@ -1,0 +1,51 @@
+parameters:
+  - name: tournamentId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+
+get:
+  operationId: getTournamentMatches
+  summary: Get matches for a tournament (paginated)
+  description: Returns matches ordered by round and group name.
+  tags:
+    - Tournaments
+  security: []
+  parameters:
+    - name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      description: Zero-based page index.
+    - name: size
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+      description: Number of records per page.
+  responses:
+    '200':
+      description: Paginated list of matches.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../components/schemas/paged-response.yaml'
+              - type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '../components/schemas/match-response.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

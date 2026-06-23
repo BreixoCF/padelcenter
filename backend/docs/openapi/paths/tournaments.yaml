@@ -1,0 +1,31 @@
+post:
+  operationId: createTournament
+  summary: Create a tournament
+  description: >
+    Creates a new tournament in DRAFT status for the specified center.
+    Requires ADMIN role.
+  tags:
+    - Tournaments
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/tournament-request.yaml'
+  responses:
+    '201':
+      description: Tournament created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/tournament-response.yaml'
+    '400':
+      $ref: '../components/responses/bad-request.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

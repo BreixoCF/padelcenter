@@ -1,0 +1,23 @@
+type: object
+required:
+  - winnerPairId
+  - scoreA
+  - scoreB
+  - reportedBy
+  - reportedAt
+properties:
+  winnerPairId:
+    type: string
+    format: uuid
+  scoreA:
+    type: integer
+    example: 6
+  scoreB:
+    type: integer
+    example: 3
+  reportedBy:
+    type: string
+    format: uuid
+  reportedAt:
+    type: string
+    format: date-time

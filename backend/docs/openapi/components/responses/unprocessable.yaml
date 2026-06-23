@@ -1,0 +1,13 @@
+description: >
+  Unprocessable Entity — the request was syntactically valid but violated a
+  business rule (e.g. current password is incorrect, booking time conflict).
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/problem-detail.yaml'
+    example:
+      type: "about:blank"
+      title: "Business Rule Violation"
+      status: 422
+      detail: "The current password provided is incorrect"
+      timestamp: "2025-04-15T10:30:00Z"

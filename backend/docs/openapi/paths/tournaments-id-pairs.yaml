@@ -1,0 +1,61 @@
+parameters:
+  - name: tournamentId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+
+post:
+  operationId: registerPair
+  summary: Register a pair for a tournament
+  description: >
+    Registers two players as a pair in PENDING status.
+    The tournament must be in REGISTRATION_OPEN status.
+  tags:
+    - Tournaments
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/register-pair-request.yaml'
+  responses:
+    '201':
+      description: Pair registered successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/tournament-pair-response.yaml'
+    '400':
+      $ref: '../components/responses/bad-request.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '409':
+      $ref: '../components/responses/conflict.yaml'
+    '422':
+      $ref: '../components/responses/unprocessable.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'
+
+get:
+  operationId: getTournamentPairs
+  summary: List all pairs for a tournament
+  tags:
+    - Tournaments
+  security: []
+  responses:
+    '200':
+      description: List of pairs.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/tournament-pair-response.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

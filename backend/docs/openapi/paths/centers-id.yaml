@@ -1,0 +1,50 @@
+parameters:
+  - name: centerId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+    description: Unique identifier of the center.
+    example: "aabbccdd-1234-5678-abcd-ef0123456789"
+
+get:
+  operationId: getCenterById
+  summary: Get center details
+  description: >
+    Returns the full details of a padel center.
+    Public endpoint — no authentication required.
+  tags:
+    - Centers
+  security: []
+  responses:
+    '200':
+      description: Center details.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/center-response.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'
+
+delete:
+  operationId: deleteCenter
+  summary: Delete a center (soft-delete)
+  description: Soft-deletes a padel center. Requires ADMIN role.
+  tags:
+    - Centers
+  security:
+    - bearerAuth: []
+  responses:
+    '204':
+      description: Center deleted.
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

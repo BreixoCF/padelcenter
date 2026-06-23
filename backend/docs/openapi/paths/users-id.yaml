@@ -1,0 +1,90 @@
+parameters:
+  - name: id
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+    description: Unique identifier of the user.
+    example: "123e4567-e89b-12d3-a456-426614174000"
+
+get:
+  operationId: getUserById
+  summary: Get a user by ID
+  description: Returns the full user representation for the given ID.
+  tags:
+    - Users
+  responses:
+    '200':
+      description: User found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/user-response.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'
+
+put:
+  operationId: updateUser
+  summary: Update a user's profile
+  description: >
+    Replaces the mutable profile fields (name, email, phone, optionally password)
+    of the specified user. Email is validated with format:email (fix I-9).
+    Only the user themselves or a global ADMIN may perform this action.
+  tags:
+    - Users
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/user-update-request.yaml'
+        example:
+          firstName: "Ana"
+          lastName: "Martínez"
+          email: "ana.nueva@example.com"
+          phoneNumber: "+34611234567"
+  responses:
+    '200':
+      description: User updated successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/user-response.yaml'
+    '400':
+      $ref: '../components/responses/bad-request.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '409':
+      $ref: '../components/responses/conflict.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'
+
+delete:
+  operationId: deleteUser
+  summary: Soft-delete a user
+  description: >
+    Marks the user as deleted (soft-delete). The record is preserved in the
+    database with a deletedAt timestamp. Only the user themselves or a
+    global ADMIN may perform this action.
+  tags:
+    - Users
+  responses:
+    '204':
+      description: User deleted successfully. No response body.
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

@@ -1,0 +1,20 @@
+post:
+  operationId: refreshToken
+  summary: Refresh access token
+  description: >
+    Issues a new short-lived access token using the httpOnly refresh token cookie.
+    No request body required.
+  tags:
+    - Auth
+  security: []
+  responses:
+    '200':
+      description: New access token issued.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/token-response.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

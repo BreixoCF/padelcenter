@@ -1,0 +1,48 @@
+type: object
+required:
+  - tournamentId
+  - centerId
+  - name
+  - format
+  - status
+  - maxPairs
+  - startDate
+  - endDate
+properties:
+  tournamentId:
+    type: string
+    format: uuid
+  centerId:
+    type: string
+    format: uuid
+  name:
+    type: string
+    example: "Copa Verano 2025"
+  description:
+    type: string
+  format:
+    type: string
+    enum:
+      - ROUND_ROBIN
+      - ELIMINATION
+      - GROUPS_AND_ELIMINATION
+  status:
+    type: string
+    enum:
+      - DRAFT
+      - REGISTRATION_OPEN
+      - REGISTRATION_CLOSED
+      - IN_PROGRESS
+      - COMPLETED
+      - CANCELLED
+  maxPairs:
+    type: integer
+    example: 8
+  startDate:
+    type: string
+    format: date
+  endDate:
+    type: string
+    format: date
+  audit:
+    $ref: './auditable-response.yaml'

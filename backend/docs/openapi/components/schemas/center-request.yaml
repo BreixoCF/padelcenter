@@ -1,0 +1,38 @@
+type: object
+description: Payload for creating a new padel center. Requires ADMIN role.
+required:
+  - name
+  - address
+  - city
+properties:
+  name:
+    type: string
+    minLength: 1
+    maxLength: 255
+    description: Display name of the center. Must be unique within the system.
+    example: "Padel Center Barcelona"
+  address:
+    type: string
+    minLength: 1
+    maxLength: 255
+    description: Full street address of the center.
+    example: "Calle Principal 123"
+  city:
+    type: string
+    minLength: 1
+    maxLength: 100
+    description: City where the center is located.
+    example: "Barcelona"
+  phoneNumber:
+    type: string
+    maxLength: 20
+    nullable: true
+    description: Optional contact phone number for the center.
+    example: "933123456"
+  email:
+    type: string
+    format: email
+    maxLength: 255
+    nullable: true
+    description: Optional contact email for the center. Unique within the system if provided.
+    example: "barcelona@padelcenter.com"

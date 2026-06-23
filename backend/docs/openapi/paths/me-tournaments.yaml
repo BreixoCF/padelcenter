@@ -1,0 +1,44 @@
+get:
+  operationId: getMyTournaments
+  summary: Get tournaments where current user is registered
+  description: >
+    Returns a paginated list of tournaments where the authenticated user
+    is registered as player1 or player2 in a CONFIRMED pair.
+  tags:
+    - Auth
+  parameters:
+    - name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      description: Zero-based page index.
+    - name: size
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+      description: Number of records per page.
+  responses:
+    '200':
+      description: Paginated list of tournaments the user is registered in.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../components/schemas/paged-response.yaml'
+              - type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '../components/schemas/tournament-response.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

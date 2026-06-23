@@ -1,0 +1,68 @@
+### GET all users
+GET {{dev_baseUrl}}/users
+
+> {%
+const expected = [200, 201, 204];
+client.test("Expected status code", () => {
+  client.assert(expected.includes(response.status), 'Unexpected status: + ${response.status}');
+});
+%}
+
+
+### POST create user
+POST {{dev_baseUrl}}/users
+Content-Type: application/json
+
+{
+  "firstName": "Breixo",
+  "lastName": "Camiña Fernández",
+  "email": "breixocf@gmail.com",
+  "password": "MiPasswordSeguro123",
+  "phoneNumber": "600123456"
+}
+
+### POST create center
+POST {{dev_baseUrl}}/centers
+Content-Type: application/json
+
+{
+  "name": "Center",
+  "address": "Jaume Balmes 67",
+  "city": "Sant Boi",
+  "phoneNumber": "600123456",
+  "email": "santboi4@example.com"
+}
+
+### POST create field
+POST {{dev_baseUrl}}/centers/{{centerId}}/fields
+Content-Type: application/json
+
+{
+  "name": "132",
+  "type": "Seco",
+  "pricePerHour": 3.0,
+  "isAvailable": true
+}
+
+### PUT update user
+PUT {{dev_baseUrl}}/users/{{userId}}
+Content-Type: application/json
+
+{
+  "firstName": "Breixo",
+  "lastName": "Camiña",
+  "email": "breixo2@gmail.com",
+  "password": "jijajajaji",
+  "phoneNumber": "608654534"
+}
+
+### PATCH update roles
+PATCH {{dev_baseUrl}}/users/{{userId}}/roles
+Content-Type: application/json
+
+[
+  {
+    "centerId": "{{centerId}}",
+    "role": "ADMIN"
+  }
+]

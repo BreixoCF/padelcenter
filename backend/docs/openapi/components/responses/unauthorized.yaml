@@ -1,0 +1,13 @@
+description: >
+  Authentication required — the request did not include a valid JWT Bearer token,
+  or the token has expired.
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/problem-detail.yaml'
+    example:
+      type: "about:blank"
+      title: "Unauthorized"
+      status: 401
+      detail: "Full authentication is required to access this resource"
+      timestamp: "2025-04-15T10:30:00Z"

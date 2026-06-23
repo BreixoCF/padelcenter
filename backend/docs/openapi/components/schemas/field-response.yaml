@@ -1,0 +1,35 @@
+type: object
+description: Full field representation returned by all field read and write operations.
+required:
+  - fieldId
+  - name
+  - pricePerHour
+  - isAvailable
+properties:
+  fieldId:
+    type: string
+    format: uuid
+    description: Unique identifier of the field.
+    example: "f1e2d3c4-b5a6-7890-fedc-ba9876543210"
+  name:
+    type: string
+    description: Display name of the field within its center. Unique per center.
+    example: "Court 1"
+  type:
+    type: string
+    nullable: true
+    description: Surface or enclosure type (e.g. "Indoor", "Outdoor", "Cristal").
+    example: "Indoor"
+  pricePerHour:
+    type: number
+    format: double
+    description: Booking price per hour in the system's default currency.
+    example: 25.00
+  isAvailable:
+    type: boolean
+    description: Whether this field is currently accepting bookings.
+    example: true
+  center:
+    $ref: './center-summary-response.yaml'
+  audit:
+    $ref: './auditable-response.yaml'

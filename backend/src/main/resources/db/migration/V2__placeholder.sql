@@ -1,0 +1,3 @@
+-- Placeholder: V2 was merged into V1 during initial development.
+-- This migration exists solely to maintain a contiguous version sequence
+-- and prevent Flyway from reporting a missing migration warning.

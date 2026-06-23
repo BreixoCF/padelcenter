@@ -1,0 +1,37 @@
+parameters:
+  - name: tournamentId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+  - name: pairId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+
+patch:
+  operationId: confirmPair
+  summary: Confirm a registered pair
+  description: Transitions a pair from PENDING to CONFIRMED. Requires center ADMIN role.
+  tags:
+    - Tournaments
+  responses:
+    '200':
+      description: Pair confirmed.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/tournament-pair-response.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '422':
+      $ref: '../components/responses/unprocessable.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

@@ -1,0 +1,9 @@
+type: object
+description: New access token issued after a successful token refresh.
+required:
+  - accessToken
+properties:
+  accessToken:
+    type: string
+    description: Short-lived JWT access token. Include in Authorization Bearer header.
+    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."

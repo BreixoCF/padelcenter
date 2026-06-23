@@ -1,0 +1,25 @@
+type: object
+description: Full update payload for a field. All fields are required.
+required:
+  - name
+  - type
+  - pricePerHour
+  - isAvailable
+properties:
+  name:
+    type: string
+    description: Display name of the field.
+    example: "Court 1"
+  type:
+    type: string
+    description: Type of the field surface or enclosure.
+    example: "Indoor"
+  pricePerHour:
+    type: number
+    format: double
+    description: Price per hour in EUR.
+    example: 25.00
+  isAvailable:
+    type: boolean
+    description: Whether the field is available for booking.
+    example: true

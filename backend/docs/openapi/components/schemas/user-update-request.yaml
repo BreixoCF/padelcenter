@@ -1,0 +1,40 @@
+type: object
+description: >
+  Payload for updating an existing user's profile information.
+  Email is validated with format:email (fix I-9 — consistent with CreateUserRequest).
+required:
+  - firstName
+  - lastName
+  - email
+properties:
+  firstName:
+    type: string
+    minLength: 1
+    description: Updated first name.
+    example: "Ana"
+  lastName:
+    type: string
+    minLength: 1
+    description: Updated last name.
+    example: "García"
+  email:
+    type: string
+    format: email
+    description: >
+      Updated email address. Must be unique within the system.
+      Validated with email format (consistent with user creation).
+    example: "ana.nueva@example.com"
+  password:
+    type: string
+    format: password
+    minLength: 8
+    nullable: true
+    description: >
+      Optional new password included in a profile update. For dedicated
+      password changes, prefer PATCH /users/{id}/password instead.
+    example: "newSecurePass456!"
+  phoneNumber:
+    type: string
+    nullable: true
+    description: Updated phone number. Pass null to clear.
+    example: "+34611234567"

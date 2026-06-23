@@ -1,0 +1,33 @@
+parameters:
+  - name: tournamentId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+
+patch:
+  operationId: closeRegistration
+  summary: Close registration and generate bracket
+  description: >
+    Transitions the tournament from REGISTRATION_OPEN to REGISTRATION_CLOSED,
+    generates all matches and moves the tournament to IN_PROGRESS.
+  tags:
+    - Tournaments
+  responses:
+    '200':
+      description: Registration closed and bracket generated.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/tournament-response.yaml'
+    '401':
+      $ref: '../components/responses/unauthorized.yaml'
+    '403':
+      $ref: '../components/responses/forbidden.yaml'
+    '404':
+      $ref: '../components/responses/not-found.yaml'
+    '422':
+      $ref: '../components/responses/unprocessable.yaml'
+    '500':
+      $ref: '../components/responses/server-error.yaml'

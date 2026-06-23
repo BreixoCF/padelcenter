@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: padelcenter
+  profiles:
+    active: local
+  jpa:
+    open-in-view: false
+  threads:
+    virtual:
+      enabled: true
+app:
+  timezone: UTC
+  jwt:
+    secret: ${JWT_SECRET:padelcenter-dev-secret-key-change-in-production-min32chars!!}
+    access-token-expiry: ${JWT_ACCESS_TOKEN_EXPIRY:900}
+    refresh-token-expiry: ${JWT_REFRESH_TOKEN_EXPIRY:604800}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  show-actuator: false

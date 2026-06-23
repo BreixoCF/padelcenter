@@ -1,0 +1,15 @@
+type: object
+description: Credentials for email/password login.
+required:
+  - email
+  - password
+properties:
+  email:
+    type: string
+    format: email
+    example: "ana.garcia@example.com"
+  password:
+    type: string
+    format: password
+    minLength: 8
+    example: "securePass123!"

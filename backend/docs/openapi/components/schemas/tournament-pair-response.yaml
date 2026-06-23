@@ -1,0 +1,33 @@
+type: object
+required:
+  - pairId
+  - tournamentId
+  - player1Id
+  - player2Id
+  - status
+  - registeredAt
+properties:
+  pairId:
+    type: string
+    format: uuid
+  tournamentId:
+    type: string
+    format: uuid
+  player1Id:
+    type: string
+    format: uuid
+  player2Id:
+    type: string
+    format: uuid
+  teamName:
+    type: string
+    description: Team name chosen by the pair
+  status:
+    type: string
+    enum:
+      - PENDING
+      - CONFIRMED
+      - REJECTED
+  registeredAt:
+    type: string
+    format: date-time
