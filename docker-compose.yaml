@@ -1,0 +1,13 @@
+services:
+  padelcenter-web:
+    container_name: padelcenter-web
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8080
+        API_URL: http://host.docker.internal:8080
+    ports:
+      - "3000:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

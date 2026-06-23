@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# padelcenter-web
 
-## Getting Started
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-18-blue)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 
-First, run the development server:
+Frontend de gestión de centros de pádel: reservas, pistas, centros, torneos
+y usuarios. Next.js 14 (App Router) + TypeScript, sobre la API de
+[padelcenter](../padelcenter).
+
+## Requisitos previos
+
+- [Docker](https://docs.docker.com/get-docker/) + Docker Compose (arranque rápido)
+- El backend [padelcenter](../padelcenter) debe estar corriendo en `localhost:8080`
+- Node.js 20+ y [pnpm](https://pnpm.io/) (solo si quieres ejecutar fuera de Docker)
+
+## Arranque rápido con Docker
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 1. Arranca primero el backend (ver README de padelcenter)
+# 2. Arranca el frontend
+docker compose up -d --build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- App: http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+El contenedor del frontend llega al backend a través de
+`host.docker.internal`, que apunta al `localhost` de la máquina host
+donde el backend expone el puerto 8080.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Arranque en local (sin Docker)
 
-## Learn More
+```bash
+pnpm install
+cp .env.example .env.local   # ajusta las URLs si el backend no está en :8080
+pnpm dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+- App: http://localhost:3000
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Generar el cliente de la API
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+El cliente React Query se genera a partir del contrato OpenAPI del
+backend con [Orval](https://orval.dev/). Requiere el backend corriendo
+en `localhost:8080` (sirve el spec en `/api-docs`):
 
-## Deploy on Vercel
+```bash
+pnpm generate-api
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Nunca editar a mano los ficheros de `src/lib/api/generated/`.**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Variables de entorno
+
+| Variable | Descripción | Dónde se usa |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | URL del backend visible desde el navegador | Cliente (axios), se incrusta en el bundle al compilar |
+| `API_URL` | URL del backend usada por el servidor Next.js | `next.config.mjs` (`rewrites`), solo servidor |
+
+Ambas se resuelven en **build time** (no en runtime): si cambias el
+backend de URL, hay que reconstruir la imagen.
+Plantilla en [.env.example](.env.example).
+
+## Tests y lint
+
+```bash
+pnpm lint
+```
+
+## Estructura del proyecto
+
+```
+src/
+├── app/                 # Rutas (App Router)
+├── lib/
+│   ├── api/
+│   │   ├── client.ts        # Instancia de axios (customInstance de Orval)
+│   │   └── generated/       # Hooks React Query generados por Orval — no editar
+│   └── ...
+└── components/          # Componentes UI (shadcn/Radix)
+```
+
+## Arquitectura
+
+El frontend consume la API de `padelcenter` vía hooks generados con
+Orval a partir del contrato OpenAPI (`docs/openapi/index.yaml` en el
+backend). La autenticación usa JWT en memoria (Zustand) con refresh
+automático vía cookie httpOnly.
