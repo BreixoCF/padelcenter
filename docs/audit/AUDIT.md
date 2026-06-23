@@ -1,7 +1,7 @@
 # Audit — padelcenter
 
 > Fecha: 2026-04-14  
-> Referencia: CLAUDE.md (`.claude/CLAUDE.md` + raíz)  
+> Referencia: convenciones internas del proyecto  
 > Rama analizada: `develop`
 
 ---
@@ -89,9 +89,9 @@
 - `CreateUserRequest` no tiene ninguna anotación de validación (`@NotBlank`, `@Email`, `@Size`, etc.).
 - `CreateCenterRequest` no tiene ninguna anotación de validación.
 - `CreateFieldRequest` no tiene ninguna anotación de validación.
-- `GlobalExceptionHandler` retorna `Map<String, Object>` en lugar de `ProblemDetail` (RFC 9457), que es el estándar definido en CLAUDE.md.
+- `GlobalExceptionHandler` retorna `Map<String, Object>` en lugar de `ProblemDetail` (RFC 9457), que es el estándar definido en las convenciones del proyecto.
 - `FieldController` está vacío — sin endpoints, ni siquiera un `GET /fields`.
-- Las rutas no siguen el versionado `/api/v1/` definido en CLAUDE.md (usan `/users`, `/bookings`, `/centers` directamente).
+- Las rutas no siguen el versionado `/api/v1/` definido en las convenciones del proyecto (usan `/users`, `/bookings`, `/centers` directamente).
 - `AuditableResponse` nombra el campo `lastModifiedBy` en lugar de `modifiedBy`, inconsistente con el dominio.
 
 ### Missing
@@ -115,7 +115,7 @@
 ## Base de datos / migraciones Flyway
 
 ### Violations
-- `application-test.yaml` desactiva Flyway y usa `ddl-auto: create-drop` con H2. El esquema de tests diverge del de producción, enmascarando errores de migración — el mismo tipo de incidente que CLAUDE.md menciona explícitamente como motivación para usar Testcontainers.
+- `application-test.yaml` desactiva Flyway y usa `ddl-auto: create-drop` con H2. El esquema de tests diverge del de producción, enmascarando errores de migración — el mismo tipo de incidente que motiva el uso de Testcontainers en las convenciones del proyecto.
 - `V2__sample_data.sql` inyecta datos de prueba como migración de producción. En un entorno real, Flyway aplicaría estos datos en staging/prod.
 
 ### Missing
@@ -136,9 +136,9 @@
 ## Build (Gradle)
 
 ### Violations
-- El proyecto usa **Maven** (`pom.xml`), no **Gradle Kotlin DSL** como especifica CLAUDE.md. Es la herramienta de build incorrecta según el estándar del equipo.
+- El proyecto usa **Maven** (`pom.xml`), no **Gradle Kotlin DSL** como especifican las convenciones del proyecto. Es la herramienta de build incorrecta según el estándar del equipo.
 - `spring.threads.virtual.enabled=true` no está configurado en `application.yaml` — los virtual threads (Java 21 / Project Loom) no están activados.
-- `spring.jpa.open-in-view` no está configurado explícitamente — el valor por defecto en Spring Boot es `true`, el anti-patrón que CLAUDE.md prohíbe explícitamente.
+- `spring.jpa.open-in-view` no está configurado explícitamente — el valor por defecto en Spring Boot es `true`, el anti-patrón que las convenciones del proyecto prohíben explícitamente.
 
 ### Missing
 - No existe `build.gradle.kts`, `settings.gradle.kts`, `gradle/libs.versions.toml` ni `gradle.properties`.
@@ -181,7 +181,7 @@
 | 17 | `CenterJpaRepository` y `FieldJpaRepository` sin métodos custom — backing JPA ausente | Persistencia | Medio | Bajo |
 | 18 | Virtual threads no habilitados (`spring.threads.virtual.enabled=true` ausente) | Build/Config | Medio | Bajo |
 | 19 | `V2__sample_data.sql` mezcla datos de prueba en migraciones de producción | Base de datos | Medio | Bajo |
-| 20 | Build usa Maven en lugar de Gradle Kotlin DSL (CLAUDE.md) | Build | Bajo | Alto |
+| 20 | Build usa Maven en lugar de Gradle Kotlin DSL (convenciones del proyecto) | Build | Bajo | Alto |
 | 21 | `FieldCommandMapper` existe pero no se usa — `CreateFieldUseCase` construye el objeto manualmente | Aplicación | Bajo | Bajo |
 | 22 | Faltan índices en FKs de alta cardinalidad (`bookings.user_id`, `center_roles.user_id`, `users.email`) | Base de datos | Bajo | Bajo |
 | 23 | No hay ArchUnit tests para enforcement de reglas de capas en CI | Build | Bajo | Medio |

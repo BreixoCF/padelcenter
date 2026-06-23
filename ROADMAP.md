@@ -63,7 +63,7 @@ Testcontainers + PostgreSQL ya estaba en su lugar. Creados `FieldControllerIT` y
 **Commit:** `test(unit+arch): complete use case coverage and ArchUnit rules`
 
 ### ✅ Prompt 11 — Observabilidad
-Structured logging con SLF4J/MDC, métricas con Micrometer, actuator endpoints. Patrón documentado en CLAUDE.md; implementación deferred a siguiente PR.
+Structured logging con SLF4J/MDC, métricas con Micrometer, actuator endpoints. Patrón documentado en las convenciones del proyecto; implementación deferred a siguiente PR.
 
 ### ✅ Prompt 12 — CI/CD
 Pipeline GitHub Actions: build, test, análisis estático (Checkstyle/SpotBugs), publicación de imagen OCI con Cloud Native Buildpacks. Deferred a siguiente PR.

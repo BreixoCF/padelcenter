@@ -3,7 +3,7 @@ Copia este prompt y rellena las secciones entre [] antes de enviarlo.
 ---
 
 Implementa un nuevo caso de uso siguiendo todas las convenciones
-del CLAUDE.md y la arquitectura hexagonal del proyecto.
+del proyecto y la arquitectura hexagonal.
 
 ## Contexto de negocio
 

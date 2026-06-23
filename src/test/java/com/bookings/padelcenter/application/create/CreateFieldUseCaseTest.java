@@ -138,8 +138,8 @@ class CreateFieldUseCaseTest {
 	}
 
 	@Test
-	@DisplayName("Should create field with null id before save")
-	void shouldCreateFieldWithNullId() {
+	@DisplayName("Should generate a new id before save")
+	void shouldGenerateNewId() {
 		// Given
 		when(centerRepository.findById(centerId)).thenReturn(Optional.of(existingCenter));
 		when(fieldRepository.save(any(Field.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -153,7 +153,7 @@ class CreateFieldUseCaseTest {
 		verify(fieldRepository).save(fieldCaptor.capture());
 		Field capturedField = fieldCaptor.getValue();
 
-		assertThat(capturedField.fieldId()).isNull();
+		assertThat(capturedField.fieldId()).isNotNull();
 	}
 
 	@Test
