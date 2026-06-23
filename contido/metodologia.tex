@@ -1,0 +1,172 @@
+\chapter{Metodología y planificación}
+\label{chap:metodologia}
+
+\lettrine{E}{l} desarrollo de PadelCenter se ha llevado a cabo de forma individual,
+sin un equipo que requiera ceremonias de coordinación, pero sí con una metodología
+de trabajo deliberada que ha guiado el orden de las tareas, la gestión del riesgo
+y el seguimiento del progreso. En este capítulo se describe dicha metodología, la
+planificación inicial del trabajo y un análisis de cómo la ejecución real se
+desvió de lo previsto.
+
+\section{Metodología de desarrollo}
+\label{sec:metodologia_desarrollo}
+
+Se adoptó un enfoque \textbf{iterativo e incremental por módulo funcional},
+combinado con el carácter \textit{contract-first} ya descrito en el
+capítulo~\ref{chap:diseno}. Cada módulo (autenticación, centros y pistas,
+reservas, torneos) se desarrolló siguiendo el mismo ciclo:
+
+\begin{enumerate}
+  \item Definición del contrato del módulo en la especificación OpenAPI.
+  \item Diseño del modelo de dominio y los puertos correspondientes.
+  \item Implementación de los casos de uso y los adaptadores de infraestructura.
+  \item Cobertura con tests unitarios y de integración.
+  \item Implementación del frontend que consume el módulo.
+\end{enumerate}
+
+Este ciclo se eligió frente a un desarrollo en cascada porque permite obtener,
+al final de cada iteración, un incremento funcional completo y verificable
+(\textit{vertical slice}), reduciendo el riesgo de descubrir problemas de
+integración entre capas al final del proyecto. Frente a un marco más formal
+como Scrum, se descartaron las ceremonias de equipo (\textit{daily},
+\textit{sprint planning} con varios roles, retrospectivas grupales) por no
+aportar valor en un trabajo individual, conservando en cambio los elementos que
+sí son útiles en solitario: tablero de tareas, iteraciones acotadas en el tiempo
+y revisión del progreso al cierre de cada una.
+
+\subsection{Herramientas de seguimiento}
+
+\begin{itemize}
+  \item \textbf{Control de versiones y tablero de tareas}: Git, con un
+    repositorio independiente para backend y frontend, e issues para registrar
+    tareas pendientes y errores detectados durante el desarrollo.
+  \item \textbf{Integración continua}: ejecución automática de la batería de
+    tests (unitarios, integración y arquitectura) en cada cambio, evitando que
+    se acumule deuda técnica no detectada.
+  \item \textbf{Especificación OpenAPI}: además de contrato de API, ha actuado
+    como documento vivo de seguimiento del alcance funcional: el progreso de
+    cada módulo es directamente visible en el número de endpoints especificados
+    e implementados.
+\end{itemize}
+
+\section{Plan de trabajo inicial}
+\label{sec:plan_inicial}
+
+La planificación inicial dividió el trabajo en cinco fases, alineadas con la
+estructura de la memoria:
+
+\begin{table}[ht]
+\centering
+\begin{tabularx}{\textwidth}{lXc}
+\hline
+\textbf{Fase} & \textbf{Contenido} & \textbf{Esfuerzo estimado} \\
+\hline
+F1 — Análisis y diseño & Estado del arte, definición de requisitos, diseño de
+  arquitectura y modelo de dominio, primera versión del contrato OpenAPI &
+  20\% \\
+F2 — Backend & Implementación de dominio, casos de uso, persistencia,
+  seguridad y tests del backend & 40\% \\
+F3 — Frontend & Implementación de la interfaz, integración con la API
+  generada, gestión de estado y autenticación en cliente & 25\% \\
+F4 — Pruebas e integración & Tests de integración end-to-end, pulido de
+  errores de integración entre frontend y backend & 10\% \\
+F5 — Documentación & Redacción de la memoria y preparación de la defensa &
+  5\% \\
+\hline
+\end{tabularx}
+\caption{Plan de trabajo inicial por fases, con esfuerzo estimado como
+  porcentaje del total.}
+\label{tab:plan_inicial}
+\end{table}
+
+\subsection{Análisis de riesgos}
+
+\begin{table}[ht]
+\centering
+\begin{tabularx}{\textwidth}{lXX}
+\hline
+\textbf{Riesgo} & \textbf{Impacto} & \textbf{Mitigación adoptada} \\
+\hline
+Disponibilidad irregular por solapamiento con la actividad laboral del autor &
+  Retrasos en la cadencia de avance, especialmente durante periodos de
+  mayor carga laboral &
+  Priorización estricta del alcance funcional (sección~\ref{sec:objetivos})
+  frente a funcionalidades secundarias \\
+Cambios en el contrato de la API tras iniciar la implementación del frontend &
+  Retrabajo en backend y frontend simultáneamente &
+  Enfoque \textit{contract-first}: cualquier cambio se refleja primero en el
+  OpenAPI y se propaga mediante generación de código, evitando
+  inconsistencias manuales \\
+Subestimación de la complejidad del módulo de torneos (generación de
+  emparejamientos) &
+  Retraso en la fase de backend &
+  Implementación incremental por formato de competición, empezando por el más
+  sencillo (\texttt{ROUND\_ROBIN}) antes de abordar eliminación y grupos \\
+Curva de aprendizaje de herramientas no usadas previamente por el autor
+  (Orval, ArchUnit, Testcontainers) &
+  Retraso puntual al inicio de cada módulo nuevo &
+  Prueba de concepto aislada de cada herramienta antes de integrarla en el
+  flujo principal de desarrollo \\
+\hline
+\end{tabularx}
+\caption{Riesgos identificados al inicio del proyecto y mitigaciones aplicadas.}
+\label{tab:riesgos}
+\end{table}
+
+\section{Ejecución real y desviaciones}
+\label{sec:ejecucion_real}
+
+La figura~\ref{tab:ejecucion_real} resume la actividad real de desarrollo por
+mes, medida a partir del historial de control de versiones de ambos
+repositorios.
+
+\begin{table}[ht]
+\centering
+\begin{tabularx}{\textwidth}{lXX}
+\hline
+\textbf{Periodo} & \textbf{Backend} & \textbf{Frontend} \\
+\hline
+Noviembre 2025 -- febrero 2026 &
+  Actividad baja y discontinua: diseño de la arquitectura hexagonal, modelo de
+  dominio inicial y primera versión del contrato OpenAPI, en paralelo con
+  la actividad laboral del autor &
+  Sin actividad: el frontend no se inició hasta tener estabilizado el
+  contrato de la API \\
+Marzo 2026 &
+  Sin actividad registrada &
+  Sin actividad registrada \\
+Abril 2026 &
+  Fase intensiva: implementación de la mayor parte de los casos de uso,
+  persistencia, seguridad y tests &
+  Fase intensiva: implementación de la mayor parte de las páginas, integración
+  con la API generada y gestión de estado \\
+Mayo -- junio 2026 &
+  Cierre, correcciones puntuales y redacción de la memoria &
+  Cierre, correcciones puntuales y redacción de la memoria \\
+\hline
+\end{tabularx}
+\caption{Actividad real de desarrollo por periodo, según el historial de
+  control de versiones.}
+\label{tab:ejecucion_real}
+\end{table}
+
+La desviación más relevante respecto al plan inicial es la \textbf{concentración
+del trabajo en un periodo mucho más corto del previsto}: la fase de análisis y
+diseño (F1) se extendió de forma discontinua durante varios meses por
+solapamiento con las obligaciones laborales del autor, mientras que las
+fases F2 y F3 (backend y frontend), planificadas inicialmente de forma
+secuencial, terminaron ejecutándose de manera prácticamente simultánea durante
+abril de 2026 una vez estabilizado el contrato de la API. Esto fue posible
+precisamente gracias al enfoque \textit{contract-first}: al existir un contrato
+OpenAPI estable, ambos proyectos pudieron avanzar en paralelo sin bloquearse
+mutuamente, ya que el frontend podía generar sus tipos y \textit{hooks} a partir
+de la especificación sin depender de que el backend estuviese completamente
+implementado.
+
+En términos de esfuerzo relativo, la proporción final entre backend y frontend
+(78 \textit{commits} frente a 20) es más desequilibrada que la estimada
+inicialmente en la tabla~\ref{tab:plan_inicial} (40\,\% frente a 25\,\%). Esto
+se explica por el mayor número de módulos de dominio a modelar en el backend
+(siete entidades principales, 42 casos de uso) frente a un frontend que reutiliza
+en gran medida los mismos patrones de página para cada módulo una vez establecida
+la estructura inicial de rutas y componentes.
