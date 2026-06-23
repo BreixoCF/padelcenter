@@ -1,248 +1,62 @@
-# Logging JSON Estructurado — Ejemplos
+# Logging — configuración y ejemplos
 
-## Configuración Local
+## Por perfil
 
-Cuando ejecutas:
+| Perfil | Appender | Salida |
+|--------|----------|--------|
+| `local` / `test` | `CONSOLE_COLOR` | Texto plano con colores ANSI |
+| _(default, sin perfil `local`)_ | `CONSOLE_JSON` | JSON estructurado (NDJSON), vía `LogstashEncoder` |
+
 ```bash
-docker compose up -d postgres
+# Local (colores)
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+
+# JSON (perfil por defecto)
+java -jar target/padelcenter-*.jar
 ```
 
-Los logs aparecen en **consola en formato JSON estructurado**, listo para ingestión en ELK Stack o Grafana Loki.
+### Formato local — converters de Logback
 
----
+`logback-spring.xml` registra dos conversion rules de Spring Boot usadas en el pattern del appender `CONSOLE_COLOR`:
 
-## Ejemplos de Logs
+```xml
+<conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+<conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+```
 
-### 1. Request entrante (MDC + CommonsRequestLoggingFilter)
+- **`%clr(texto){color}`** — añade color ANSI; detecta automáticamente si la salida no es una TTY y lo desactiva. Colores disponibles: `{faint}`, `{highlight}` (color según nivel), `{cyan}`, `{yellow}`, `{red}`, etc.
+- **`%wEx`** — indenta los stack traces para que sean legibles en consola, en vez de una sola línea continua.
+
+Si estos converters no están registrados, Logback falla al arrancar con
+`Unknown word for conversion [clr]` / `[wEx]`.
+
+```
+11:25:00.125  INFO --- [http-nio-8080-exec-1]  c.b.p.a.c.CreateUserUseCase : user.created userId=... email=...
+```
+
+### Formato JSON (perfil por defecto)
 
 ```json
-{
-  "timestamp": "2026-04-16T11:20:15.234Z",
-  "level": "DEBUG",
-  "logger": "org.springframework.web.filter.CommonsRequestLoggingFilter",
-  "message": "HTTP REQUEST: method=POST uri=/api/v1/users params=[]",
-  "thread": "http-nio-8080-exec-1",
-  "traceId": "550e8400-e29b-41d4-a716-446655440000",
-  "requestId": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
-  "httpMethod": "POST",
-  "httpUri": "/api/v1/users",
-  "app": "padelcenter",
-  "env": "local"
-}
+{"timestamp":"2026-04-16T11:25:00.125Z","level":"INFO","logger":"com.bookings.padelcenter.application.create.CreateUserUseCase","message":"user.created userId=550e8400-e29b-41d4-a716-446655440001 email=john@example.com","thread":"http-nio-8080-exec-1","traceId":"550e8400-e29b-41d4-a716-446655440000","requestId":"7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f","httpMethod":"POST","httpUri":"/api/v1/users","app":"padelcenter"}
 ```
 
-### 2. Use case: CreateUser (DEBUG entry)
+Campos: `timestamp` (ISO 8601), `level`, `logger`, `message`, `thread`, `traceId`,
+`requestId`, `httpMethod`/`httpUri` (request en curso), `app`.
 
-```json
-{
-  "timestamp": "2026-04-16T11:20:15.245Z",
-  "level": "DEBUG",
-  "logger": "com.bookings.padelcenter.application.create.CreateUserUseCase",
-  "message": "user.create.start email=john@example.com firstName=John lastName=Doe",
-  "thread": "http-nio-8080-exec-1",
-  "traceId": "550e8400-e29b-41d4-a716-446655440000",
-  "requestId": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
-  "httpMethod": "POST",
-  "httpUri": "/api/v1/users",
-  "app": "padelcenter",
-  "env": "local"
-}
-```
+## Nivel INFO en producción — solo eventos de negocio
 
-### 3. Use case: CreateUser (INFO success)
+`application-local.yaml` sube a `WARN` el ruido de framework (`org.hibernate.SQL`,
+`DispatcherServlet`, `Spring Security`, etc.), de forma que cada request exitoso
+genera **una sola línea** de log con el evento de negocio relevante
+(`user.created`, `booking.created`, `booking.cancel.failed`...), no las ~20 líneas
+de DEBUG (queries SQL, bindings, filtros de seguridad) que generaría por defecto.
 
-```json
-{
-  "timestamp": "2026-04-16T11:20:15.265Z",
-  "level": "INFO",
-  "logger": "com.bookings.padelcenter.application.create.CreateUserUseCase",
-  "message": "user.created userId=550e8400-e29b-41d4-a716-446655440001 email=john@example.com firstName=John lastName=Doe",
-  "thread": "http-nio-8080-exec-1",
-  "traceId": "550e8400-e29b-41d4-a716-446655440000",
-  "requestId": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
-  "httpMethod": "POST",
-  "httpUri": "/api/v1/users",
-  "app": "padelcenter",
-  "env": "local"
-}
-```
+## Propagación de `traceId`
 
-### 4. Use case: CreateBooking (complete flow)
-
-```json
-{
-  "timestamp": "2026-04-16T11:20:16.100Z",
-  "level": "DEBUG",
-  "logger": "com.bookings.padelcenter.application.create.CreateBookingUseCase",
-  "message": "booking.create.start fieldId=f47ac10b-58cc-4372-a567-0e02b2c3d479 userId=550e8400-e29b-41d4-a716-446655440001 start=2026-04-18T10:00:00 end=2026-04-18T11:00:00",
-  "thread": "http-nio-8080-exec-2",
-  "traceId": "550e8400-e29b-41d4-a716-446655440002",
-  "requestId": "8d9e0f1a-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
-  "httpMethod": "POST",
-  "httpUri": "/api/v1/users/550e8400-e29b-41d4-a716-446655440001/bookings",
-  "app": "padelcenter",
-  "env": "local"
-}
-```
-
-```json
-{
-  "timestamp": "2026-04-16T11:20:16.110Z",
-  "level": "DEBUG",
-  "logger": "com.bookings.padelcenter.application.create.CreateBookingUseCase",
-  "message": "booking.create.field.found fieldId=f47ac10b-58cc-4372-a567-0e02b2c3d479 available=true",
-  "thread": "http-nio-8080-exec-2",
-  "traceId": "550e8400-e29b-41d4-a716-446655440002",
-  "requestId": "8d9e0f1a-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
-  "httpMethod": "POST",
-  "httpUri": "/api/v1/users/550e8400-e29b-41d4-a716-446655440001/bookings",
-  "app": "padelcenter",
-  "env": "local"
-}
-```
-
-```json
-{
-  "timestamp": "2026-04-16T11:20:16.125Z",
-  "level": "INFO",
-  "logger": "com.bookings.padelcenter.application.create.CreateBookingUseCase",
-  "message": "booking.created bookingId=12345 fieldId=f47ac10b-58cc-4372-a567-0e02b2c3d479 userId=550e8400-e29b-41d4-a716-446655440001 totalPrice=50.00",
-  "thread": "http-nio-8080-exec-2",
-  "traceId": "550e8400-e29b-41d4-a716-446655440002",
-  "requestId": "8d9e0f1a-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
-  "httpMethod": "POST",
-  "httpUri": "/api/v1/users/550e8400-e29b-41d4-a716-446655440001/bookings",
-  "app": "padelcenter",
-  "env": "local"
-}
-```
-
-### 5. Use case: UpdatePassword (WARN on failure)
-
-```json
-{
-  "timestamp": "2026-04-16T11:20:17.200Z",
-  "level": "WARN",
-  "logger": "com.bookings.padelcenter.application.update.UpdatePasswordUseCase",
-  "message": "user.password.update.failed userId=550e8400-e29b-41d4-a716-446655440001 reason=invalid_current_password",
-  "thread": "http-nio-8080-exec-3",
-  "traceId": "550e8400-e29b-41d4-a716-446655440003",
-  "requestId": "9e0f1a2b-3c4d-5e6f-7a8b-9c0d1e2f3a4b",
-  "httpMethod": "PATCH",
-  "httpUri": "/api/v1/users/550e8400-e29b-41d4-a716-446655440001/password",
-  "app": "padelcenter",
-  "env": "local"
-}
-```
-
-### 6. Use case: CancelBooking (WARN on conflict)
-
-```json
-{
-  "timestamp": "2026-04-16T11:20:18.300Z",
-  "level": "WARN",
-  "logger": "com.bookings.padelcenter.application.update.CancelBookingUseCase",
-  "message": "booking.cancel.failed bookingId=12346 reason=already_cancelled",
-  "thread": "http-nio-8080-exec-4",
-  "traceId": "550e8400-e29b-41d4-a716-446655440004",
-  "requestId": "0f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
-  "httpMethod": "DELETE",
-  "httpUri": "/api/v1/bookings/12346",
-  "app": "padelcenter",
-  "env": "local"
-}
-```
-
-### 7. Query: GetAllUsers (pagination)
-
-```json
-{
-  "timestamp": "2026-04-16T11:20:19.400Z",
-  "level": "DEBUG",
-  "logger": "com.bookings.padelcenter.application.read.GetAllUsersUseCase",
-  "message": "users.list.start page=0 size=20",
-  "thread": "http-nio-8080-exec-5",
-  "traceId": "550e8400-e29b-41d4-a716-446655440005",
-  "requestId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-  "httpMethod": "GET",
-  "httpUri": "/api/v1/users",
-  "app": "padelcenter",
-  "env": "local"
-}
-```
-
-```json
-{
-  "timestamp": "2026-04-16T11:20:19.420Z",
-  "level": "DEBUG",
-  "logger": "com.bookings.padelcenter.application.read.GetAllUsersUseCase",
-  "message": "users.list.found count=15 totalPages=1",
-  "thread": "http-nio-8080-exec-5",
-  "traceId": "550e8400-e29b-41d4-a716-446655440005",
-  "requestId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-  "httpMethod": "GET",
-  "httpUri": "/api/v1/users",
-  "app": "padelcenter",
-  "env": "local"
-}
-```
-
-### 8. SQL Query (Hibernate DEBUG)
-
-```json
-{
-  "timestamp": "2026-04-16T11:20:19.435Z",
-  "level": "DEBUG",
-  "logger": "org.hibernate.SQL",
-  "message": "select user0_.user_id, user0_.first_name, user0_.last_name, user0_.email, ... from users user0_ where user0_.deleted_at is null limit ? offset ?",
-  "thread": "http-nio-8080-exec-5",
-  "traceId": "550e8400-e29b-41d4-a716-446655440005",
-  "requestId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-  "app": "padelcenter",
-  "env": "local"
-}
-```
-
-### 9. SQL Parameters (Hibernate TRACE)
-
-```json
-{
-  "timestamp": "2026-04-16T11:20:19.440Z",
-  "level": "TRACE",
-  "logger": "org.hibernate.orm.jdbc.bind",
-  "message": "binding parameter [1] as [INTEGER] - [20], binding parameter [2] as [INTEGER] - [0]",
-  "thread": "http-nio-8080-exec-5",
-  "traceId": "550e8400-e29b-41d4-a716-446655440005",
-  "requestId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-  "app": "padelcenter",
-  "env": "local"
-}
-```
-
-### 10. Response (CommonsRequestLoggingFilter)
-
-```json
-{
-  "timestamp": "2026-04-16T11:20:19.450Z",
-  "level": "DEBUG",
-  "logger": "org.springframework.web.filter.CommonsRequestLoggingFilter",
-  "message": "HTTP RESPONSE: status=200, contentType=application/json",
-  "thread": "http-nio-8080-exec-5",
-  "traceId": "550e8400-e29b-41d4-a716-446655440005",
-  "requestId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-  "httpMethod": "GET",
-  "httpUri": "/api/v1/users",
-  "app": "padelcenter",
-  "env": "local"
-}
-```
-
----
-
-## Propagación de traceId
-
-En un entorno de microservicios con API Gateway:
+`MdcFilter` extrae el header `X-Trace-Id` de la request entrante (o genera un UUID
+si no viene), lo añade al MDC para que aparezca en todos los logs de ese request,
+y lo devuelve en la respuesta con el mismo header — permite correlacionar logs de
+un mismo request a través de varios servicios.
 
 ```bash
 curl -H "X-Trace-Id: 550e8400-e29b-41d4-a716-446655440000" \
@@ -250,94 +64,42 @@ curl -H "X-Trace-Id: 550e8400-e29b-41d4-a716-446655440000" \
      http://localhost:8080/api/v1/users
 ```
 
-- El `X-Trace-Id` es **extraído por MdcFilter**
-- Se añade a **todos los logs del request** (MDC)
-- Se devuelve en la **respuesta** con el header `X-Trace-Id`
-- Permite **correlacionar logs de múltiples servicios**
+## Ingestión en ELK / Grafana Loki
 
-Si no viene `X-Trace-Id`, se **genera un UUID aleatorio**.
-
----
-
-## Ingestión en ELK/Loki
-
-### Logstash → Elasticsearch
-
-```conf
-input {
-  stdin { codec => "json" }
-}
-
-filter {
-  date {
-    match => [ "timestamp", "ISO8601" ]
-  }
-}
-
-output {
-  elasticsearch {
-    hosts => ["elasticsearch:9200"]
-    index => "padelcenter-%{+YYYY.MM.dd}"
-  }
-}
-```
-
-### Promtail → Grafana Loki
+**Promtail → Loki:**
 
 ```yaml
 clients:
   - url: http://loki:3100/loki/api/v1/push
-
 scrape_configs:
   - job_name: padelcenter
     static_configs:
-      - targets:
-          - localhost
-        labels:
-          app: padelcenter
-          job: spring-logs
+      - targets: [localhost]
+        labels: { app: padelcenter, job: spring-logs }
     pipeline_stages:
       - json:
-          expressions:
-            timestamp: timestamp
-            level: level
-            logger: logger
-            message: message
-            traceId: traceId
-            requestId: requestId
-            app: app
-      - labels:
-          level:
-          traceId:
-          app:
+          expressions: { timestamp: timestamp, level: level, logger: logger, message: message, traceId: traceId, app: app }
+      - labels: { level:, traceId:, app: }
 ```
-
-Luego en Grafana:
 
 ```logql
 {app="padelcenter"} | json | level="INFO"
 {app="padelcenter", traceId="550e8400-e29b-41d4-a716-446655440000"}
-{logger="com.bookings.padelcenter.application.create.CreateUserUseCase"}
 ```
 
----
+**Logstash → Elasticsearch:**
 
-## Niveles y Patrones
-
-| Nivel | Caso de uso | Ejemplo |
-|-------|-----------|---------|
-| **TRACE** | Bindings SQL muy detallado | `org.hibernate.orm.jdbc.bind` |
-| **DEBUG** | Flow de use cases, queries | `booking.create.start`, `users.list.found` |
-| **INFO** | Eventos de negocio | `user.created`, `booking.cancelled`, `user.password.updated` |
-| **WARN** | Errores recuperables | `user.password.update.failed`, `booking.cancel.failed` |
-| **ERROR** | Excepciones no manejadas | `GlobalExceptionHandler` (no explícito aquí, pero capturado) |
-
----
+```conf
+input { stdin { codec => "json" } }
+filter { date { match => [ "timestamp", "ISO8601" ] } }
+output { elasticsearch { hosts => ["elasticsearch:9200"] index => "padelcenter-%{+YYYY.MM.dd}" } }
+```
 
 ## Seguridad
 
-⚠️ **Datos sensibles nunca se loguean:**
-- ❌ `Authorization: Bearer ...` — bloqueado (`setIncludeHeaders(false)`)
-- ❌ Request body con contraseña — bloqueado (`setIncludePayload(false)`)
-- ❌ Response body — bloqueado (solo headers)
-- ✅ `email`, `userId`, `traceId`, métodos y parámetros funcionales
+Datos sensibles que nunca se loguean:
+
+- `Authorization: Bearer ...` — `CommonsRequestLoggingFilter` con `setIncludeHeaders(false)`
+- Request/response body (contraseñas, etc.) — `setIncludePayload(false)`
+
+Solo se loguean `email`, `userId`, `traceId` y parámetros funcionales no sensibles.
