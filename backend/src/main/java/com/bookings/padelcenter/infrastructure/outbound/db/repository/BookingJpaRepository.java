@@ -59,10 +59,10 @@ public interface BookingJpaRepository extends JpaRepository<BookingEntity, Long>
 	@Query("""
 		SELECT b FROM BookingEntity b
 		WHERE b.field.center.centerId = :centerId
-		  AND (:fieldId IS NULL OR b.field.fieldId = :fieldId)
-		  AND (:dayStart IS NULL OR b.startTime >= :dayStart)
-		  AND (:dayEnd IS NULL OR b.startTime < :dayEnd)
-		  AND (:status IS NULL OR b.status = :status)
+		  AND (CAST(:fieldId AS uuid) IS NULL OR b.field.fieldId = :fieldId)
+		  AND (CAST(:dayStart AS timestamp) IS NULL OR b.startTime >= :dayStart)
+		  AND (CAST(:dayEnd AS timestamp) IS NULL OR b.startTime < :dayEnd)
+		  AND (CAST(:status AS integer) IS NULL OR b.status = :status)
 		ORDER BY b.startTime ASC
 		""")
 	Page<BookingEntity> findByCenterWithFilters(
