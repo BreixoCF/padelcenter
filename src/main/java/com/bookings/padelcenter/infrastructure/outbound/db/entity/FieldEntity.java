@@ -3,6 +3,7 @@ package com.bookings.padelcenter.infrastructure.outbound.db.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -11,6 +12,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "fields")
+@SQLRestriction("deleted_at IS NULL")
 public class FieldEntity extends AuditableEntity<UUID> {
 
 	@Id

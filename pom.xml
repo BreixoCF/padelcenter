@@ -162,6 +162,41 @@
 					</environmentVariables>
 				</configuration>
 			</plugin>
+			<!--
+			  *IT classes run via Failsafe, not Surefire, each in its own forked JVM
+			  (reuseForks=false). Each fork gets its own Testcontainers Postgres
+			  instance and HikariPool: a connectivity blip in one IT class (seen on
+			  this machine as Docker Desktop/WSL2 dropping the container's forwarded
+			  port mid-run) no longer cascades into every IT class that runs after it
+			  in the same JVM, since they no longer share a JVM.
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<includes>
+						<include>**/*IT.java</include>
+					</includes>
+					<reuseForks>false</reuseForks>
+					<argLine>
+						-XX:+EnableDynamicAgentLoading
+						-Dnet.bytebuddy.experimental=true
+						-Dapi.version=1.43
+					</argLine>
+					<environmentVariables>
+						<DOCKER_HOST>tcp://127.0.0.1:2375</DOCKER_HOST>
+						<TESTCONTAINERS_HOST_OVERRIDE>127.0.0.1</TESTCONTAINERS_HOST_OVERRIDE>
+					</environmentVariables>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<!-- OpenAPI code generation from docs/openapi/index.yaml -->
 			<plugin>
 				<groupId>org.openapitools</groupId>

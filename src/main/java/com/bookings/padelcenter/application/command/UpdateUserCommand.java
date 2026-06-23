@@ -1,5 +1,7 @@
 package com.bookings.padelcenter.application.command;
 
+import com.bookings.padelcenter.application.shared.AuthenticatedUser;
+
 import java.util.UUID;
 
 public record UpdateUserCommand(
@@ -8,5 +10,6 @@ public record UpdateUserCommand(
 	String lastName,
 	String email,
 	String password,
-	String phoneNumber
+	String phoneNumber,
+	AuthenticatedUser authenticatedUser
 ) {}

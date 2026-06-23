@@ -3,6 +3,12 @@
 > Fecha: 2026-04-14  
 > Referencia: convenciones internas del proyecto  
 > Rama analizada: `develop`
+>
+> **Re-verificado: 2026-06-23.** Este documento describe el estado del código en
+> abril; la columna *Estado* de la tabla de prioridad refleja la verificación
+> contra el código actual. El cuerpo del documento (secciones por capa) no se
+> ha actualizado y puede contener hallazgos ya corregidos — usar la tabla de
+> prioridad como referencia vigente.
 
 ---
 
@@ -160,30 +166,30 @@
 
 ## Tabla de prioridad
 
-| # | Problema | Capa | Impacto | Esfuerzo |
-|---|---|---|---|---|
-| 1 | `UpdateUserResponse` expone el hash de contraseña en la respuesta REST | Web | Crítico | Bajo |
-| 2 | `PasswordService` usa `"hashed_" + password` sin BCrypt — desplegable en producción | Aplicación | Crítico | Bajo |
-| 3 | Ausencia total de `SecurityConfig` — ningún endpoint requiere autenticación | Web | Crítico | Alto |
-| 4 | `CreateBookingUseCase` hace 3 lecturas + 1 escritura sin `@Transactional` — no atómico | Aplicación | Alto | Bajo |
-| 5 | `@Transactional(readOnly = true)` ausente en todos los casos de uso de lectura y repositorios | Aplicación | Alto | Bajo |
-| 6 | `CenterRepositoryImpl` y `FieldRepositoryImpl` con 5 métodos sin implementar (retornan vacío/false) | Persistencia | Alto | Medio |
-| 7 | `open-in-view` no configurado como `false` — N+1 latente en cualquier endpoint con lazy relations | Build/Config | Alto | Bajo |
-| 8 | Tests usan H2 + `ddl-auto: create-drop` en lugar de Testcontainers + PostgreSQL real | Base de datos | Alto | Medio |
-| 9 | `EmailAlreadyExistsException` tiene `@ResponseStatus` en capa de dominio — acopla dominio a HTTP | Dominio | Medio | Bajo |
-| 10 | `CreateUserRequest`, `CreateCenterRequest`, `CreateFieldRequest` sin validaciones `@NotBlank`/`@Email` | Web | Medio | Bajo |
-| 11 | `GlobalExceptionHandler` no usa `ProblemDetail` (RFC 9457) — retorna `Map` ad-hoc | Web | Medio | Bajo |
-| 12 | `Booking.startTime`/`endTime` son `String` en dominio — conversión frágil vía `Instant.parse()` | Dominio | Medio | Medio |
-| 13 | `modifiedBy`/`deletedBy` siempre `null` — sin propagación del usuario autenticado a use cases | Aplicación | Medio | Alto |
-| 14 | No hay paginación en `GetAllUsersUseCase` — lista sin acotar | Aplicación | Medio | Bajo |
-| 15 | API sin versionado — rutas directas `/users`, `/bookings` en lugar de `/api/v1/` | Web | Medio | Medio |
-| 16 | `FieldController` vacío — sin endpoints de consulta de pistas | Web | Medio | Medio |
-| 17 | `CenterJpaRepository` y `FieldJpaRepository` sin métodos custom — backing JPA ausente | Persistencia | Medio | Bajo |
-| 18 | Virtual threads no habilitados (`spring.threads.virtual.enabled=true` ausente) | Build/Config | Medio | Bajo |
-| 19 | `V2__sample_data.sql` mezcla datos de prueba en migraciones de producción | Base de datos | Medio | Bajo |
-| 20 | Build usa Maven en lugar de Gradle Kotlin DSL (convenciones del proyecto) | Build | Bajo | Alto |
-| 21 | `FieldCommandMapper` existe pero no se usa — `CreateFieldUseCase` construye el objeto manualmente | Aplicación | Bajo | Bajo |
-| 22 | Faltan índices en FKs de alta cardinalidad (`bookings.user_id`, `center_roles.user_id`, `users.email`) | Base de datos | Bajo | Bajo |
-| 23 | No hay ArchUnit tests para enforcement de reglas de capas en CI | Build | Bajo | Medio |
-| 24 | No hay dependencias de observabilidad (Micrometer Prometheus, OpenTelemetry) | Build | Bajo | Medio |
-| 25 | `AuditableResponse.lastModifiedBy` inconsistente con el campo `modifiedBy` del dominio | Web | Bajo | Bajo |
+| # | Problema | Capa | Impacto | Esfuerzo | Estado (2026-06-23) |
+|---|---|---|---|---|---|
+| 1 | `UpdateUserResponse` expone el hash de contraseña en la respuesta REST | Web | Crítico | Bajo | ✅ Corregido |
+| 2 | `PasswordService` usa `"hashed_" + password` sin BCrypt — desplegable en producción | Aplicación | Crítico | Bajo | ✅ Corregido (Spring Security + `PasswordEncoder`, sin `PasswordService` ad-hoc) |
+| 3 | Ausencia total de `SecurityConfig` — ningún endpoint requiere autenticación | Web | Crítico | Alto | ✅ Corregido (`SecurityConfig` + JWT HMAC + `@PreAuthorize`) |
+| 4 | `CreateBookingUseCase` hace 3 lecturas + 1 escritura sin `@Transactional` — no atómico | Aplicación | Alto | Bajo | ✅ Corregido |
+| 5 | `@Transactional(readOnly = true)` ausente en todos los casos de uso de lectura y repositorios | Aplicación | Alto | Bajo | ✅ Corregido |
+| 6 | `CenterRepositoryImpl` y `FieldRepositoryImpl` con 5 métodos sin implementar (retornan vacío/false) | Persistencia | Alto | Medio | ✅ Corregido |
+| 7 | `open-in-view` no configurado como `false` — N+1 latente en cualquier endpoint con lazy relations | Build/Config | Alto | Bajo | ✅ Corregido (`application.yaml`) |
+| 8 | Tests usan H2 + `ddl-auto: create-drop` en lugar de Testcontainers + PostgreSQL real | Base de datos | Alto | Medio | ✅ Corregido (`AbstractIntegrationTest` + Testcontainers) |
+| 9 | `EmailAlreadyExistsException` tiene `@ResponseStatus` en capa de dominio — acopla dominio a HTTP | Dominio | Medio | Bajo | ✅ Corregido |
+| 10 | `CreateUserRequest`, `CreateCenterRequest`, `CreateFieldRequest` sin validaciones `@NotBlank`/`@Email` | Web | Medio | Bajo | ✅ Corregido (constraints en `docs/openapi/components/schemas/*-request.yaml`, generan `@NotNull`/`@Size`/`@Email`) |
+| 11 | `GlobalExceptionHandler` no usa `ProblemDetail` (RFC 9457) — retorna `Map` ad-hoc | Web | Medio | Bajo | ✅ Corregido |
+| 12 | `Booking.startTime`/`endTime` son `String` en dominio — conversión frágil vía `Instant.parse()` | Dominio | Medio | Medio | ✅ Corregido (`LocalDateTime` en dominio) |
+| 13 | `modifiedBy`/`deletedBy` siempre `null` — sin propagación del usuario autenticado a use cases | Aplicación | Medio | Alto | ✅ Corregido (2026-06-23: `deletedBy` ya estaba propagado vía `AuthenticatedUser`; `modifiedBy` se corrigió en esta sesión añadiendo `authenticatedUser` a `UpdateUserCommand`) |
+| 14 | No hay paginación en `GetAllUsersUseCase` — lista sin acotar | Aplicación | Medio | Bajo | ✅ Corregido (`PageResult`) |
+| 15 | API sin versionado — rutas directas `/users`, `/bookings` en lugar de `/api/v1/` | Web | Medio | Medio | ✅ Corregido |
+| 16 | `FieldController` vacío — sin endpoints de consulta de pistas | Web | Medio | Medio | ✅ Corregido |
+| 17 | `CenterJpaRepository` y `FieldJpaRepository` sin métodos custom — backing JPA ausente | Persistencia | Medio | Bajo | ✅ Corregido |
+| 18 | Virtual threads no habilitados (`spring.threads.virtual.enabled=true` ausente) | Build/Config | Medio | Bajo | ✅ Corregido |
+| 19 | `V2__sample_data.sql` mezcla datos de prueba en migraciones de producción | Base de datos | Medio | Bajo | ✅ Corregido (`V2__placeholder.sql`; datos de prueba viven en `test-data.sql` de test resources) |
+| 20 | Build usa Maven en lugar de Gradle Kotlin DSL (convenciones del proyecto) | Build | Bajo | Alto | ⛔ Hallazgo inválido — Maven es el stack oficial del proyecto (ver `CLAUDE.md` del workspace) |
+| 21 | `FieldCommandMapper` existe pero no se usa — `CreateFieldUseCase` construye el objeto manualmente | Aplicación | Bajo | Bajo | ✅ Corregido (2026-06-23: se creó `FieldCommandMapper` y `CreateFieldUseCase` delega en él, igual que `CreateBookingUseCase`/`CreateCenterUseCase`) |
+| 22 | Faltan índices en FKs de alta cardinalidad (`bookings.user_id`, `center_roles.user_id`, `users.email`) | Base de datos | Bajo | Bajo | ✅ Corregido (`V3__add_missing_indexes.sql`) |
+| 23 | No hay ArchUnit tests para enforcement de reglas de capas en CI | Build | Bajo | Medio | ✅ Corregido (`ArchitectureTest`) |
+| 24 | No hay dependencias de observabilidad (Micrometer Prometheus, OpenTelemetry) | Build | Bajo | Medio | ⏳ Pendiente — solo Actuator básico, sin Micrometer/Prometheus ni OpenTelemetry |
+| 25 | `AuditableResponse.lastModifiedBy` inconsistente con el campo `modifiedBy` del dominio | Web | Bajo | Bajo | ✅ Corregido |

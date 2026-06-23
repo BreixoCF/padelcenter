@@ -3,6 +3,7 @@ package com.bookings.padelcenter.infrastructure.outbound.db.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "centers")
+@SQLRestriction("deleted_at IS NULL")
 public class CenterEntity extends AuditableEntity<UUID> {
 
 	@Id

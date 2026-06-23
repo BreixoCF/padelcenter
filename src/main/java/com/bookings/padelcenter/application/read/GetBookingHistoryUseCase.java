@@ -9,6 +9,7 @@ import com.bookings.padelcenter.domain.repository.BookingRepository;
 import com.bookings.padelcenter.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ public class GetBookingHistoryUseCase implements QueryUseCase<GetBookingHistoryQ
 	private final UserRepository userRepository;
 
 	@Override
+	@PreAuthorize("@authResolver.resolveUserId(authentication).equals(#query.userId) or hasRole('ADMIN')")
 	public PageResult<Booking> execute(GetBookingHistoryQuery query) {
 		log.debug("booking.history.start userId={} page={} size={}",
 			query.userId(), query.page(), query.size());

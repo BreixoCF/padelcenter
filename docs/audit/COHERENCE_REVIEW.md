@@ -2,6 +2,11 @@
 
 > Auditoría transversal del proyecto. No modifica ningún fichero.
 > Fecha: 2026-04-16 | Rama: develop
+>
+> **Re-verificado: 2026-06-23.** La columna *Estado* de la "Tabla de
+> Prioridades" refleja la verificación contra el código actual; el cuerpo del
+> documento (secciones 1-5) no se ha actualizado y puede describir código ya
+> corregido — usar la tabla de prioridades como referencia vigente.
 
 ---
 
@@ -242,17 +247,17 @@
 
 ## Tabla de Prioridades
 
-| Prioridad | Severidad | Componente | Problema |
-|-----------|-----------|------------|---------|
-| 1 | ❌ Crítico | `BookingEntity` | `@Id private Long id` sin `@Column(name="booking_id")` → runtime error `column be1_0.id does not exist` |
-| 2 | ❌ Crítico | `CenterPersistenceMapper` | `toEntity()` no mapea `manager` → `manager_id` siempre NULL al crear/actualizar center |
-| 3 | ❌ Crítico | `GetBookingHistoryUseCase` | Sin autorización — cualquier usuario puede ver el historial de otro |
-| 4 | ❌ Crítico | `BookingControllerIT` | `createBooking_validRequest_returns201` falla: usuario del JWT no existe en la BD |
-| 5 | ❌ Error | Todos los JpaRepository | Sin filtro `deleted_at IS NULL` — registros eliminados (soft-delete) son visibles |
-| 6 | ⚠️ Warning | `FieldEntity` / `CenterEntity` | `referencedColumnName` usa nombre Java (camelCase) en vez de columna DB |
-| 7 | ⚠️ Warning | `UpdateUserUseCase` | Retorna `updatedUser` pre-save; `modifiedAt` generado por `@LastModifiedDate` no se refleja en la respuesta |
-| 8 | ⚠️ Warning | `CreateBookingUseCase` | No verifica `field.isAvailable()` ni solapamiento de horario |
-| 9 | ⚠️ Warning | `BookingPersistenceMapper` | `LocalDateTime ↔ Instant` hardcodea `ZoneOffset.UTC` — riesgo si se cambia timezone del servidor |
-| 10 | ⚠️ Warning | `InvalidPasswordException` | Mapeada a HTTP 401; semánticamente sería más correcto 422 |
-| 11 | ⚠️ Warning | `BookingParticipant` | Domain record + JPA entity + tabla en DB, pero sin repositorio, use cases ni endpoints |
-| 12 | ⚠️ Warning | `CenterSummaryResponse` | Sin campo `id` — clientes no pueden identificar el center en listados |
+| Prioridad | Severidad | Componente | Problema | Estado (2026-06-23) |
+|-----------|-----------|------------|---------|---|
+| 1 | ❌ Crítico | `BookingEntity` | `@Id private Long id` sin `@Column(name="booking_id")` → runtime error `column be1_0.id does not exist` | ✅ Corregido |
+| 2 | ❌ Crítico | `CenterPersistenceMapper` | `toEntity()` no mapea `manager` → `manager_id` siempre NULL al crear/actualizar center | ✅ Corregido (2026-06-23). Nota: hoy no hay ningún caso de uso que permita asignar `managerId` (no existe en `CreateCenterCommand` ni en el OpenAPI), así que el bug era latente; queda corregido de cara a cuando se añada esa funcionalidad |
+| 3 | ❌ Crítico | `GetBookingHistoryUseCase` | Sin autorización — cualquier usuario puede ver el historial de otro | ✅ Corregido (2026-06-23): `@PreAuthorize` exige que `userId` coincida con el autenticado o rol ADMIN |
+| 4 | ❌ Crítico | `BookingControllerIT` | `createBooking_validRequest_returns201` falla: usuario del JWT no existe en la BD | ✅ Corregido (`seedRegularUser()` en `@BeforeEach`) |
+| 5 | ❌ Error | Todos los JpaRepository | Sin filtro `deleted_at IS NULL` — registros eliminados (soft-delete) son visibles | ✅ Corregido (2026-06-23): `@SQLRestriction("deleted_at IS NULL")` en `UserEntity`, `CenterEntity`, `FieldEntity`, `BookingEntity` |
+| 6 | ⚠️ Warning | `FieldEntity` / `CenterEntity` | `referencedColumnName` usa nombre Java (camelCase) en vez de columna DB | ✅ Ya estaba corregido — ambas entidades usan el nombre de columna DB (`user_id`, `center_id`) |
+| 7 | ⚠️ Warning | `UpdateUserUseCase` | Retorna `updatedUser` pre-save; `modifiedAt` generado por `@LastModifiedDate` no se refleja en la respuesta | ✅ Corregido — retorna `savedUser` (resultado de `save()`) |
+| 8 | ⚠️ Warning | `CreateBookingUseCase` | No verifica `field.isAvailable()` ni solapamiento de horario | ✅ Corregido |
+| 9 | ⚠️ Warning | `BookingPersistenceMapper` | `LocalDateTime ↔ Instant` hardcodea `ZoneOffset.UTC` — riesgo si se cambia timezone del servidor | ⏳ Pendiente — sigue hardcodeado (documentado con comentario explícito en el código); aceptado mientras el servidor opere en UTC |
+| 10 | ⚠️ Warning | `InvalidPasswordException` | Mapeada a HTTP 401; semánticamente sería más correcto 422 | ✅ Corregido — mapeada a 422 |
+| 11 | ⚠️ Warning | `BookingParticipant` | Domain record + JPA entity + tabla en DB, pero sin repositorio, use cases ni endpoints | ⛔ Hallazgo inválido — diferido intencionalmente, ver [ADR-003](../adr/ADR-003-booking-participants-deferred.md) |
+| 12 | ⚠️ Warning | `CenterSummaryResponse` | Sin campo `id` — clientes no pueden identificar el center en listados | ✅ Corregido |

@@ -103,6 +103,17 @@ Backend convertido a **resource server puro**: Keycloak 24.0.3 emite los tokens,
 
 **Commit:** `feat(gaps): GET /me current user profile, PUT /fields/{id} full field update`
 
+### ✅ Rollback — Vuelta a JWT HMAC local (Keycloak descartado)
+La integración con Keycloak (prompt "Keycloak — Integración como proveedor de identidad") se revirtió.
+`V7__remove_keycloak_id_from_users.sql` elimina la columna `keycloak_id` añadida en V6.
+`SyncUserUseCase` y `POST /api/v1/auth/sync` ya no existen. `GetCurrentUserUseCase`
+vuelve a resolver por `userId` (claim `sub` del JWT), no por `keycloakId`. La auth actual
+es JWT HMAC HS256 firmado localmente (`app.jwt.secret`, ver `SecurityConfig`/`JwtConfig`),
+con login propio en `AuthController` (`POST /api/v1/auth/login`). El servicio `keycloak`
+y el script `init-multiple-dbs.sh` se eliminaron de `tools/docker/docker-compose.yaml`.
+Motivo: ver `CLAUDE.md` del workspace, que define JWT HMAC local como el modelo de auth
+del proyecto.
+
 ---
 
 ## Estado general
@@ -111,13 +122,20 @@ Backend convertido a **resource server puro**: Keycloak 24.0.3 emite los tokens,
 
 - Arquitectura hexagonal reforzada (domain → application → infrastructure)
 - API-first con OpenAPI Generator
-- Keycloak 24.0.3 como IdP — resource server puro, sin secretos en código
+- Auth: JWT HMAC HS256 firmado localmente (`app.jwt.secret`) — Keycloak fue evaluado y descartado, ver "Rollback" más abajo
 - CORS configurado para frontend web y móvil
 - Tests: 170 unit + ArchUnit verdes
 
 **Fase 2 — Gaps de API: ✅ COMPLETA**
 
-- `GET /api/v1/me` — resolución por `keycloakId`, mensaje claro si no sincronizado
+- `GET /api/v1/me` — resolución por `userId` (claim `sub` del JWT)
 - `PUT /api/v1/fields/{id}` — actualización inmutable preservando `center`+`id`, solo ADMIN
 - 6 tests nuevos, ArchUnit verde
 - Tests totales: 176 unit + ArchUnit verdes
+
+**Fase 3 — Rollback de Keycloak a JWT HMAC local: ✅ COMPLETA**
+
+- `keycloak_id` eliminado de `users` (V7)
+- `SyncUserUseCase` y `/api/v1/auth/sync` eliminados
+- Servicio `keycloak` eliminado de `docker-compose.yaml`
+- Login propio (`POST /api/v1/auth/login`) con JWT firmado localmente

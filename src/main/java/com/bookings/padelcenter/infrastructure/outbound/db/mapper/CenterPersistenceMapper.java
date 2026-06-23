@@ -22,6 +22,9 @@ public class CenterPersistenceMapper {
 		entity.setPhoneNumber(center.phoneNumber());
 		entity.setCity(center.city());
 		entity.setEmail(center.email());
+		if (center.manager() != null) {
+			entity.setManager(userPersistenceMapper.toEntity(center.manager()));
+		}
 		return entity;
 	}
 

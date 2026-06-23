@@ -175,6 +175,23 @@ class UserControllerIT extends AbstractIntegrationTest {
 				.andExpect(status().isForbidden());
 	}
 
+	@Test
+	@DisplayName("GET /api/v1/users/{userId}/bookings — different user without ADMIN returns 403")
+	void getUserBookings_asDifferentUser_returns403() throws Exception {
+		String body = mockMvc.perform(post(BASE_URL)
+						.with(adminJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(VALID_USER_JSON))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+
+		String userId = JsonPath.read(body, "$.userId");
+
+		mockMvc.perform(get(BASE_URL + "/" + userId + "/bookings")
+						.with(userJwt()))
+				.andExpect(status().isForbidden());
+	}
+
 	// ── Validation ───────────────────────────────────────────────────────────
 
 	@Test

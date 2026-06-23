@@ -1,6 +1,7 @@
 package com.bookings.padelcenter.application.create;
 
 import com.bookings.padelcenter.application.command.CreateFieldCommand;
+import com.bookings.padelcenter.application.mapper.FieldCommandMapper;
 import com.bookings.padelcenter.domain.exception.CenterNotFoundException;
 import com.bookings.padelcenter.domain.model.Auditable;
 import com.bookings.padelcenter.domain.model.Center;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -35,12 +35,16 @@ class CreateFieldUseCaseTest {
 	@Mock
 	private FieldRepository fieldRepository;
 
+	@Mock
+	private FieldCommandMapper fieldCommandMapper;
+
 	@InjectMocks
 	private CreateFieldUseCase createFieldUseCase;
 
 	private UUID centerId;
 	private CreateFieldCommand command;
 	private Center existingCenter;
+	private Field fieldToCreate;
 	private Field expectedField;
 
 	@BeforeEach
@@ -66,7 +70,7 @@ class CreateFieldUseCaseTest {
 			Auditable.newAudit()
 		);
 
-		expectedField = new Field(
+		fieldToCreate = new Field(
 			UUID.randomUUID(),
 			"Court 1",
 			"Indoor",
@@ -75,6 +79,8 @@ class CreateFieldUseCaseTest {
 			existingCenter,
 			Auditable.newAudit()
 		);
+
+		expectedField = fieldToCreate;
 	}
 
 	@Test
@@ -82,7 +88,8 @@ class CreateFieldUseCaseTest {
 	void shouldCreateFieldWhenCenterExists() {
 		// Given
 		when(centerRepository.findById(centerId)).thenReturn(Optional.of(existingCenter));
-		when(fieldRepository.save(any(Field.class))).thenReturn(expectedField);
+		when(fieldCommandMapper.toDomain(command, existingCenter)).thenReturn(fieldToCreate);
+		when(fieldRepository.save(fieldToCreate)).thenReturn(expectedField);
 
 		// When
 		Field result = createFieldUseCase.execute(command);
@@ -96,7 +103,7 @@ class CreateFieldUseCaseTest {
 		assertThat(result.center()).isEqualTo(existingCenter);
 
 		verify(centerRepository, times(1)).findById(centerId);
-		verify(fieldRepository, times(1)).save(any(Field.class));
+		verify(fieldRepository, times(1)).save(fieldToCreate);
 	}
 
 	@Test
@@ -110,71 +117,23 @@ class CreateFieldUseCaseTest {
 			.isInstanceOf(CenterNotFoundException.class);
 
 		verify(centerRepository, times(1)).findById(centerId);
+		verify(fieldCommandMapper, never()).toDomain(any(), any());
 		verify(fieldRepository, never()).save(any(Field.class));
 	}
 
 	@Test
-	@DisplayName("Should create field with correct attributes from command")
-	void shouldCreateFieldWithCorrectAttributes() {
+	@DisplayName("Should use mapper to create field from command")
+	void shouldUseMapperToCreateField() {
 		// Given
 		when(centerRepository.findById(centerId)).thenReturn(Optional.of(existingCenter));
-		when(fieldRepository.save(any(Field.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-		ArgumentCaptor<Field> fieldCaptor = ArgumentCaptor.forClass(Field.class);
+		when(fieldCommandMapper.toDomain(command, existingCenter)).thenReturn(fieldToCreate);
+		when(fieldRepository.save(fieldToCreate)).thenReturn(expectedField);
 
 		// When
 		createFieldUseCase.execute(command);
 
 		// Then
-		verify(fieldRepository).save(fieldCaptor.capture());
-		Field capturedField = fieldCaptor.getValue();
-
-		assertThat(capturedField.name()).isEqualTo("Court 1");
-		assertThat(capturedField.type()).isEqualTo("Indoor");
-		assertThat(capturedField.pricePerHour()).isEqualByComparingTo(new BigDecimal("25.00"));
-		assertThat(capturedField.isAvailable()).isTrue();
-		assertThat(capturedField.center()).isEqualTo(existingCenter);
-		assertThat(capturedField.audit()).isNotNull();
-	}
-
-	@Test
-	@DisplayName("Should generate a new id before save")
-	void shouldGenerateNewId() {
-		// Given
-		when(centerRepository.findById(centerId)).thenReturn(Optional.of(existingCenter));
-		when(fieldRepository.save(any(Field.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-		ArgumentCaptor<Field> fieldCaptor = ArgumentCaptor.forClass(Field.class);
-
-		// When
-		createFieldUseCase.execute(command);
-
-		// Then
-		verify(fieldRepository).save(fieldCaptor.capture());
-		Field capturedField = fieldCaptor.getValue();
-
-		assertThat(capturedField.fieldId()).isNotNull();
-	}
-
-	@Test
-	@DisplayName("Should create field with new audit information")
-	void shouldCreateFieldWithNewAudit() {
-		// Given
-		when(centerRepository.findById(centerId)).thenReturn(Optional.of(existingCenter));
-		when(fieldRepository.save(any(Field.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-		ArgumentCaptor<Field> fieldCaptor = ArgumentCaptor.forClass(Field.class);
-
-		// When
-		createFieldUseCase.execute(command);
-
-		// Then
-		verify(fieldRepository).save(fieldCaptor.capture());
-		Field capturedField = fieldCaptor.getValue();
-
-		assertThat(capturedField.audit()).isNotNull();
-		assertThat(capturedField.audit().createdAt()).isNotNull();
-		assertThat(capturedField.audit().modifiedAt()).isNotNull();
+		verify(fieldCommandMapper, times(1)).toDomain(command, existingCenter);
 	}
 
 	@Test
@@ -192,7 +151,8 @@ class CreateFieldUseCaseTest {
 		);
 
 		when(centerRepository.findById(centerId)).thenReturn(Optional.of(existingCenter));
-		when(fieldRepository.save(any(Field.class))).thenReturn(savedField);
+		when(fieldCommandMapper.toDomain(command, existingCenter)).thenReturn(fieldToCreate);
+		when(fieldRepository.save(fieldToCreate)).thenReturn(savedField);
 
 		// When
 		Field result = createFieldUseCase.execute(command);

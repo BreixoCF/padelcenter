@@ -68,12 +68,11 @@ de este flujo.
 
 ```bash
 # Unit tests + ArchUnit (sin Docker)
-mvn test -Dtest="*Test,ArchitectureTest"
+mvn test
 
-# Integration tests (requiere Docker, usa Testcontainers)
-mvn test -Dtest="*IT"
-
-# Suite completa
+# Suite completa: unit + ArchUnit + integration (requiere Docker, usa Testcontainers).
+# Las *IT corren con Failsafe; cada clase en su propio fork de JVM (reuseForks=false),
+# así una caída puntual de la red de Docker en una clase no arrastra a las demás.
 mvn verify
 ```
 

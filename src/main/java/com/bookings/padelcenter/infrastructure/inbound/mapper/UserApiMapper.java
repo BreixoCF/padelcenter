@@ -57,14 +57,15 @@ public class UserApiMapper {
 				.audit(toAuditResponse(user.audit()));
 	}
 
-	public UpdateUserCommand toCommand(UUID id, UserUpdateRequest request) {
+	public UpdateUserCommand toCommand(UUID id, UserUpdateRequest request, AuthenticatedUser authenticatedUser) {
 		return new UpdateUserCommand(
 				id,
 				request.getFirstName(),
 				request.getLastName(),
 				request.getEmail(),
 				request.getPassword(),
-				request.getPhoneNumber()
+				request.getPhoneNumber(),
+				authenticatedUser
 		);
 	}
 

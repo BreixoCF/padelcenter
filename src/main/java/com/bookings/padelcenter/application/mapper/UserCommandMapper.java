@@ -39,7 +39,7 @@ public class UserCommandMapper {
 				command.password(),
 				command.phoneNumber(),
 				user.centerRoles(),
-				user.audit().update(user.audit().modifiedBy())
+				user.audit().update(command.authenticatedUser().userId())
 		);
 	}
 }

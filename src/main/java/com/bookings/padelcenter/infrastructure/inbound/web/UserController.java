@@ -80,7 +80,7 @@ public class UserController implements UsersApi {
 
 	@Override
 	public ResponseEntity<UserResponse> updateUser(UUID id, UserUpdateRequest userUpdateRequest) {
-		var command = userMapper.toCommand(id, userUpdateRequest);
+		var command = userMapper.toCommand(id, userUpdateRequest, authResolver.currentUser());
 		var user = updateUserUseCase.execute(command);
 		return ResponseEntity.ok(userMapper.toResponse(user));
 	}

@@ -1,13 +1,12 @@
 package com.bookings.padelcenter.application.create;
 
 import com.bookings.padelcenter.application.command.CreateFieldCommand;
+import com.bookings.padelcenter.application.mapper.FieldCommandMapper;
 import com.bookings.padelcenter.application.shared.CommandUseCase;
 import com.bookings.padelcenter.domain.exception.CenterNotFoundException;
-import com.bookings.padelcenter.domain.model.Auditable;
 import com.bookings.padelcenter.domain.model.Field;
 import com.bookings.padelcenter.domain.repository.CenterRepository;
 import com.bookings.padelcenter.domain.repository.FieldRepository;
-import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +21,7 @@ public class CreateFieldUseCase implements CommandUseCase<CreateFieldCommand, Fi
 
 		private final CenterRepository centerRepository;
 		private final FieldRepository fieldRepository;
+		private final FieldCommandMapper fieldCommandMapper;
 
 		@PreAuthorize("hasRole('ADMIN')")
 		public Field execute(CreateFieldCommand command) {
@@ -30,15 +30,7 @@ public class CreateFieldUseCase implements CommandUseCase<CreateFieldCommand, Fi
 
 			var center = centerRepository.findById(command.centerId())
 					.orElseThrow(() -> new CenterNotFoundException(command.centerId()));
-			var fieldToCreate = new Field(
-					UuidCreator.getTimeOrderedEpoch(),
-					command.name(),
-					command.type(),
-					command.pricePerHour(),
-					command.isAvailable(),
-					center,
-					Auditable.newAudit()
-			);
+			var fieldToCreate = fieldCommandMapper.toDomain(command, center);
 			var field = fieldRepository.save(fieldToCreate);
 
 			log.info("field.created fieldId={} centerId={} name={} pricePerHour={}",

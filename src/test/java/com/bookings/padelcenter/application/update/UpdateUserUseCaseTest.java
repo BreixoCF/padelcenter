@@ -2,6 +2,7 @@ package com.bookings.padelcenter.application.update;
 
 import com.bookings.padelcenter.application.command.UpdateUserCommand;
 import com.bookings.padelcenter.application.mapper.UserCommandMapper;
+import com.bookings.padelcenter.application.shared.AuthenticatedUser;
 import com.bookings.padelcenter.domain.exception.EmailAlreadyExistsException;
 import com.bookings.padelcenter.domain.exception.UserNotFoundException;
 import com.bookings.padelcenter.domain.model.Auditable;
@@ -52,7 +53,8 @@ class UpdateUserUseCaseTest {
 			"Updated",
 			"john.updated@example.com",
 			"newPassword123",
-			"600999888"
+			"600999888",
+			new AuthenticatedUser(userId)
 		);
 
 		existingUser = new User(
@@ -147,7 +149,8 @@ class UpdateUserUseCaseTest {
 			"Updated",
 			"john.doe@example.com", // Same email as existing user
 			"newPassword123",
-			"600999888"
+			"600999888",
+			new AuthenticatedUser(userId)
 		);
 
 		User updatedUserSameEmail = new User(
@@ -234,7 +237,8 @@ class UpdateUserUseCaseTest {
 			"UpdatedName",
 			sameEmail,
 			"newPassword",
-			"600999888"
+			"600999888",
+			new AuthenticatedUser(userId)
 		);
 
 		User userWithUpdates = new User(
@@ -272,7 +276,8 @@ class UpdateUserUseCaseTest {
 			"Doe",
 			newEmail,
 			"password",
-			"600123456"
+			"600123456",
+			new AuthenticatedUser(userId)
 		);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
