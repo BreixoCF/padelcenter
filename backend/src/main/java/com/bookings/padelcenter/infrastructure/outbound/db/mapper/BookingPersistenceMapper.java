@@ -26,6 +26,11 @@ public class BookingPersistenceMapper {
 		if (booking.bookingId() != null) {
 			entity.setBookingId(booking.bookingId());
 		}
+		updateEntity(entity, booking);
+		return entity;
+	}
+
+	public void updateEntity(BookingEntity entity, Booking booking) {
 		entity.setUser(userPersistenceMapper.toEntity(booking.user()));
 		entity.setField(fieldPersistenceMapper.toEntity(booking.field()));
 		entity.setStartTime(toInstant(booking.startTime()));
@@ -34,7 +39,6 @@ public class BookingPersistenceMapper {
 		entity.setBookedAt(booking.bookedAt());
 		entity.setStatus(booking.status().getId());
 		auditablePersistenceMapper.mapToEntity(booking.audit(), entity);
-		return entity;
 	}
 
 	public Booking toDomain(BookingEntity entity) {

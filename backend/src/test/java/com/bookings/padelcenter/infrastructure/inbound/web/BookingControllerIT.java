@@ -222,4 +222,87 @@ class BookingControllerIT extends AbstractIntegrationTest {
 				Integer.class, bookingId);
 		assertEquals(2, status);
 	}
+
+	// ── Update / Cancel after creation ──────────────────────────────────────────
+
+	@Test
+	@DisplayName("PUT /api/v1/bookings/{id} — owner can update an existing booking")
+	void updateBooking_asOwner_returns200() throws Exception {
+		createUser("update.owner@example.com");
+		UUID fieldId = createField();
+
+		String bookingJson = """
+				{
+				  "fieldId":     "%s",
+				  "startTime":   "2025-06-01T10:00:00Z",
+				  "endTime":     "2025-06-01T11:00:00Z",
+				  "totalPrice":  25.00
+				}
+				""".formatted(fieldId);
+
+		String bookingBody = mockMvc.perform(post(BOOKINGS_URL)
+						.with(userJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(bookingJson))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+
+		Long bookingId = ((Number) JsonPath.read(bookingBody, "$.bookingId")).longValue();
+
+		mockMvc.perform(get(BOOKINGS_URL + "/" + bookingId)
+						.with(userJwt()))
+				.andExpect(status().isOk());
+
+		mockMvc.perform(put(BOOKINGS_URL + "/" + bookingId)
+						.with(userJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "startTime":  "2025-06-01T12:00:00Z",
+								  "endTime":    "2025-06-01T13:00:00Z",
+								  "totalPrice": 40.00
+								}
+								"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.totalPrice").value(40.00));
+	}
+
+	@Test
+	@DisplayName("PATCH /api/v1/bookings/{id}/cancel — owner can cancel an existing booking")
+	void cancelBooking_asOwner_returns200() throws Exception {
+		createUser("cancel.owner.success@example.com");
+		UUID fieldId = createField();
+
+		String bookingJson = """
+				{
+				  "fieldId":     "%s",
+				  "startTime":   "2025-06-01T16:00:00Z",
+				  "endTime":     "2025-06-01T17:00:00Z",
+				  "totalPrice":  25.00
+				}
+				""".formatted(fieldId);
+
+		String bookingBody = mockMvc.perform(post(BOOKINGS_URL)
+						.with(userJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(bookingJson))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+
+		Long bookingId = ((Number) JsonPath.read(bookingBody, "$.bookingId")).longValue();
+
+		mockMvc.perform(get(BOOKINGS_URL + "/" + bookingId)
+						.with(userJwt()))
+				.andExpect(status().isOk());
+
+		mockMvc.perform(patch(BOOKINGS_URL + "/" + bookingId + "/cancel")
+						.with(userJwt()))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value("CANCELLED"));
+
+		int status = jdbcTemplate.queryForObject(
+				"SELECT status FROM bookings WHERE booking_id = ?",
+				Integer.class, bookingId);
+		assertEquals(3, status);
+	}
 }

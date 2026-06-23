@@ -7,6 +7,7 @@ import com.bookings.padelcenter.domain.repository.BookingRepository;
 import com.bookings.padelcenter.infrastructure.outbound.db.entity.BookingEntity;
 import com.bookings.padelcenter.infrastructure.outbound.db.mapper.BookingPersistenceMapper;
 import com.bookings.padelcenter.infrastructure.outbound.db.repository.BookingJpaRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
@@ -29,10 +30,21 @@ public class BookingRepositoryImpl implements BookingRepository {
 	private final BookingPersistenceMapper mapper;
 
 	@Override
+	@Transactional
 	public Booking save(Booking booking) {
-		BookingEntity entity = mapper.toEntity(booking);
+		BookingEntity entity = booking.bookingId() != null
+				? loadManagedEntity(booking)
+				: mapper.toEntity(booking);
 		BookingEntity saved = bookingJpaRepository.save(entity);
 		return mapper.toDomain(saved);
+	}
+
+	private BookingEntity loadManagedEntity(Booking booking) {
+		BookingEntity entity = bookingJpaRepository.findById(booking.bookingId())
+				.orElseThrow(() -> new EntityNotFoundException(
+						"Booking not found: " + booking.bookingId()));
+		mapper.updateEntity(entity, booking);
+		return entity;
 	}
 
 	@Override
