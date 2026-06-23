@@ -12,21 +12,22 @@ de commits original (importado vía `git subtree`).
 
 ## Arranque rápido
 
-```bash
-# 1. Backend — base de datos + API
-cd backend/tools/docker
-docker compose up -d --build
+Un único `docker-compose.yaml` en la raíz levanta los tres servicios
+(PostgreSQL, backend y web) conectados entre sí:
 
-# 2. Web — frontend (requiere el backend corriendo en :8080)
-cd ../../../web
+```bash
 docker compose up -d --build
 ```
 
 - API: http://localhost:8080 — Swagger UI en `/swagger-ui/index.html`
 - Web: http://localhost:3000
 
-Instrucciones detalladas, variables de entorno y arranque sin Docker en el
-README de cada subproyecto: [backend/README.md](backend/README.md),
+Para parar y borrar los datos: `docker compose down -v`.
+
+Si solo quieres levantar el backend (sin el frontend), usa el
+`docker-compose.yaml` específico en `backend/tools/docker/`. Instrucciones
+detalladas, variables de entorno y arranque sin Docker en el README de cada
+subproyecto: [backend/README.md](backend/README.md),
 [web/README.md](web/README.md).
 
 ## Memoria

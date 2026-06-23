@@ -6,27 +6,27 @@
 
 Frontend de gestión de centros de pádel: reservas, pistas, centros, torneos
 y usuarios. Next.js 14 (App Router) + TypeScript, sobre la API de
-[padelcenter](../padelcenter).
+[backend](../backend).
 
 ## Requisitos previos
 
 - [Docker](https://docs.docker.com/get-docker/) + Docker Compose (arranque rápido)
-- El backend [padelcenter](../padelcenter) debe estar corriendo en `localhost:8080`
 - Node.js 20+ y [pnpm](https://pnpm.io/) (solo si quieres ejecutar fuera de Docker)
 
 ## Arranque rápido con Docker
 
+Este servicio forma parte del `docker-compose.yaml` en la raíz del
+monorepo, junto con `postgres` y `backend`. Para levantar todo:
+
 ```bash
-# 1. Arranca primero el backend (ver README de padelcenter)
-# 2. Arranca el frontend
+# desde la raíz del repo
 docker compose up -d --build
 ```
 
 - App: http://localhost:3000
 
-El contenedor del frontend llega al backend a través de
-`host.docker.internal`, que apunta al `localhost` de la máquina host
-donde el backend expone el puerto 8080.
+Dentro de la red de Docker, el frontend llega al backend por nombre de
+servicio (`http://backend:8080`), no por `localhost`.
 
 ## Arranque en local (sin Docker)
 

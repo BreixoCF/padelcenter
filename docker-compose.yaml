@@ -1,0 +1,64 @@
+services:
+  postgres:
+    container_name: postgres-padelcenter
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: padelcenterdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_padelcenter:/var/lib/postgresql/data
+    networks:
+      - padelcenter-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d padelcenterdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    container_name: padelcenter-backend
+    image: padelcenter-backend:local
+    build:
+      context: ./backend
+      dockerfile: tools/docker/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/padelcenterdb
+      SPRING_DATASOURCE_USERNAME: app
+      SPRING_DATASOURCE_PASSWORD: app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - padelcenter-network
+
+  web:
+    container_name: padelcenter-web
+    image: padelcenter-web:local
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        # URL vista por el navegador (se incrusta en el bundle al compilar).
+        NEXT_PUBLIC_API_URL: http://localhost:8080
+        # URL usada por el servidor Next.js (rewrites), dentro de la red de Docker.
+        API_URL: http://backend:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - padelcenter-network
+
+volumes:
+  pgdata_padelcenter:
+    driver: local
+
+networks:
+  padelcenter-network:
