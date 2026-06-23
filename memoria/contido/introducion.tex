@@ -1,0 +1,105 @@
+\chapter{Introducción}
+\label{chap:introducion}
+
+\lettrine{E}{l} pádel es el segundo deporte más practicado en España, con más de
+cinco millones de jugadores federados y miles de clubes repartidos por todo el
+territorio nacional. Este crecimiento exponencial ha generado una demanda
+creciente de herramientas digitales que permitan a los centros deportivos gestionar
+su actividad de forma eficiente, desde la reserva de pistas hasta la organización
+de torneos. Sin embargo, muchos clubes siguen dependiendo de sistemas manuales,
+hojas de cálculo o aplicaciones genéricas que no están adaptadas a las
+particularidades del negocio del pádel.
+
+PadelCenter nace como respuesta a esta necesidad: una aplicación web específicamente
+diseñada para la gestión integral de centros de pádel, que abarca la administración
+de pistas, la creación y gestión de reservas, y la organización de torneos con
+emparejamientos automáticos.
+
+\section{Contexto y motivación}
+\label{sec:contexto}
+
+La transformación digital del sector deportivo es una tendencia global impulsada
+por la pandemia de COVID-19 y por el auge de los servicios \textit{on-demand}.
+Los usuarios esperan poder reservar una pista desde su teléfono móvil en cuestión
+de segundos, con confirmación inmediata y sin necesidad de llamar por teléfono
+al club.
+
+Desde el punto de vista académico, este proyecto representa una oportunidad de
+aplicar en un contexto real las competencias adquiridas durante el Grado en
+Ingeniería Informática, en particular las relacionadas con la ingeniería del
+software: diseño de sistemas, arquitecturas limpias, desarrollo \textit{contract-first},
+pruebas automatizadas y trabajo con tecnologías modernas tanto en backend como
+en frontend.
+
+La elección del dominio del pádel responde a una motivación personal del autor,
+combinada con la observación de que los sistemas existentes en el mercado presentan
+importantes carencias en cuanto a personalización, extensibilidad y calidad del
+software subyacente.
+
+\section{Objetivos}
+\label{sec:objetivos}
+
+Los objetivos del presente trabajo se dividen en funcionales y técnicos:
+
+\subsection{Objetivos funcionales}
+
+\begin{itemize}
+  \item Implementar un sistema de autenticación seguro con roles diferenciados
+        (jugador y administrador de centro).
+  \item Permitir la gestión de centros deportivos y sus pistas (alta, baja,
+        modificación, consulta).
+  \item Desarrollar un módulo de reservas con control de conflictos temporales
+        y visibilidad según el rol del usuario.
+  \item Implementar un módulo de torneos con inscripción de participantes y
+        generación automática de emparejamientos.
+\end{itemize}
+
+\subsection{Objetivos técnicos}
+
+\begin{itemize}
+  \item Diseñar el sistema siguiendo la arquitectura hexagonal, garantizando
+        la independencia del dominio de negocio respecto a los detalles de
+        infraestructura.
+  \item Adoptar un enfoque \textit{contract-first} basado en OpenAPI~3, de modo
+        que la especificación de la API sea la fuente de verdad del contrato
+        entre frontend y backend.
+  \item Garantizar una cobertura de pruebas adecuada mediante tests unitarios,
+        de integración y de arquitectura.
+  \item Implementar un entorno de desarrollo reproducible mediante Docker Compose.
+\end{itemize}
+
+\section{Estructura de la memoria}
+\label{sec:estructura}
+
+El presente documento se organiza en los siguientes capítulos:
+
+\begin{description}
+  \item[Capítulo~\ref{chap:estadoarte} — Estado del arte:] Se analizan las
+    soluciones existentes en el mercado para la gestión de reservas deportivas,
+    se evalúan las tecnologías candidatas y se justifica la elección de la pila
+    tecnológica adoptada.
+
+  \item[Capítulo~\ref{chap:metodologia} — Metodología y planificación:] Se
+    describe la metodología de desarrollo adoptada, el plan de trabajo inicial,
+    los riesgos identificados y un análisis de la ejecución real del proyecto
+    frente a lo planificado.
+
+  \item[Capítulo~\ref{chap:analisis} — Análisis:] Se presentan los actores del
+    sistema, los requisitos funcionales y no funcionales, y los casos de uso
+    principales.
+
+  \item[Capítulo~\ref{chap:diseno} — Diseño:] Se describe la arquitectura del
+    sistema, el modelo de dominio, el diseño de la API y el esquema de base
+    de datos.
+
+  \item[Capítulo~\ref{chap:implementacion} — Implementación:] Se detallan los
+    aspectos más relevantes de la implementación del backend y el frontend,
+    así como la integración entre ambos.
+
+  \item[Capítulo~\ref{chap:pruebas} — Pruebas:] Se explica la estrategia de
+    pruebas adoptada y se presentan los resultados obtenidos.
+
+  \item[Capítulo~\ref{chap:conclusions} — Conclusiones:] Se evalúan los
+    resultados obtenidos, se relaciona el trabajo con las competencias de la
+    titulación y se proponen líneas de trabajo futuro.
+\end{description}

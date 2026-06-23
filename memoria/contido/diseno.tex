@@ -1,0 +1,300 @@
+\chapter{Diseño}
+\label{chap:diseno}
+
+\lettrine{E}{l} diseño de PadelCenter gira en torno a tres decisiones
+arquitectónicas fundamentales: la arquitectura hexagonal como estructura del
+backend, el enfoque \textit{contract-first} con OpenAPI como contrato de la API,
+y OAuth2 Resource Server con JWT local como mecanismo de seguridad. En este
+capítulo se describen estas decisiones y sus consecuencias en la estructura del
+sistema.
+
+\section{Arquitectura hexagonal}
+\label{sec:arquitectura_hexagonal}
+
+La arquitectura hexagonal organiza el backend en tres capas con dependencias
+estrictamente dirigidas hacia el interior:
+
+\begin{description}
+  \item[\texttt{domain}:] Contiene los modelos de negocio, los enumerados, los
+    puertos (interfaces) y las excepciones de dominio. No tiene ninguna dependencia
+    externa: ni Spring, ni JPA, ni ninguna otra librería de infraestructura. Es el
+    núcleo del sistema.
+
+  \item[\texttt{application}:] Contiene los casos de uso, organizados en cuatro
+    subpaquetes según su naturaleza: \texttt{create}, \texttt{read},
+    \texttt{update} y \texttt{delete}. También define los tipos
+    \texttt{CommandUseCase} y \texttt{QueryUseCase} como interfaces base. Solo
+    depende de \texttt{domain}.
+
+  \item[\texttt{infrastructure}:] Contiene los adaptadores de entrada
+    (\texttt{inbound}: controladores HTTP, mappers de API) y de salida
+    (\texttt{outbound}: entidades JPA, repositorios, mappers de persistencia,
+    seguridad). Implementa los puertos definidos en \texttt{domain}.
+\end{description}
+
+\begin{figure}[ht]
+\centering
+\fbox{\parbox{0.85\textwidth}{
+\centering
+\vspace{1em}
+\textbf{infrastructure.inbound} (controllers, API mappers) \\[0.3em]
+\textbf{infrastructure.outbound} (JPA entities, persistence mappers, JWT) \\[0.5em]
+$\downarrow$ depende de \\[0.5em]
+\textbf{application} (casos de uso: create / read / update / delete) \\[0.5em]
+$\downarrow$ depende de \\[0.5em]
+\textbf{domain} (records, puertos, excepciones — sin dependencias externas)
+\vspace{1em}
+}}
+\caption{Estructura de capas de la arquitectura hexagonal de PadelCenter.}
+\label{fig:arquitectura_hexagonal}
+\end{figure}
+
+\subsection{Modelos de dominio como records inmutables}
+
+Una decisión de diseño relevante es que todos los modelos del dominio son
+\textbf{Java records} (introducidos en Java 16 y estables desde Java 17). Los
+records son clases inmutables por definición: todos sus campos se declaran en el
+constructor canónico, no tienen setters y proporcionan \texttt{equals},
+\texttt{hashCode} y \texttt{toString} automáticamente.
+
+Esta elección refuerza la arquitectura hexagonal de dos formas:
+\begin{itemize}
+  \item Ningún adaptador puede modificar un objeto de dominio una vez creado,
+    evitando efectos secundarios difíciles de rastrear.
+  \item Los records no pueden extender otras clases, lo que impide que las
+    entidades de dominio hereden accidentalmente de clases de infraestructura
+    (como entidades JPA).
+\end{itemize}
+
+Las entidades JPA (\texttt{UserEntity}, \texttt{BookingEntity}, etc.) son clases
+convencionales en la capa de infraestructura y no se exponen nunca fuera de ella.
+
+\section{Modelo de dominio}
+\label{sec:modelo_dominio}
+
+Las entidades principales del dominio son:
+
+\begin{description}
+  \item[\texttt{User}:] Usuario del sistema. Campos: \texttt{userId} (UUID),
+    \texttt{firstName}, \texttt{lastName}, \texttt{email}, \texttt{passwordHash}
+    (BCrypt), \texttt{phoneNumber}, \texttt{centerRoles}, \texttt{audit}.
+
+  \item[\texttt{Center}:] Centro deportivo. Campos: \texttt{centerId} (UUID),
+    \texttt{name}, \texttt{address}, \texttt{city}, \texttt{phoneNumber},
+    \texttt{email}, \texttt{manager}, \texttt{audit}.
+
+  \item[\texttt{Field}:] Pista de un centro. Campos: \texttt{fieldId} (UUID),
+    \texttt{name}, \texttt{type}, \texttt{pricePerHour} (\texttt{BigDecimal}),
+    \texttt{isAvailable} (Boolean), \texttt{center}, \texttt{audit}.
+
+  \item[\texttt{Booking}:] Reserva. Campos: \texttt{bookingId} (\texttt{BIGINT}
+    — excepción histórica respecto al uso de UUID en el resto de entidades),
+    \texttt{user}, \texttt{field}, \texttt{startTime}/\texttt{endTime}
+    (\texttt{LocalDateTime}), \texttt{totalPrice}, \texttt{status}
+    (\texttt{PENDING}, \texttt{CONFIRMED}, \texttt{CANCELLED}, \texttt{COMPLETED}),
+    \texttt{bookedAt}, \texttt{audit}.
+
+  \item[\texttt{CenterRole}:] Rol contextual de un usuario en un centro concreto.
+    Permite que un mismo usuario sea \texttt{ADMIN} en un centro y \texttt{USER}
+    en otro.
+
+  \item[\texttt{Tournament}:] Torneo. Campos: \texttt{tournamentId} (UUID),
+    \texttt{centerId}, \texttt{name}, \texttt{format}
+    (\texttt{ROUND\_ROBIN}, \texttt{ELIMINATION} o
+    \texttt{GROUPS\_AND\_ELIMINATION}),
+    \texttt{status} (ver figura~\ref{fig:ciclo_torneo}), \texttt{maxPairs},
+    \texttt{startDate}, \texttt{endDate}, \texttt{audit}.
+
+  \item[\texttt{TournamentPair}:] Pareja inscrita en un torneo. Estado:
+    \texttt{PENDING}, que evoluciona a \texttt{CONFIRMED} o \texttt{REJECTED}.
+    Incluye \texttt{teamName} opcional.
+
+  \item[\texttt{Match}:] Partido generado para un emparejamiento. Estado:
+    \texttt{SCHEDULED}, \texttt{IN\_PROGRESS}, \texttt{COMPLETED},
+    \texttt{CANCELLED}. Contiene \texttt{MatchResult} con marcador y ganador.
+
+  \item[\texttt{Auditable}:] Record base de auditoría incluido en todas las
+    entidades: \texttt{createdAt}, \texttt{createdBy} (UUID),
+    \texttt{modifiedAt}, \texttt{modifiedBy}, \texttt{deletedAt},
+    \texttt{deletedBy} (soft delete).
+\end{description}
+
+\section{Diseño de la API — Contract-First}
+\label{sec:diseno_api}
+
+El enfoque \textit{contract-first} implica que la especificación OpenAPI se
+escribe antes que cualquier código de implementación. El fichero
+\texttt{docs/openapi/index.yaml} es la fuente de verdad del contrato de la API.
+
+El proceso de desarrollo de un nuevo endpoint sigue estos pasos:
+\begin{enumerate}
+  \item Se añade el endpoint al fichero \texttt{index.yaml} con sus parámetros,
+    esquemas de request y response, y códigos de estado.
+  \item Se ejecuta \texttt{./mvnw generate-sources}, que invoca el plugin
+    \textit{openapi-generator-maven-plugin~7.6.0} y genera las interfaces de
+    controlador y los DTOs (como records Java) en \texttt{target/generated-sources}.
+  \item El controlador implementa la interfaz generada. Si la firma del método no
+    coincide con la especificación, el compilador lo detecta.
+  \item En el frontend, \texttt{pnpm generate-api} (con el backend en
+    \texttt{:8080}) regenera los hooks React Query mediante Orval.
+\end{enumerate}
+
+\subsection{Convenciones de la especificación}
+
+\begin{itemize}
+  \item Todos los endpoints siguen el prefijo \texttt{/api/v1/}.
+  \item Los identificadores de recursos son UUIDs (salvo \texttt{bookingId},
+    que es BIGINT por razones históricas).
+  \item Los errores siguen el esquema \texttt{ProblemDetail} de RFC~9457.
+  \item Los \textit{timestamps} se representan en formato ISO~8601 con zona
+    horaria UTC.
+  \item La paginación sigue el esquema de Spring Data con \texttt{page},
+    \texttt{size} y \texttt{sort}, envuelto en \texttt{PageResult<T>}.
+\end{itemize}
+
+\subsection{Endpoints de la API}
+
+La tabla~\ref{tab:endpoints} recoge los 40 endpoints expuestos por la API,
+organizados por controlador.
+
+\begin{table}[ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llll}
+\hline
+\textbf{Método} & \textbf{Ruta} & \textbf{Descripción} & \textbf{Rol mínimo} \\
+\hline
+POST & /api/v1/auth/login & Iniciar sesión & Anónimo \\
+POST & /api/v1/auth/refresh & Renovar token & Anónimo \\
+POST & /api/v1/auth/logout & Cerrar sesión & Anónimo \\
+GET  & /api/v1/me & Usuario actual & USER \\
+GET  & /api/v1/me/bookings & Mis reservas & USER \\
+GET  & /api/v1/me/tournaments & Mis torneos & USER \\
+GET  & /api/v1/me/matches & Mis partidos & USER \\
+\hline
+POST & /api/v1/users & Registrarse & Anónimo \\
+GET  & /api/v1/users & Listar usuarios & ADMIN \\
+GET  & /api/v1/users/\{id\} & Ver usuario & ADMIN \\
+PUT  & /api/v1/users/\{id\} & Actualizar usuario & Propietario/ADMIN \\
+PUT  & /api/v1/users/\{id\}/roles & Cambiar roles & ADMIN \\
+PUT  & /api/v1/users/\{id\}/password & Cambiar contraseña & Propietario \\
+DELETE & /api/v1/users/\{id\} & Eliminar usuario & ADMIN \\
+GET  & /api/v1/users/\{id\}/bookings & Reservas de usuario & ADMIN \\
+\hline
+POST & /api/v1/centers & Crear centro & ADMIN \\
+GET  & /api/v1/centers & Listar centros & USER \\
+GET  & /api/v1/centers/\{id\} & Ver centro & USER \\
+DELETE & /api/v1/centers/\{id\} & Eliminar centro & ADMIN \\
+POST & /api/v1/centers/\{id\}/fields & Crear pista & ADMIN \\
+GET  & /api/v1/centers/\{id\}/fields & Listar pistas del centro & USER \\
+GET  & /api/v1/centers/\{id\}/bookings & Reservas del centro & MANAGER \\
+GET  & /api/v1/centers/\{id\}/tournaments & Torneos del centro & USER \\
+\hline
+GET  & /api/v1/fields & Listar pistas & USER \\
+GET  & /api/v1/fields/\{id\} & Ver pista & USER \\
+GET  & /api/v1/fields/\{id\}/availability & Disponibilidad por fecha & USER \\
+PUT  & /api/v1/fields/\{id\}/availability & Activar/desactivar pista & MANAGER \\
+DELETE & /api/v1/fields/\{id\} & Eliminar pista & ADMIN \\
+\hline
+POST & /api/v1/bookings & Crear reserva & USER \\
+GET  & /api/v1/bookings/\{id\} & Ver reserva & Propietario/MANAGER \\
+PUT  & /api/v1/bookings/\{id\} & Actualizar reserva & Propietario \\
+POST & /api/v1/bookings/\{id\}/cancel & Cancelar reserva & Propietario/MANAGER \\
+\hline
+POST & /api/v1/tournaments & Crear torneo & ADMIN \\
+GET  & /api/v1/tournaments/\{id\} & Ver torneo & USER \\
+DELETE & /api/v1/tournaments/\{id\} & Eliminar torneo & ADMIN \\
+POST & /api/v1/tournaments/\{id\}/pairs & Inscribirse como pareja & USER \\
+GET  & /api/v1/tournaments/\{id\}/pairs & Ver parejas & USER \\
+POST & /api/v1/tournaments/\{id\}/pairs/\{pId\}/confirm & Confirmar pareja & MANAGER \\
+POST & /api/v1/tournaments/\{id\}/registration/open & Abrir inscripción & ADMIN \\
+POST & /api/v1/tournaments/\{id\}/registration/close & Cerrar e generar cuadro & ADMIN \\
+GET  & /api/v1/tournaments/\{id\}/matches & Ver partidos & USER \\
+GET  & /api/v1/tournaments/\{id\}/standings & Ver clasificación & USER \\
+\hline
+POST & /api/v1/matches/\{id\}/result & Reportar resultado & MANAGER \\
+\hline
+\end{tabular}}
+\caption{Endpoints de la API REST de PadelCenter.}
+\label{tab:endpoints}
+\end{table}
+
+\section{Esquema de base de datos}
+\label{sec:esquema_bd}
+
+La base de datos es PostgreSQL~16~\cite{postgresql}. Las migraciones se gestionan con Flyway y se
+nombran siguiendo el convenio \texttt{V\{version\}\_\_\{descripcion\}.sql}.
+
+Las tablas principales son:
+
+\begin{itemize}
+  \item \texttt{users}: datos de usuario y credenciales (BCrypt).
+  \item \texttt{center\_roles}: relación usuario-centro-rol con restricción
+    \texttt{UNIQUE(user\_id, center\_id)}.
+  \item \texttt{centers}: centros deportivos con soft delete.
+  \item \texttt{fields}: pistas de cada centro con precio y flag
+    \texttt{is\_available}.
+  \item \texttt{bookings}: reservas con clave primaria \texttt{BIGSERIAL} y
+    control de solapamiento mediante índice parcial (migración V4).
+  \item \texttt{booking\_participants}: participantes adicionales de una reserva.
+  \item \texttt{tournaments}: torneos con \texttt{CHECK} sobre \texttt{status}
+    (6 valores) y \texttt{format} (3 valores).
+  \item \texttt{tournament\_pairs}: parejas inscritas con \texttt{team\_name}
+    (añadido en migración V8).
+  \item \texttt{tournament\_matches}: partidos con resultado embebido.
+\end{itemize}
+
+Todas las tablas incluyen columnas de auditoría: \texttt{created\_at},
+\texttt{created\_by} (UUID), \texttt{modified\_at}, \texttt{modified\_by},
+\texttt{deleted\_at}, \texttt{deleted\_by}.
+
+\section{Diseño de seguridad}
+\label{sec:diseno_seguridad}
+
+La autenticación se basa en JWT firmados con HMAC-SHA256 (\texttt{HS256}).
+En el lado del servidor, la verificación se implementa mediante el módulo
+{\ttfamily spring-boot-starter-\linebreak[0]oauth2-resource-server} de Spring Security, que
+configura un \texttt{NimbusJwtDecoder} con la clave secreta local. Esto permite
+aprovechar toda la infraestructura de integración JWT de Spring
+(decodificación, validación de claims, inyección en el contexto de seguridad)
+sin depender de ningún proveedor de identidad externo.
+
+El flujo de autenticación es el siguiente:
+\begin{enumerate}
+  \item El cliente envía \texttt{POST /api/v1/auth/login} con correo y contraseña.
+  \item El servidor verifica las credenciales y genera un \textit{access token}
+    (15 minutos de validez) y un \textit{refresh token} (7 días).
+  \item El \textit{access token} se devuelve en el cuerpo de la respuesta; el
+    \textit{refresh token} se establece como cookie \textit{httpOnly} y
+    \texttt{SameSite=Strict}.
+  \item Las peticiones protegidas incluyen el \textit{access token} en el
+    header \texttt{Authorization: Bearer \{token\}}.
+  \item Cuando el \textit{access token} expira, el cliente llama a
+    \texttt{POST /api/v1/auth/refresh}; el servidor lee la cookie y emite un
+    nuevo par de tokens.
+\end{enumerate}
+
+\subsection{Evaluadores de autorización personalizados}
+
+Más allá de la autenticación, PadelCenter implementa autorización granular
+mediante evaluadores custom registrados como beans de Spring:
+
+\begin{description}
+  \item[\texttt{@bookingOwnerEvaluator}:] Verifica que el usuario autenticado
+    es el propietario de la reserva, o que tiene rol \texttt{MANAGER} o
+    \texttt{ADMIN} en el centro de la pista reservada.
+
+  \item[\texttt{@centerRoleEvaluator}:] Verifica que el usuario tiene el rol
+    mínimo requerido en el centro sobre el que opera. Permite operaciones
+    diferenciadas según si el actor es \texttt{USER}, \texttt{MANAGER} o
+    \texttt{ADMIN} en ese centro concreto.
+
+  \item[\texttt{@tournamentRoleEvaluator}:] Verifica permisos específicos
+    sobre torneos: inscripción (cualquier \texttt{USER}), confirmación de parejas
+    y reporte de resultados (\texttt{MANAGER} del centro), gestión del ciclo
+    de vida (\texttt{ADMIN}).
+\end{description}
+
+Estos evaluadores se invocan mediante \texttt{@PreAuthorize} directamente en
+los métodos de los casos de uso, manteniendo la lógica de autorización cerca
+de la lógica de negocio sin contaminar los controladores.

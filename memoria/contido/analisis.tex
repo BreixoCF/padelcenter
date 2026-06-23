@@ -1,0 +1,300 @@
+\chapter{Análisis}
+\label{chap:analisis}
+
+\lettrine{E}{l} análisis del sistema parte de la identificación de los actores
+que interaccionan con PadelCenter y de las necesidades que cada uno de ellos
+tiene. A partir de estos actores se derivan los requisitos funcionales y no
+funcionales, que constituyen la base del diseño y la implementación.
+
+\section{Actores del sistema}
+\label{sec:actores}
+
+Se han identificado tres actores con responsabilidades diferenciadas, modelados
+mediante el sistema de roles por centro (\texttt{CenterRole}):
+
+\begin{description}
+  \item[Usuario (\texttt{USER}):] Jugador registrado en el sistema. Puede
+    consultar centros y pistas disponibles, crear y cancelar sus propias reservas,
+    inscribirse en torneos como pareja y consultar sus partidos. Tiene visibilidad
+    limitada: solo accede a sus propios datos.
+
+  \item[Manager (\texttt{MANAGER}):] Gestor operativo de un centro concreto.
+    Puede consultar todas las reservas del centro que gestiona, gestionar la
+    disponibilidad de pistas y administrar los torneos del centro. Su ámbito de
+    actuación está restringido al centro al que está asignado.
+
+  \item[Administrador (\texttt{ADMIN}):] Administrador global del sistema.
+    Tiene acceso completo: puede crear y eliminar centros, asignar roles a
+    usuarios, gestionar cualquier entidad del sistema y acceder a todos los datos
+    independientemente del centro.
+\end{description}
+
+El rol es contextual por centro: un mismo usuario puede ser \texttt{ADMIN} en
+un centro y \texttt{USER} en otro. Esto se modela mediante la entidad
+\texttt{CenterRole}, que asocia un usuario con un rol para un centro concreto.
+
+\section{Requisitos funcionales}
+\label{sec:requisitos_funcionales}
+
+\subsection{Autenticación y usuarios}
+
+\begin{itemize}
+  \item \textbf{RF-01}: El sistema permite el registro de nuevos usuarios con
+    nombre, apellidos, correo electrónico, contraseña y teléfono.
+  \item \textbf{RF-02}: El sistema permite el inicio de sesión mediante
+    credenciales (correo y contraseña), devolviendo un \textit{access token} JWT.
+  \item \textbf{RF-03}: El \textit{access token} expira a los 15 minutos; el
+    cliente puede renovarlo mediante un \textit{refresh token} almacenado en
+    cookie \textit{httpOnly}.
+  \item \textbf{RF-04}: Cada usuario tiene un rol global y opcionalmente uno
+    o varios roles por centro (\texttt{CenterRole}).
+  \item \textbf{RF-05}: Un administrador puede modificar los roles de cualquier
+    usuario y cambiar su contraseña.
+\end{itemize}
+
+\subsection{Gestión de centros}
+
+\begin{itemize}
+  \item \textbf{RF-06}: Un administrador puede crear un centro deportivo con
+    nombre, dirección, ciudad, teléfono y correo de contacto.
+  \item \textbf{RF-07}: Un administrador puede eliminar un centro (soft delete).
+  \item \textbf{RF-08}: Cualquier usuario autenticado puede consultar el listado
+    paginado de centros activos y el detalle de un centro.
+\end{itemize}
+
+\subsection{Gestión de pistas}
+
+\begin{itemize}
+  \item \textbf{RF-09}: Un administrador puede dar de alta pistas en sus centros,
+    indicando nombre, tipo de superficie, precio por hora y disponibilidad.
+  \item \textbf{RF-10}: Un administrador puede activar o desactivar una pista
+    (\texttt{isAvailable}) sin eliminarla.
+  \item \textbf{RF-11}: Cualquier usuario autenticado puede consultar la
+    disponibilidad de una pista para una fecha concreta.
+  \item \textbf{RF-12}: Un administrador puede eliminar una pista.
+\end{itemize}
+
+\subsection{Gestión de reservas}
+
+\begin{itemize}
+  \item \textbf{RF-13}: Un usuario puede crear una reserva para una pista en
+    una franja horaria concreta.
+  \item \textbf{RF-14}: El sistema rechaza la reserva si la pista no está
+    disponible o si ya existe otra reserva activa en el mismo tramo horario
+    (control de conflictos mediante índice de solapamiento en base de datos).
+  \item \textbf{RF-15}: Una reserva pasa por los estados:
+    \texttt{PENDING} → \texttt{CONFIRMED} → \texttt{COMPLETED}/\texttt{CANCELLED}.
+  \item \textbf{RF-16}: Un usuario puede cancelar sus propias reservas; un
+    administrador o manager puede cancelar cualquier reserva de su centro.
+  \item \textbf{RF-17}: Un usuario puede consultar sus reservas actuales e
+    históricas (\texttt{GET /api/v1/me/bookings}).
+  \item \textbf{RF-18}: Un administrador o manager puede consultar todas las
+    reservas de un centro (\texttt{GET /api/v1/centers/\{id\}/bookings}).
+\end{itemize}
+
+\subsection{Gestión de torneos}
+
+\begin{itemize}
+  \item \textbf{RF-19}: Un administrador puede crear un torneo en uno de sus
+    centros con nombre, descripción, formato de competición y número máximo de
+    parejas.
+  \item \textbf{RF-20}: Los formatos de competición soportados son:
+    \texttt{ROUND\_ROBIN} (todos contra todos), \texttt{ELIMINATION} (eliminación
+    directa) y \texttt{GROUPS\_AND\_ELIMINATION} (fase de grupos más eliminación).
+  \item \textbf{RF-21}: Un administrador puede abrir y cerrar el período de
+    inscripción del torneo.
+  \item \textbf{RF-22}: Los jugadores se inscriben en el torneo formando parejas.
+    La pareja pasa por los estados \texttt{PENDING} → \texttt{CONFIRMED}/\texttt{REJECTED}.
+  \item \textbf{RF-23}: Al cerrar la inscripción, el sistema genera automáticamente
+    los emparejamientos del cuadro según el formato elegido.
+  \item \textbf{RF-24}: Un administrador puede registrar el resultado de cada
+    partido (\texttt{scoreA}, \texttt{scoreB}, ganador).
+  \item \textbf{RF-25}: El sistema calcula y expone la clasificación en tiempo
+    real para torneos en formato Round Robin.
+  \item \textbf{RF-26}: Un usuario puede consultar sus torneos
+    (\texttt{GET /api/v1/me/tournaments}) y sus partidos
+    (\texttt{GET /api/v1/me/matches}).
+\end{itemize}
+
+\section{Ciclo de vida de un torneo}
+\label{sec:ciclo_torneo}
+
+El torneo sigue un ciclo de vida estricto con seis estados:
+
+\begin{figure}[ht]
+\centering
+\resizebox{0.9\textwidth}{!}{%
+\begin{tabular}{ccccc}
+\texttt{DRAFT}
+  & $\rightarrow$ &
+\texttt{REGISTRATION\_OPEN}
+  & $\rightarrow$ &
+\texttt{REGISTRATION\_CLOSED} \\[0.4em]
+  &   &   &   & $\downarrow$ \\[0.2em]
+\texttt{CANCELLED}
+  & $\leftarrow$ & \texttt{COMPLETED}
+  & $\leftarrow$ & \texttt{IN\_PROGRESS} \\
+\end{tabular}}
+
+\vspace{0.4em}
+\footnotesize\textit{\texttt{CANCELLED} es alcanzable desde cualquier estado anterior.}
+\vspace{0.8em}
+
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{lXX}
+\hline
+\textbf{Estado} & \textbf{Qué significa} & \textbf{Qué desencadena la transición de salida} \\
+\hline
+\texttt{DRAFT} &
+  Borrador recién creado. No visible para inscripciones. Permite configurar el torneo antes de abrirlo. &
+  El administrador invoca \textit{open registration}. \\
+\texttt{REGISTRATION\_OPEN} &
+  Las inscripciones están abiertas. Los jugadores pueden apuntarse como pareja. &
+  El administrador cierra el período e invoca \textit{close \& generate bracket}. \\
+\texttt{REGISTRATION\_CLOSED} &
+  No se aceptan nuevas inscripciones. El sistema genera el cuadro de forma atómica al cerrar. &
+  El administrador arranca el torneo (\textit{start}). \\
+\texttt{IN\_PROGRESS} &
+  Los partidos están en curso. Los managers registran resultados. La clasificación se actualiza en tiempo real. &
+  Se completan todos los partidos previstos. \\
+\texttt{COMPLETED} &
+  Torneo finalizado. La clasificación final está disponible. Estado terminal. &
+  — \\
+\texttt{CANCELLED} &
+  Torneo cancelado antes de completarse. No se aceptan más acciones sobre él. Estado terminal. &
+  — \\
+\hline
+\end{tabularx}
+\caption{Ciclo de vida de un torneo: estados, descripción y transiciones.}
+\label{fig:ciclo_torneo}
+\end{figure}
+
+La transición \textit{close \& generate bracket} es atómica: cierra la
+inscripción y genera todos los emparejamientos iniciales en una misma operación
+({\ttfamily Close\-Registration\-And\-Generate\-Bracket\-Use\-Case}).
+
+\section{Requisitos no funcionales}
+\label{sec:requisitos_no_funcionales}
+
+\begin{description}
+  \item[RNF-01 — Seguridad:] Toda la API requiere autenticación mediante JWT
+    Bearer token, salvo los endpoints de registro, login, refresh y logout. Las
+    contraseñas se almacenan con BCrypt. El \textit{refresh token} se transmite
+    exclusivamente mediante cookie \textit{httpOnly} y \texttt{SameSite=Strict}
+    para mitigar ataques XSS y CSRF.
+
+  \item[RNF-02 — Autorización granular:] La autorización se gestiona mediante
+    evaluadores custom (\texttt{@bookingOwnerEvaluator},
+    \texttt{@centerRoleEvaluator}, \texttt{@tournamentRoleEvaluator}) que se
+    invocan desde \texttt{@PreAuthorize} en los casos de uso, garantizando que
+    cada operación solo es accesible por el actor con el rol correcto en el
+    contexto adecuado.
+
+  \item[RNF-03 — Rendimiento:] El backend utiliza virtual threads de Java~21
+    (\textit{Project Loom}), activados mediante
+    \texttt{spring.threads.virtual.enabled=true}. Esto permite manejar un número
+    mucho mayor de conexiones concurrentes sin saturar el pool de hilos del
+    sistema operativo.
+
+  \item[RNF-04 — Contrato API:] La especificación OpenAPI es la fuente de verdad.
+    Cualquier cambio en la API debe reflejarse primero en el YAML y después
+    propagarse al código generado tanto en backend como en frontend.
+
+  \item[RNF-05 — Reproducibilidad:] El entorno de desarrollo es completamente
+    reproducible mediante Docker Compose. Cualquier desarrollador puede levantar
+    el stack completo con un único comando.
+
+  \item[RNF-06 — Mantenibilidad:] La arquitectura hexagonal garantiza que el
+    dominio de negocio no depende de ningún framework. Las reglas de arquitectura
+    se verifican automáticamente en cada build mediante ArchUnit.
+
+  \item[RNF-07 — Trazabilidad:] Todos los logs se emiten en formato JSON
+    estructurado (Logstash encoder) con contexto MDC que incluye el identificador
+    de usuario y el ID de correlación de la petición HTTP.
+\end{description}
+
+\section{Casos de uso}
+\label{sec:casos_de_uso}
+
+El sistema implementa 42 casos de uso organizados en cuatro categorías. La
+tabla~\ref{tab:casos_de_uso} recoge los principales agrupados por dominio.
+
+\begin{table}[ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llp{7cm}}
+\hline
+\textbf{Dominio} & \textbf{Actor} & \textbf{Casos de uso} \\
+\hline
+\multirow{3}{*}{Auth / Usuario} & Anónimo & Registrarse, iniciar sesión, renovar token, cerrar sesión \\
+ & Usuario & Ver perfil propio, actualizar contraseña \\
+ & Admin & Listar usuarios, cambiar roles, eliminar usuario \\
+\hline
+\multirow{2}{*}{Centros} & Admin & Crear centro, eliminar centro \\
+ & Todos & Listar centros, ver detalle de centro \\
+\hline
+\multirow{2}{*}{Pistas} & Admin/Manager & Crear pista, actualizar disponibilidad, eliminar pista \\
+ & Todos & Listar pistas, ver disponibilidad por fecha \\
+\hline
+\multirow{3}{*}{Reservas} & Usuario & Crear reserva, cancelar reserva propia, ver mis reservas \\
+ & Admin/Manager & Ver reservas del centro, cancelar cualquier reserva \\
+ & Todos & Ver detalle de reserva \\
+\hline
+\multirow{4}{*}{Torneos} & Admin & Crear torneo, abrir inscripción, cerrar inscripción y generar cuadro, eliminar torneo \\
+ & Admin/Manager & Confirmar pareja, reportar resultado de partido \\
+ & Usuario & Inscribirse como pareja, ver mis torneos, ver mis partidos \\
+ & Todos & Ver cuadro, ver partidos, ver clasificación (Round Robin) \\
+\hline
+\end{tabular}}
+\caption{Casos de uso del sistema agrupados por dominio.}
+\label{tab:casos_de_uso}
+\end{table}
+
+\subsection{Caso de uso detallado: Crear una reserva (CU-Booking-Create)}
+
+\begin{description}
+  \item[Actor principal:]\leavevmode Usuario autenticado con rol \texttt{USER}.
+  \item[Precondición:]\leavevmode El usuario ha iniciado sesión, la pista existe y está
+    activa (\texttt{isAvailable = true}).
+  \item[Flujo principal:]\leavevmode
+    \begin{enumerate}
+      \item El usuario selecciona una pista e indica fecha, hora de inicio y
+        hora de fin.
+      \item El sistema verifica que la pista está disponible
+        (\texttt{isAvailable}).
+      \item El sistema consulta el índice de solapamiento en base de datos para
+        detectar conflictos con reservas activas en el mismo tramo horario.
+      \item El sistema crea la reserva con estado \texttt{PENDING}, calcula el
+        precio total y la persiste.
+      \item El sistema devuelve los datos de la reserva con HTTP 201.
+    \end{enumerate}
+  \item[Flujo alternativo — Conflicto de horario:]\leavevmode
+    \begin{enumerate}
+      \setcounter{enumi}{2}
+      \item El sistema detecta solapamiento y devuelve HTTP 409 con detalle
+        de error según RFC~9457.
+    \end{enumerate}
+  \item[Postcondición:]\leavevmode La reserva queda registrada con estado \texttt{PENDING}
+    y la pista queda bloqueada para ese tramo horario.
+\end{description}
+
+\subsection{Caso de uso detallado: Cerrar inscripción y generar cuadro (CU-Tournament-CloseBracket)}
+
+\begin{description}
+  \item[Actor principal:]\leavevmode Administrador con rol \texttt{ADMIN} o \texttt{MANAGER}
+    en el centro del torneo.
+  \item[Precondición:]\leavevmode El torneo está en estado \texttt{REGISTRATION\_OPEN} y
+    tiene al menos dos parejas confirmadas.
+  \item[Flujo principal:]\leavevmode
+    \begin{enumerate}
+      \item El administrador invoca el endpoint de cierre de inscripción.
+      \item El sistema cambia el estado del torneo a
+        \texttt{REGISTRATION\_CLOSED}.
+      \item El sistema genera automáticamente los emparejamientos iniciales
+        según el formato del torneo (Round Robin, Eliminación o Grupos).
+      \item Los partidos se crean con estado \texttt{SCHEDULED}.
+      \item El sistema devuelve el cuadro generado con HTTP 200.
+    \end{enumerate}
+  \item[Postcondición:]\leavevmode El torneo tiene un cuadro completo y está listo para
+    comenzar.
+\end{description}

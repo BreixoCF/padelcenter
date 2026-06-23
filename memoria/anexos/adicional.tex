@@ -1,0 +1,124 @@
+\chapter{Material adicional}
+\label{chap:adicional}
+
+\lettrine{E}{ste} anexo recoge fragmentos de código e implementación que no
+resultan imprescindibles para seguir el cuerpo principal de la memoria, pero
+que ilustran con detalle dos decisiones técnicas mencionadas en los
+capítulos~\ref{chap:diseno} y~\ref{chap:implementacion}: la detección de
+solapamiento de reservas a nivel de base de datos y el algoritmo de
+generación de emparejamientos de torneos.
+
+\section{Migración V4 — Índice de solapamiento de reservas}
+\label{sec:anexo_migracion_v4}
+
+La detección de conflictos de horario (RF-14, sección~\ref{sec:requisitos_funcionales})
+podría implementarse comprobando en memoria todas las reservas existentes de
+una pista, pero esto no escala y, sobre todo, no es seguro frente a
+condiciones de carrera entre peticiones concurrentes. La migración
+\texttt{V4\_\_add\_booking\_overlap\_index.sql} añade un índice parcial que
+permite delegar esa comprobación en PostgreSQL:
+
+\begin{verbatim}
+CREATE INDEX idx_bookings_field_time_status
+    ON bookings (field_id, start_time, end_time)
+    WHERE status IN (1, 2);
+\end{verbatim}
+
+El índice es \textbf{parcial}: solo cubre las reservas en estado
+\texttt{PENDING} (1) o \texttt{CONFIRMED} (2), que son las únicas relevantes
+para el cálculo de solapamiento. Las reservas \texttt{CANCELLED} y
+\texttt{COMPLETED} quedan fuera, lo que mantiene el índice pequeño y rápido
+incluso a medida que crece el histórico de reservas del sistema. La consulta
+de solapamiento (\texttt{BookingRepository.existsConflict}) se apoya
+directamente en este índice para resolver en una sola consulta SQL si existe
+ya una reserva activa que se solape con el rango horario solicitado.
+
+\section{Algoritmo de generación de cuadros de torneo}
+\label{sec:anexo_bracket_generator}
+
+\texttt{BracketGeneratorService} es un servicio de dominio puro —sin
+dependencias de persistencia ni de Spring más allá de la anotación
+\texttt{@Service}— invocado por
+\texttt{CloseRegistrationAndGenerateBracketUseCase} al cerrar la inscripción
+de un torneo. Selecciona el algoritmo según el formato de competición:
+
+\begin{verbatim}
+public List<Match> generate(
+        Tournament tournament, List<TournamentPair> confirmedPairs) {
+    return switch (tournament.format()) {
+        case ROUND_ROBIN ->
+            generateRoundRobin(tournament, confirmedPairs);
+        case ELIMINATION ->
+            generateElimination(tournament, confirmedPairs);
+        case GROUPS_AND_ELIMINATION ->
+            generateGroupsAndElimination(tournament, confirmedPairs);
+    };
+}
+\end{verbatim}
+
+Para el formato \texttt{ROUND\_ROBIN} se genera un partido por cada pareja de
+parejas distintas (todos contra todos):
+
+\begin{verbatim}
+private List<Match> generateRoundRobin(
+        Tournament t, List<TournamentPair> pairs) {
+    var matches = new ArrayList<Match>();
+    for (int i = 0; i < pairs.size(); i++) {
+        for (int j = i + 1; j < pairs.size(); j++) {
+            var a = pairs.get(i).pairId();
+            var b = pairs.get(j).pairId();
+            matches.add(buildMatch(t.tournamentId(), a, b, 1, null));
+        }
+    }
+    return matches;
+}
+\end{verbatim}
+
+Para el formato \texttt{ELIMINATION}, las parejas se mezclan aleatoriamente y
+se emparejan para la primera ronda; las rondas siguientes se crean como
+partidos \textit{placeholder} sin parejas asignadas (\texttt{pairAId} y
+\texttt{pairBId} a \texttt{null}), que se completan progresivamente a medida
+que se conocen los ganadores de la ronda anterior:
+
+\begin{verbatim}
+private List<Match> generateElimination(
+        Tournament t, List<TournamentPair> pairs) {
+    var shuffled = new ArrayList<>(pairs);
+    Collections.shuffle(shuffled);
+
+    var matches = new ArrayList<Match>();
+    int n = shuffled.size();
+
+    // Ronda 1: parejas reales
+    for (int i = 0; i < n; i += 2) {
+        var a = shuffled.get(i).pairId();
+        var b = shuffled.get(i + 1).pairId();
+        matches.add(buildMatch(t.tournamentId(), a, b, 1, null));
+    }
+
+    // Rondas siguientes: placeholders, se rellenan
+    // al completarse la ronda anterior
+    int round = 2;
+    int matchesInRound = n / 4;
+    while (matchesInRound >= 1) {
+        for (int i = 0; i < matchesInRound; i++) {
+            matches.add(
+                buildMatch(t.tournamentId(), null, null, round, null));
+        }
+        round++;
+        matchesInRound /= 2;
+    }
+    return matches;
+}
+\end{verbatim}
+
+Esta estrategia de \textit{placeholders} evita tener que regenerar la
+estructura completa del cuadro cuando se reporta el resultado de un partido:
+\texttt{CloseRegistrationAndGenerateBracketUseCase} solo necesita localizar el
+partido de la ronda siguiente correspondiente y rellenar el hueco vacante con
+el identificador del ganador.
+
+El formato \texttt{GROUPS\_AND\_ELIMINATION} combina ambas estrategias:
+reparte las parejas en grupos de cuatro y aplica \textit{round robin} dentro
+de cada grupo, seguido de una fase eliminatoria con \textit{placeholders} para
+los dos primeros clasificados de cada grupo.

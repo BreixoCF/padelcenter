@@ -1,0 +1,143 @@
+\chapter{Pruebas}
+\label{chap:pruebas}
+
+\lettrine{L}{a} estrategia de pruebas de PadelCenter sigue la pirámide de
+pruebas clásica: una base amplia de tests unitarios rápidos, una capa intermedia
+de tests de integración que verifican el comportamiento con recursos reales, y
+tests de arquitectura que garantizan el cumplimiento de las reglas de capas. Este
+enfoque maximiza la confianza en el sistema minimizando el tiempo total de ejecución
+del conjunto de pruebas. La escritura de tests unitarios antes o inmediatamente
+después de cada caso de uso, descrita por Beck como práctica central del
+desarrollo dirigido por pruebas~\cite{beck2002tdd}, ha guiado además el diseño
+de las interfaces de los puertos del dominio: un puerto difícil de testear de
+forma aislada es, en la mayoría de los casos, síntoma de un diseño con demasiadas
+responsabilidades.
+
+\section{Estrategia de pruebas}
+\label{sec:estrategia_pruebas}
+
+\begin{description}
+  \item[Tests unitarios:] Verifican el comportamiento de un caso de uso o un
+    componente de dominio de forma aislada, con las dependencias sustituidas por
+    dobles de prueba (Mockito). Son muy rápidos y no requieren infraestructura
+    externa.
+
+  \item[Tests de integración:] Verifican el comportamiento del sistema de extremo
+    a extremo a nivel HTTP, usando una base de datos PostgreSQL real gestionada
+    por Testcontainers. Detectan errores que los tests unitarios no pueden encontrar:
+    consultas JPA incorrectas, problemas de transaccionalidad, validaciones de
+    esquema, etc.
+
+  \item[Tests de arquitectura:] Verifican que la estructura del código cumple
+    las reglas de la arquitectura hexagonal (ninguna clase del dominio importa
+    clases de Spring, los casos de uso no dependen de JPA, etc.). Se ejecutan
+    en cada build y fallan si alguien introduce una dependencia prohibida.
+\end{description}
+
+\section{Tests unitarios con Mockito}
+\label{sec:tests_unitarios}
+
+Los tests unitarios usan Mockito~\cite{mockito} y siguen el patrón \textit{given/when/then} y la convención
+de nombres \texttt{should\{Behavior\}When\{Context\}()}. Por ejemplo:
+
+\begin{verbatim}
+@Test
+void shouldThrowConflictExceptionWhenBookingOverlaps() {
+    // given
+    given(bookingRepository.existsConflict(FIELD_ID, START, END))
+        .willReturn(true);
+
+    // when / then
+    assertThatThrownBy(() -> useCase.execute(command))
+        .isInstanceOf(BookingConflictException.class);
+}
+\end{verbatim}
+
+Cada clase de caso de uso tiene su correspondiente clase de test. Los dobles
+de prueba se crean con \texttt{@Mock} y la clase bajo test con \texttt{@InjectMocks}
+en combinación con \texttt{MockitoExtension}.
+
+Los objetos de dominio que contienen lógica de negocio (por ejemplo, la
+validación de solapamiento de horarios en \texttt{Booking}) también tienen tests
+unitarios propios, sin mocks, que verifican el comportamiento con entradas y
+salidas concretas.
+
+\section{Tests de integración con Testcontainers}
+\label{sec:tests_integracion}
+
+Los tests de integración usan \texttt{@SpringBootTest(webEnvironment = RANDOM\_PORT)}
+y un contenedor PostgreSQL gestionado por Testcontainers~\cite{testcontainers}:
+
+\begin{verbatim}
+@Container
+static PostgreSQLContainer<?> postgres =
+    new PostgreSQLContainer<>("postgres:16")
+        .withDatabaseName("padelcenter_test");
+\end{verbatim}
+
+El contenedor se levanta una sola vez por clase de test
+(\texttt{@TestcontainersExtension}) para minimizar el overhead. Flyway aplica
+las migraciones automáticamente al arrancar el contexto Spring, garantizando que
+el esquema de test siempre coincide con el de producción.
+
+Las peticiones HTTP se realizan con \texttt{TestRestTemplate} o con el cliente
+Orval generado en modo test, cubriendo el ciclo completo:
+
+\begin{enumerate}
+  \item Autenticación previa para obtener un JWT válido.
+  \item Llamada al endpoint bajo prueba con el token en el header.
+  \item Verificación del código de estado HTTP y del cuerpo de la respuesta.
+  \item Verificación directa en base de datos para casos críticos de escritura.
+\end{enumerate}
+
+\section{Tests de arquitectura con ArchUnit}
+\label{sec:tests_arquitectura}
+
+ArchUnit~\cite{archunit} permite expresar las reglas de arquitectura como código Java y
+verificarlas en tiempo de compilación. PadelCenter define las siguientes reglas:
+
+\begin{itemize}
+  \item Las clases del paquete \texttt{domain} no deben depender de ninguna
+    clase de los paquetes \texttt{org.springframework} ni
+    \texttt{jakarta.persistence}.
+  \item Las clases del paquete \texttt{application} solo pueden depender de
+    \texttt{domain}, no de \texttt{infrastructure}.
+  \item Todas las clases de casos de uso deben tener exactamente un método
+    público llamado \texttt{execute}.
+  \item Los nombres de las clases de repositorio JPA deben terminar en
+    \texttt{JpaRepository}.
+\end{itemize}
+
+Si alguna de estas reglas se viola, el test falla con un mensaje descriptivo que
+indica exactamente qué clase incumple la regla y por qué.
+
+\section{Resumen de cobertura}
+\label{sec:resumen_cobertura}
+
+La tabla~\ref{tab:resumen_tests} muestra el número de tests por tipo y la
+cobertura global del backend medida con JaCoCo.
+
+\begin{table}[h]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccc}
+\hline
+\textbf{Tipo} & \textbf{Tests} & \textbf{Capas cubiertas} & \textbf{Cobertura (líneas)} \\
+\hline
+Unitarios (Mockito)          & 84  & \texttt{domain}, \texttt{application} & 91\% \\
+Integración (Testcontainers) & 38  & \texttt{infrastructure} + end-to-end   & 74\% \\
+Arquitectura (ArchUnit)      & 12  & Reglas de capas                        & N/A  \\
+\hline
+\textbf{Total}               & \textbf{134} & \textbf{---} & \textbf{82\%} \\
+\hline
+\end{tabular}}
+\caption{Resumen de tests y cobertura del backend (medida con JaCoCo).}
+\label{tab:resumen_tests}
+\end{table}
+
+La cobertura del 91\% en \texttt{domain} y \texttt{application} refleja que las
+capas más críticas del sistema están ampliamente verificadas mediante tests
+unitarios rápidos. La capa de infraestructura alcanza el 74\%: la diferencia
+se debe a adaptadores de difícil cobertura unitaria (configuración de Spring
+Security, serialización JSON), brecha que los 38 tests de integración compensan
+al verificar el comportamiento completo HTTP→base de datos con PostgreSQL real.

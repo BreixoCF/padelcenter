@@ -1,0 +1,153 @@
+\chapter{Estado del arte}
+\label{chap:estadoarte}
+
+\lettrine{L}{a} gestión digital de instalaciones deportivas es un mercado en
+rápido crecimiento, impulsado por la popularización del pádel y la demanda de
+servicios \textit{on-demand}. En este capítulo se analizan las soluciones
+existentes, se evalúan las tecnologías candidatas para el desarrollo del sistema
+y se justifica la elección tecnológica adoptada.
+
+\section{Soluciones existentes}
+\label{sec:soluciones_existentes}
+
+\subsection{Playtomic}
+
+Playtomic es la plataforma líder en España para la reserva de pistas de pádel y
+tenis. Permite a los usuarios buscar pistas disponibles en su zona, realizar
+reservas en tiempo real y gestionar sus partidos. Desde el punto de vista del
+club, ofrece un panel de administración para gestionar disponibilidad, precios y
+bonos.
+
+Sus principales fortalezas son la amplia red de clubes integrados y la experiencia
+de usuario en la aplicación móvil. Sin embargo, presenta limitaciones relevantes:
+es una solución SaaS cerrada sin posibilidad de personalización, cobra una
+comisión por reserva que puede resultar elevada para clubes pequeños, y no ofrece
+funcionalidades avanzadas de gestión de torneos integradas con el sistema de
+reservas.
+
+\subsection{Smashapp}
+
+Smashapp es una plataforma orientada a la gestión de ligas y torneos de pádel.
+Su punto fuerte es el módulo de competición, que permite crear torneos, gestionar
+inscripciones y publicar resultados. No obstante, sus capacidades de gestión de
+reservas son limitadas y está orientado a competiciones federadas más que a la
+gestión cotidiana de un club.
+
+\subsection{Sistemas propios de clubes}
+
+Muchos clubes han desarrollado o contratado sistemas a medida, a menudo
+implementados como simples formularios web conectados a una base de datos o
+incluso como hojas de cálculo compartidas. Estos sistemas presentan problemas
+de mantenibilidad, falta de integración entre módulos y dependencia de un
+proveedor concreto.
+
+\subsection{Análisis comparativo}
+
+La tabla~\ref{tab:comparativa_soluciones} resume las funcionalidades principales
+de las soluciones analizadas.
+
+\begin{table}[ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccc}
+\hline
+\textbf{Funcionalidad} & \textbf{Playtomic} & \textbf{Smashapp} & \textbf{Sist.\ propios} & \textbf{PadelCenter} \\
+\hline
+Reserva de pistas        & Sí       & Limitado  & Variable & Sí \\
+Gestión de torneos       & Básico   & Sí        & Raro     & Sí \\
+Emparejamientos auto.    & No       & Sí        & No       & Sí \\
+Personalizable           & No       & Limitado  & Sí       & Sí \\
+Código abierto           & No       & No        & Variable & Sí \\
+Sin comisión por reserva & No       & No        & Sí       & Sí \\
+Arquitectura moderna     & Descono. & Descono.  & No       & Sí \\
+\hline
+\end{tabular}}
+\caption{Comparativa de soluciones existentes.}
+\label{tab:comparativa_soluciones}
+\end{table}
+
+\section{Tecnologías evaluadas}
+\label{sec:tecnologias_evaluadas}
+
+\subsection{Frameworks de backend}
+
+Se evaluaron tres frameworks Java para el backend:
+
+\paragraph{Spring Boot~\cite{springboot}} Es el framework más maduro y ampliamente adoptado del
+ecosistema Java. Ofrece un ecosistema de módulos muy completo (Spring Security,
+Spring Data JPA, Spring MVC), una comunidad enorme y excelente integración con
+herramientas de generación de código a partir de OpenAPI. Su modelo de
+programación es familiar para cualquier desarrollador Java.
+
+\paragraph{Quarkus} Framework diseñado para entornos cloud-native, con tiempos
+de arranque muy reducidos y menor huella de memoria. Aunque es una opción muy
+interesante para microservicios, su ecosistema es menos maduro que Spring Boot
+y la curva de aprendizaje es mayor para quienes provienen del mundo Java EE.
+
+\paragraph{Micronaut} Similar a Quarkus en su orientación cloud-native, con
+inyección de dependencias en tiempo de compilación. Sus ventajas en rendimiento
+son similares a las de Quarkus, pero su adopción en el mercado es significativamente
+menor, lo que implica menor disponibilidad de recursos y librerías.
+
+La elección recayó sobre \textbf{Spring Boot} por su madurez, la calidad del
+plugin OpenAPI Generator para Maven y la cobertura de todas las necesidades
+del proyecto sin compromisos.
+
+\subsection{Frameworks de frontend}
+
+Se evaluaron tres frameworks JavaScript/TypeScript para el frontend:
+
+\paragraph{Next.js~\cite{nextjs}} Framework React con renderizado híbrido (SSR, SSG y RSC),
+App Router en su versión 14, y un ecosistema muy activo. Su modelo de enrutamiento
+basado en el sistema de ficheros es intuitivo y facilita la organización del
+código. La integración con React Query y la generación de código con Orval es
+directa.
+
+\paragraph{Nuxt} Equivalente de Next.js para el ecosistema Vue.js. Ofrece
+características similares pero la comunidad de Vue es más pequeña y el autor
+tiene mayor experiencia con React.
+
+\paragraph{Angular} Framework completo de Google, con un enfoque más opinionado
+y una mayor cantidad de boilerplate. Su curva de aprendizaje es más pronunciada
+y su arquitectura, aunque sólida, resulta excesiva para un proyecto de este
+tamaño.
+
+La elección recayó sobre \textbf{Next.js} por su flexibilidad, la calidad del
+ecosistema React y la compatibilidad con las herramientas de generación de código
+elegidas.
+
+\section{Arquitectura hexagonal vs. arquitectura en capas}
+\label{sec:arquitectura_comparativa}
+
+La arquitectura en capas tradicional (\textit{Presentation → Service → Repository})
+es el patrón más extendido en aplicaciones Spring Boot. Sin embargo, presenta
+un problema fundamental: las capas superiores acaban dependiendo de detalles de
+infraestructura (JPA, SQL, HTTP) que se filtran a través de las capas, acoplando
+el dominio de negocio a tecnologías concretas.
+
+La arquitectura hexagonal, también conocida como \textit{Ports \& Adapters} y
+propuesta por Alistair Cockburn~\cite{cockburn2005hexagonal}, resuelve este
+problema invirtiendo las dependencias: el núcleo de la aplicación (dominio y
+casos de uso) define interfaces (\textit{puertos}) que la infraestructura
+implementa (\textit{adaptadores}). Esto garantiza que el dominio nunca depende
+de JPA, Spring o cualquier otra tecnología concreta. Esta misma idea de
+inversión de dependencias hacia el dominio es el principio central de la
+\textit{Clean Architecture} de Robert C.~Martin~\cite{martin2017cleanarchitecture},
+que PadelCenter sigue de forma directa al organizar el código en las capas
+\texttt{domain}, \texttt{application} e \texttt{infrastructure}. El propio
+patrón de mapeo en dos capas descrito en la sección~\ref{sec:implementacion_backend}
+recoge ideas clásicas de mapeo objeto-relacional descritas por
+Fowler~\cite{fowler2002peaa}, adaptadas para mantener las entidades JPA
+completamente fuera del dominio.
+
+Las ventajas concretas para PadelCenter son:
+\begin{itemize}
+  \item Posibilidad de testar los casos de uso sin levantar el contexto Spring.
+  \item Facilidad para sustituir la base de datos o el mecanismo de autenticación
+        sin modificar el dominio.
+  \item Reglas de arquitectura verificables automáticamente con ArchUnit.
+\end{itemize}
+
+La desventaja principal es el mayor número de clases e interfaces necesarias
+respecto a una arquitectura en capas plana. Sin embargo, en un proyecto con
+ambición de mantenibilidad a largo plazo, esta inversión es justificada.

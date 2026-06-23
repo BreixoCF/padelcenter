@@ -1,0 +1,177 @@
+\chapter{Conclusiones}
+\label{chap:conclusions}
+
+\lettrine{E}{l} desarrollo de PadelCenter ha permitido poner en práctica, en un
+proyecto real de alcance completo, las competencias adquiridas durante el Grado
+en Ingeniería Informática, mención Ingeniería del Software. En este capítulo se
+evalúan los resultados obtenidos, se analizan las dificultades encontradas y se
+proponen líneas de trabajo futuro.
+
+\section{Objetivos alcanzados}
+\label{sec:objetivos_alcanzados}
+
+Todos los objetivos planteados en la sección~\ref{sec:objetivos} han sido
+satisfactoriamente alcanzados:
+
+\begin{itemize}
+  \item Se ha implementado un sistema completo de autenticación JWT con refresh
+    token via cookie \textit{httpOnly}, cobertura de roles y protección de rutas
+    tanto en el backend como en el frontend.
+
+  \item El módulo de gestión de centros, pistas y reservas funciona correctamente,
+    incluyendo el control de conflictos temporales y la diferenciación de
+    visibilidad según el rol del usuario.
+
+  \item El módulo de torneos permite la inscripción de jugadores, la generación
+    automática de emparejamientos y el registro de resultados.
+
+  \item La arquitectura hexagonal se ha aplicado de forma rigurosa y se verifica
+    automáticamente en cada build mediante ArchUnit.
+
+  \item El enfoque \textit{contract-first} con OpenAPI es efectivo: toda la API
+    está documentada en el YAML y tanto los interfaces del backend como los hooks
+    del frontend se generan automáticamente a partir de él.
+
+  \item El entorno de desarrollo es completamente reproducible con Docker Compose.
+\end{itemize}
+
+\section{Dificultades encontradas}
+\label{sec:dificultades}
+
+\paragraph{Integración Orval con App Router de Next.js} La generación de clientes
+HTTP con Orval no es trivial cuando se combina con el App Router de Next.js~14,
+que distingue entre \textit{Server Components} y \textit{Client Components}.
+Los hooks React Query solo pueden usarse en componentes de cliente, lo que
+requiere una estrategia de prefetch en el servidor y uso de \texttt{use client}
+en los componentes que consumen los hooks.
+
+\paragraph{Control transaccional en tests de integración} Los tests de integración
+con Testcontainers y Spring requieren un cuidado especial en el aislamiento de
+datos entre tests. El uso de \texttt{@Transactional} en los tests puede enmascarar
+problemas reales con las transacciones de la aplicación, por lo que se optó por
+truncar las tablas entre tests de forma explícita.
+
+\paragraph{Generación de emparejamientos} El algoritmo de generación de
+emparejamientos para torneos con número impar de participantes requirió un
+diseño cuidadoso para gestionar los \textit{bye} (participantes con pase
+automático a la siguiente ronda) de forma consistente.
+
+\section{Relación con las competencias de la titulación}
+\label{sec:competencias}
+
+El desarrollo de PadelCenter ha permitido adquirir y consolidar las siguientes
+competencias del GEI, mención Ingeniería del Software:
+
+\begin{description}
+  \item[CE1 — Accesibilidad, usabilidad y seguridad:]\leavevmode
+    El diseño de la API REST, la implementación de la autenticación JWT y la
+    protección de rutas demuestran la aplicación de esta competencia.
+
+  \item[CE2 — Plataformas hardware y software:]\leavevmode
+    La evaluación comparativa de frameworks (Spring Boot, Quarkus, Next.js) y
+    la justificación de las elecciones tecnológicas refleja esta competencia.
+
+  \item[CE3 — Calidad e innovación tecnológica:]\leavevmode
+    La estrategia de pruebas (unitarios, integración, arquitectura) y la
+    verificación automática de las reglas de arquitectura son manifestaciones
+    de esta competencia.
+
+  \item[CE4 — Servicios y sistemas software:]\leavevmode
+    El ciclo completo desde el análisis de requisitos hasta la implementación
+    y validación mediante tests demuestra esta competencia.
+
+  \item[CE5 (mención) — Especificación, diseño e implementación:]\leavevmode
+    La aplicación de arquitectura hexagonal, el enfoque \textit{contract-first}
+    y el uso de herramientas modernas de generación de código son ejemplos
+    concretos de esta competencia aplicada.
+\end{description}
+
+\section{Consideraciones éticas, legales y de sostenibilidad}
+\label{sec:eticas_legales}
+
+\subsection{Protección de datos personales}
+
+PadelCenter trata datos de carácter personal: nombre, correo electrónico,
+teléfono y contraseña (esta última nunca en claro, sino como \textit{hash}
+BCrypt). El tratamiento de estos datos debe ajustarse al Reglamento General de
+Protección de Datos (RGPD) y a la Ley Orgánica 3/2018 (LOPDGDD). El diseño
+actual cumple algunos principios básicos —minimización (solo se solicitan los
+campos estrictamente necesarios para operar el sistema) y seguridad
+(\textit{hashing} de contraseñas, cifrado en tránsito mediante HTTPS en
+despliegue, \textit{token} de refresco en cookie \textit{httpOnly})— pero
+también revela una tensión no resuelta: el uso de \textit{soft delete}
+(sección~\ref{sec:esquema_bd}) mantiene los datos del usuario en base de datos
+tras su eliminación lógica, lo que entra en conflicto con el derecho al olvido
+si no se complementa con un proceso de purga definitiva tras el plazo legal de
+conservación. Una versión productiva del sistema debería incorporar dicho
+proceso de purga y un registro de actividades de tratamiento.
+
+\subsection{Impacto social y económico}
+
+El modelo de negocio de las plataformas dominantes del sector (Playtomic,
+Smashapp) se basa en una comisión por reserva, lo que penaliza
+proporcionalmente más a los clubes pequeños con menor volumen de reservas.
+PadelCenter, al ser una solución que un club puede operar de forma autónoma,
+elimina esa comisión variable, lo que resulta especialmente relevante para
+clubes de barrio o de gestión municipal con presupuestos ajustados. El efecto
+social esperado es una digitalización más accesible para este segmento, que
+de otro modo continuaría dependiendo de hojas de cálculo o llamadas
+telefónicas.
+
+\subsection{Sostenibilidad}
+
+El impacto ambiental directo del proyecto es reducido, al tratarse de software
+de gestión sin componente hardware específico. Cabe señalar dos decisiones con
+una incidencia indirecta: el uso de \textit{virtual threads}
+(sección~\ref{sec:implementacion_backend}) permite atender más peticiones
+concurrentes con los mismos recursos de cómputo, y la sustitución de procesos
+manuales (llamadas, registros en papel) por una gestión digital reduce el
+consumo de recursos físicos asociado a la operativa diaria de un club.
+
+\subsection{Viabilidad económica}
+
+Una estimación del coste de desarrollo, calculada a partir del esfuerzo
+dedicado al proyecto (sección~\ref{sec:ejecucion_real}) y de una tarifa de
+mercado para un perfil de ingeniero \textit{junior} en España
+(aproximadamente 20--25~\texteuro/hora en modalidad \textit{freelance}),
+sitúa el coste de construir una primera versión funcional como la descrita en
+esta memoria en un rango de unos pocos miles de euros. Frente a esto, un
+modelo de negocio basado en una cuota de suscripción mensual fija por centro
+—en lugar de una comisión por reserva— resultaría rentable para un club con un
+volumen de reservas moderado en un plazo de pocos meses, y elimina la
+incertidumbre de ingresos variables tanto para el club como para el operador
+de la plataforma. Una validación rigurosa de esta hipótesis de negocio
+requeriría, no obstante, datos reales de adopción que quedan fuera del alcance
+de este TFG.
+
+\section{Líneas de trabajo futuro}
+\label{sec:lineas_futuras}
+
+PadelCenter es un sistema funcional y extensible, pero quedan varias líneas de
+trabajo que mejorarían significativamente el producto:
+
+\begin{description}
+  \item[Autenticación OAuth2/OIDC:] Integración con un proveedor de identidad
+    como Keycloak o Auth0, permitiendo el inicio de sesión con Google u otras
+    cuentas sociales. La arquitectura hexagonal facilita este cambio: se sustituye
+    el adaptador JWT por un adaptador OAuth2 sin tocar el dominio.
+
+  \item[Notificaciones push:] Envío de recordatorios de reserva y notificaciones
+    de torneos mediante WebSockets o Server-Sent Events, complementado con
+    notificaciones push en dispositivos móviles.
+
+  \item[Aplicación móvil:] Desarrollo de una aplicación React Native que reutilice
+    los mismos hooks generados por Orval, ya que la especificación OpenAPI también
+    puede generar clientes para React Native.
+
+  \item[Despliegue en cloud:] Contenerización completa con Docker y despliegue
+    en un proveedor cloud (AWS, GCP o Azure) mediante Kubernetes o un servicio
+    PaaS. La base de datos se migraría a un servicio gestionado (RDS, Cloud SQL).
+
+  \item[Sistema de valoraciones:] Los jugadores podrían valorar las pistas y los
+    centros tras una reserva, añadiendo un módulo de reputación al sistema.
+
+  \item[Integración de pagos:] Integración con una pasarela de pago (Stripe) para
+    gestionar el cobro de reservas de forma automática, incluyendo reembolsos
+    en caso de cancelación.
+\end{description}

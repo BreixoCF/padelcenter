@@ -1,0 +1,241 @@
+\chapter{Implementación}
+\label{chap:implementacion}
+
+\lettrine{L}{a} implementación de PadelCenter se divide en dos proyectos
+independientes que se comunican a través del contrato OpenAPI: el backend
+en Java~21 con Spring Boot~3.4.4 y el frontend en TypeScript con Next.js~14.
+En este capítulo se describen las decisiones de implementación más relevantes
+de cada uno y el flujo de integración end-to-end.
+
+\section{Backend}
+\label{sec:implementacion_backend}
+
+\subsection{Estructura del proyecto}
+
+El proyecto backend organiza el código siguiendo la estructura de la arquitectura
+hexagonal, con el paquete raíz \texttt{com.bookings.padelcenter}:
+
+\begin{itemize}
+  \item \texttt{domain.model}: records inmutables de dominio (User, Center, Field,
+    Booking, Tournament, TournamentPair, Match, CenterRole, Auditable\ldots).
+    Sin dependencias externas.
+  \item \texttt{domain.port}: interfaces de puertos de entrada y salida.
+  \item \texttt{domain.exception}: excepciones de dominio tipadas
+    (ResourceNotFoundException, BookingAlreadyCancelledException,
+    EmailAlreadyExistsException, UnauthorizedException\ldots).
+  \item \texttt{application.create/read/update/delete}: 42 casos de uso
+    organizados por naturaleza de la operación. Cada uno implementa
+    \texttt{CommandUseCase} o \texttt{QueryUseCase}.
+  \item \texttt{infrastructure.inbound.web}: controladores HTTP que implementan
+    las interfaces generadas por OpenAPI.
+  \item \texttt{infrastructure.inbound.mapper}: mappers API↔dominio.
+  \item \texttt{infra\-structure.out\-bound.db.entity}: entidades JPA.
+  \item \texttt{infra\-structure.out\-bound.db.mapper}: mappers dominio↔entidad JPA.
+  \item \texttt{infra\-structure.out\-bound.security}: JWT, BCrypt, evaluadores
+    de autorización.
+  \item \texttt{infrastructure.config}: configuración de Spring Security y logging.
+\end{itemize}
+
+\subsection{Generación de código OpenAPI}
+
+El plugin \texttt{openapi-generator-maven-plugin}~\cite{openapiGenerator} (v7.6.0) se configura en el
+\texttt{pom.xml} para generar en fase \texttt{generate-sources}:
+
+\begin{itemize}
+  \item \textbf{Interfaces de controlador}: anotadas con \texttt{@RequestMapping},
+    que los controladores implementan. Si la firma no coincide con el contrato,
+    el compilador lo detecta.
+  \item \textbf{DTOs como records Java}: inmutables, con anotaciones Bean
+    Validation derivadas del esquema OpenAPI (\texttt{@NotNull}, \texttt{@Size},
+    etc.). Exclusivos de la capa web; nunca se exponen al dominio.
+\end{itemize}
+
+\subsection{Patrón de mapeo en dos capas}
+
+El proyecto implementa el mapeo entre capas mediante dos familias de clases
+\texttt{@Component} manuales, sin dependencias de generación de código:
+
+\begin{description}
+  \item[\texttt{infrastructure.inbound.mapper}:] Mappers \textbf{API↔dominio}.
+    Transforman los records DTO generados por OpenAPI en objetos de dominio
+    (comandos y queries) antes de invocar el caso de uso, y transforman el
+    resultado del caso de uso en el DTO de respuesta. Por ejemplo,
+    \texttt{BookingApiMapper} convierte \texttt{CreateBookingRequest} en
+    \texttt{CreateBookingUseCase.Command} y \texttt{Booking} en
+    \texttt{BookingResponse}.
+
+  \item[\texttt{infra\-structure.out\-bound.db.mapper}:] Mappers
+    \textbf{dominio↔entidad JPA}. Transforman los records de dominio en
+    entidades anotadas con \texttt{@Entity} y viceversa, gestionando la
+    conversión de tipos (UUID, BigDecimal, enumerados) y la hidratación
+    de objetos relacionados. Por ejemplo, \texttt{BookingPersistenceMapper}
+    transforma entre \texttt{Booking} (record inmutable) y
+    \texttt{BookingEntity} (entidad JPA mutable).
+\end{description}
+
+Esta separación garantiza que ni los DTOs de la API ni las entidades JPA
+contaminan el dominio o los casos de uso.
+
+\subsection{Flyway y migraciones de base de datos}
+
+El esquema se gestiona con Flyway~\cite{flyway}. Las migraciones viven en
+{\ttfamily src/main/resources/\linebreak[0]db/migration/}:
+
+\begin{itemize}
+  \item \texttt{V1\_\_init\_schema.sql}: tablas \texttt{users}, \texttt{centers},
+    \texttt{fields}, \texttt{bookings}, \texttt{booking\_participants} y
+    \texttt{center\_roles} con columnas de auditoría.
+  \item \texttt{V3\_\_add\_missing\_indexes.sql}: índices de optimización.
+  \item \texttt{V4\_\_add\_booking\_overlap\_index.sql}: índice parcial para
+    detección eficiente de solapamiento de reservas a nivel de base de datos.
+  \item \texttt{V5\_\_create\_tournament\_tables.sql}: crea las tablas de torneos
+    (\texttt{tournaments}, \texttt{tournament\_pairs} y \texttt{tournament\_matches}).
+  \item \texttt{V8\_\_add\_team\_name\_to\_pairs.sql}: campo
+    \texttt{team\_name} opcional en \texttt{tournament\_pairs}.
+\end{itemize}
+
+\subsection{Virtual threads (Project Loom)}
+
+El servidor usa virtual threads de Java~21~\cite{projectloom}, activados con una única propiedad:
+
+\begin{verbatim}
+spring.threads.virtual.enabled=true
+\end{verbatim}
+
+Los virtual threads permiten un modelo de concurrencia de alta densidad: como
+son baratos de crear y bloquear, el servidor puede manejar miles de peticiones
+simultáneas sin el overhead de un pool de hilos de plataforma.
+
+\subsection{Trazabilidad con MDC y logging estructurado}
+
+Todas las peticiones HTTP pasan por un filtro \texttt{MdcFilter} que inyecta
+en el MDC (\textit{Mapped Diagnostic Context}) el identificador de usuario y
+un ID de correlación de petición. Los logs se emiten en formato JSON mediante
+\textit{logstash-logback-encoder}, lo que facilita la ingesta en sistemas de
+observabilidad como Elasticsearch o Loki.
+
+\subsection{Convenciones de los casos de uso}
+
+Cada caso de uso implementa \texttt{CommandUseCase<C, R>} o
+\texttt{QueryUseCase<Q, R>}, donde el tipo genérico de entrada es siempre un
+record interno de la propia clase. Esto agrupa comando y caso de uso en un
+único fichero y hace explícito el contrato de cada operación. Las excepciones
+de dominio se propagan hasta el \texttt{GlobalExceptionHandler}
+(\texttt{@ControllerAdvice}), que las traduce a respuestas \texttt{ProblemDetail}
+según RFC~9457.
+
+\section{Frontend}
+\label{sec:implementacion_frontend}
+
+\subsection{Estructura del proyecto}
+
+El frontend usa el App Router de Next.js~14~\cite{nextjs}. Las rutas se organizan en grupos
+entre paréntesis para compartir layouts sin añadir segmentos a la URL:
+
+\begin{itemize}
+  \item \texttt{app/(auth)/}: rutas autenticadas con layout de aplicación
+    (header, navegación). Incluye: \texttt{dashboard}, \texttt{centers},
+    \texttt{centers/[centerId]}, \texttt{bookings}, \texttt{tournaments},
+    \texttt{tournaments/[tournamentId]}, \texttt{matches} y \texttt{profile}.
+  \item \texttt{app/(admin)/admin/}: rutas exclusivas de administrador.
+    Incluye: gestión de \texttt{centers}, \texttt{centers/[centerId]},
+    \texttt{fields}, \texttt{bookings} y \texttt{tournaments}.
+  \item Rutas públicas: \texttt{/login}, \texttt{/register},
+    \texttt{/auth/callback}.
+\end{itemize}
+
+\subsection{Librería de componentes: shadcn/ui y Radix UI}
+
+La interfaz se construye sobre \textbf{shadcn/ui}~\cite{shadcnui}, una colección
+de componentes copiables basada en primitivos accesibles de \textbf{Radix UI}~\cite{radixui} y estilizada con
+Tailwind CSS~\cite{tailwind}. Esta elección aporta:
+
+\begin{itemize}
+  \item Componentes accesibles (ARIA) sin configuración adicional
+    (Dialog, Popover, DropdownMenu, Select, Tabs, Toast\ldots).
+  \item Control total sobre el código: los componentes se copian al repositorio
+    y son modificables, a diferencia de librerías opacas de terceros.
+  \item Integración nativa con Tailwind CSS y \texttt{class-variance-authority}
+    para variantes tipadas de estilos.
+\end{itemize}
+
+\subsection{Generación de hooks con Orval}
+
+Orval~\cite{orval} lee la especificación OpenAPI del backend corriendo en \texttt{:8080} y
+genera en \texttt{src/lib/api/generated/}, organizado por tag (auth, bookings,
+centers, fields, matches, tournaments, users):
+
+\begin{itemize}
+  \item Un hook React Query~\cite{reactquery} (\texttt{useQuery}) por operación GET.
+  \item Una función de mutación (\texttt{useMutation}) por operación
+    POST/PUT/DELETE.
+  \item Los tipos TypeScript correspondientes a todos los esquemas del OpenAPI.
+\end{itemize}
+
+El cliente HTTP subyacente es Axios~\cite{axios} con un mutator personalizado que gestiona
+el refresco automático del token cuando el servidor responde con HTTP~401.
+
+\subsection{Gestión del estado de autenticación con Zustand}
+
+\begin{sloppypar}
+El \textit{access token} JWT se almacena en memoria en un store
+Zustand~\cite{zustand} (\texttt{src/lib/auth/store.ts}), nunca en
+\texttt{localStorage} ni en \texttt{sessionStorage}, lo que elimina el riesgo
+de robo mediante XSS. Los datos del usuario se persisten en \texttt{localStorage}
+mediante el middleware \texttt{persist} de Zustand para sobrevivir a recargas
+de página. Al recargar, el interceptor de Axios intenta el refresco del token
+mediante la cookie \textit{httpOnly} antes de redirigir al login.
+\end{sloppypar}
+
+\subsection{Protección de rutas}
+
+El middleware de Next.js (\texttt{middleware.ts}) actúa como guardián de rutas:
+verifica la autenticación para las rutas bajo \texttt{/(auth)/} y además
+comprueba el rol \texttt{ADMIN} para las rutas bajo \texttt{/(admin)/},
+redirigiendo a \texttt{/dashboard} si el rol es insuficiente.
+
+\section{Flujo end-to-end: creación de una reserva}
+\label{sec:flujo_end_to_end}
+
+A continuación se describe el flujo completo desde el clic del usuario hasta
+la respuesta en pantalla:
+
+\begin{sloppypar}
+\begin{enumerate}
+  \item El usuario selecciona pista, fecha y franja horaria y pulsa
+    \textit{Reservar}.
+  \item El hook \texttt{useCreateBooking} (generado por Orval) envía
+    \texttt{POST /api/v1/bookings} con el \textit{access token} JWT en el
+    header \texttt{Authorization: Bearer}.
+  \item El filtro de Spring Security decodifica el token con
+    \texttt{NimbusJwtDecoder} y establece el contexto de seguridad.
+  \item \texttt{BookingController} recibe la petición, la valida con Bean
+    Validation, usa \texttt{BookingApiMapper} para transformar el DTO en un
+    \texttt{CreateBookingUseCase.Command} y ejecuta el caso de uso.
+  \item \texttt{CreateBookingUseCase} invoca el método
+    \texttt{existsConflict()} de \texttt{BookingRepository}, que consulta el
+    índice de solapamiento de la base de datos.
+  \item Si no hay conflicto, persiste la reserva con estado \texttt{PENDING},
+    calcula el precio total y devuelve el record \texttt{Booking}.
+  \item El controlador usa \texttt{BookingApiMapper} para transformar el record
+    en \texttt{BookingResponse} y responde con HTTP~201.
+  \item React Query invalida la caché de \texttt{useGetMyBookings} y el listado
+    se actualiza automáticamente.
+\end{enumerate}
+\end{sloppypar}
+
+\section{Entorno local con Docker Compose}
+\label{sec:entorno_local}
+
+El fichero \texttt{tools/docker/docker-compose.yaml} define los servicios
+necesarios para el desarrollo local:
+
+\begin{itemize}
+  \item \textbf{postgres}: PostgreSQL~16, expuesto en el puerto 5432. Flyway
+    aplica las migraciones automáticamente al arrancar el backend.
+  \item \textbf{padelcenter}: backend Spring Boot con perfil de desarrollo.
+\end{itemize}
+
+El frontend se ejecuta fuera de Docker con \texttt{pnpm dev} para aprovechar
+el \textit{hot reload} de Next.js. La variable de entorno
+\texttt{NEXT\_PUBLIC\_API\_URL=http://localhost:8080} conecta ambos proyectos.
