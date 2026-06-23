@@ -111,4 +111,24 @@ class CenterControllerIT extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.currentPage").value(0))
 				.andExpect(jsonPath("$.pageSize").value(20));
 	}
+
+	// ── GET /api/v1/centers/{centerId}/bookings ──────────────────────────────
+
+	@Test
+	@DisplayName("GET /api/v1/centers/{id}/bookings — without filters returns 200")
+	void getCenterBookings_withoutFilters_returns200() throws Exception {
+		String centerBody = mockMvc.perform(post(CENTERS_URL)
+						.with(adminJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(VALID_CENTER_JSON))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+
+		String centerId = com.jayway.jsonpath.JsonPath.read(centerBody, "$.centerId");
+
+		mockMvc.perform(get(CENTERS_URL + "/" + centerId + "/bookings")
+						.with(adminJwt()))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content").isArray());
+	}
 }
