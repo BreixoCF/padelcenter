@@ -3,6 +3,7 @@ package com.bookings.padelcenter.infrastructure.outbound.db.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -11,6 +12,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "tournaments")
+@SQLRestriction("deleted_at IS NULL")
 public class TournamentEntity extends AuditableEntity<UUID> {
 
 	@Id

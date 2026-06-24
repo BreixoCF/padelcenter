@@ -234,12 +234,8 @@ class TournamentControllerIT extends AbstractIntegrationTest {
 						.with(adminJwt()))
 				.andExpect(status().isNoContent());
 
-		// TournamentEntity no tiene @SQLRestriction (a diferencia de Center/Field):
-		// el torneo sigue siendo legible tras el borrado, pero con estado CANCELLED
-		// y el borrado lógico correctamente persistido en deleted_at/deleted_by.
 		mockMvc.perform(get(TOURNAMENTS_URL + "/" + tournamentId))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.status").value("CANCELLED"));
+				.andExpect(status().isNotFound());
 
 		Integer deletedAtIsNull = jdbcTemplate.queryForObject(
 				"SELECT COUNT(*) FROM tournaments WHERE tournament_id = ?::uuid AND deleted_at IS NULL",
