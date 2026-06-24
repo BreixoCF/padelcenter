@@ -34,6 +34,36 @@ Para parar y borrar los datos:
 docker compose down -v
 ```
 
+## Datos de prueba (seed local)
+
+En perfil `local` (el que usa Docker), además de las migraciones de esquema
+se aplican `V9__seed_curated_data.sql` y `V10__seed_bulk_data.sql`
+(`src/main/resources/db/seed/`), que dejan la base de datos con datos
+realistas para probar todas las funcionalidades sin tener que crearlos a mano:
+6 centros, 24 pistas, ~200 usuarios, ~1000 reservas y un torneo con 8 parejas
+confirmadas listo para cerrar inscripción.
+
+Solo se aplican una vez por base de datos (Flyway lo registra); reiniciar el
+contenedor sin `down -v` no los repite ni los duplica.
+
+**Todas las cuentas semilla usan la contraseña `Padel2026!`** (en claro, solo
+para entorno local — este proyecto no se despliega nunca a producción):
+
+| Email | Rol | Notas |
+|---|---|---|
+| `admin@padelcenter.local` | ADMIN en los 6 centros | cuenta principal para probar todo |
+| `manager@padelcenter.local` | MANAGER en 2 centros | para probar permisos de centro |
+| `ana.garcia@padelcenter.local` … `ruben.soto@padelcenter.local` (18 usuarios) | USER | jugadores demo; 16 de ellos ya están emparejados en el torneo semilla, 2 quedan libres para probar `POST /tournaments/{id}/pairs` |
+
+El torneo semilla ("Copa Primavera 2026") se deja en `REGISTRATION_OPEN` a
+propósito — cierra la inscripción tú mismo con
+`PATCH /api/v1/tournaments/{id}/registration/close` para ver los 28 matches
+generarse en vivo (round-robin con 8 parejas).
+
+Los ~200 usuarios de relleno (`player0001@padelcenter.local` …
+`player0180@padelcenter.local`) comparten un hash fijo y no están pensados
+para loguearse — son solo volumen para probar paginación y filtros.
+
 ## Arranque en local (sin Docker para el backend)
 
 ```bash
