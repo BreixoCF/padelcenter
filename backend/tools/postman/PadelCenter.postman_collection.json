@@ -576,6 +576,20 @@
         },
         {
           "name": "Delete center",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 204) {",
+                  "    pm.environment.set(\"centerId\", \"b0000000-0000-0000-0000-000000000001\");",
+                  "    pm.environment.set(\"fieldId\", \"c0000000-0000-0000-0000-000000000001\");",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [],
@@ -583,7 +597,8 @@
               "raw": "{{baseUrl}}/api/v1/centers/{{centerId}}",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "centers", "{{centerId}}"]
-            }
+            },
+            "description": "Tras borrar, restaura {{centerId}}/{{fieldId}} a los valores semilla curados (Padel Club Madrid Norte / Pista 1), para que los pasos posteriores de la colección no referencien un center ya eliminado."
           },
           "response": []
         }
