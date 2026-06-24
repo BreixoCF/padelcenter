@@ -44,7 +44,13 @@ proveedor concreto.
 \subsection{Análisis comparativo}
 
 La tabla~\ref{tab:comparativa_soluciones} resume las funcionalidades principales
-de las soluciones analizadas.
+de las soluciones analizadas. Playtomic y Smashapp son productos cerrados sin
+documentación técnica pública ni código accesible, por lo que la comparación
+se basa en el uso de sus aplicaciones y en su documentación de cara al
+cliente, no en una auditoría de su implementación; debe leerse como una
+valoración cualitativa orientativa —suficiente para justificar la elección
+de funcionalidades de PadelCenter— y no como una verificación exhaustiva de
+las capacidades reales de cada competidor.
 
 \begin{table}[ht]
 \centering
@@ -123,28 +129,119 @@ La arquitectura en capas tradicional (\textit{Presentation → Service → Repos
 es el patrón más extendido en aplicaciones Spring Boot. Sin embargo, presenta
 un problema fundamental: las capas superiores acaban dependiendo de detalles de
 infraestructura (JPA, SQL, HTTP) que se filtran a través de las capas, acoplando
-el dominio de negocio a tecnologías concretas.
+el dominio de negocio a tecnologías concretas. En la práctica, el \texttt{Service}
+suele inyectar directamente una interfaz \texttt{JpaRepository} de Spring Data:
+el dominio de negocio queda comprometido, en tiempo de compilación, con un
+\textit{framework} de persistencia concreto.
 
-La arquitectura hexagonal, también conocida como \textit{Ports \& Adapters} y
-propuesta por Alistair Cockburn~\cite{cockburn2005hexagonal}, resuelve este
-problema invirtiendo las dependencias: el núcleo de la aplicación (dominio y
-casos de uso) define interfaces (\textit{puertos}) que la infraestructura
-implementa (\textit{adaptadores}). Esto garantiza que el dominio nunca depende
-de JPA, Spring o cualquier otra tecnología concreta. Esta misma idea de
-inversión de dependencias hacia el dominio es el principio central de la
-\textit{Clean Architecture} de Robert C.~Martin~\cite{martin2017cleanarchitecture},
-que PadelCenter sigue de forma directa al organizar el código en las capas
-\texttt{domain}, \texttt{application} e \texttt{infrastructure}. El propio
-patrón de mapeo en dos capas descrito en la sección~\ref{sec:implementacion_backend}
-recoge ideas clásicas de mapeo objeto-relacional descritas por
-Fowler~\cite{fowler2002peaa}, adaptadas para mantener las entidades JPA
-completamente fuera del dominio.
+\subsection{Ports \& Adapters: origen y conceptos}
 
-Las ventajas concretas para PadelCenter son:
+La arquitectura hexagonal, también conocida como \textit{Ports \& Adapters},
+fue propuesta por Alistair Cockburn~\cite{cockburn2005hexagonal} para resolver
+precisamente ese problema, partiendo de una observación: tanto la interfaz de
+usuario como la base de datos son, desde el punto de vista del núcleo de la
+aplicación, igualmente \textit{externas}. La forma hexagonal no tiene un
+significado literal de seis lados; representa simplemente que el núcleo puede
+exponer tantos lados (puertos) como necesite, a diferencia del rectángulo de
+arriba a abajo de la arquitectura en capas, que sugiere una única dirección de
+dependencia lineal.
+
+Cockburn distingue dos tipos de puerto:
+\begin{description}
+  \item[Puertos primarios (\textit{driving}):] interfaces que el núcleo
+    \emph{ofrece} hacia el exterior. Un caso de uso (\texttt{CreateBookingUseCase})
+    es un puerto primario: algo de fuera —un controlador REST, una prueba
+    automatizada, una futura interfaz de línea de comandos— lo invoca para que
+    el núcleo haga su trabajo.
+  \item[Puertos secundarios (\textit{driven}):] interfaces que el núcleo
+    \emph{necesita} del exterior para funcionar. \texttt{BookingRepository} es
+    un puerto secundario: el núcleo lo invoca, pero quien lo \emph{implementa}
+    está fuera del núcleo.
+\end{description}
+
+Cada puerto tiene uno o varios \textit{adaptadores} que lo conectan con una
+tecnología concreta. Los adaptadores primarios \emph{dirigen} el núcleo
+(un controlador Spring MVC que traduce una petición HTTP en una llamada a
+\texttt{CreateBookingUseCase.execute()}); los adaptadores secundarios son
+\emph{dirigidos por} el núcleo (\texttt{BookingRepositoryImpl}, que traduce las
+llamadas del puerto a consultas JPA). La idea distintiva del patrón —más allá
+de la simple inyección de dependencias— es esta \textbf{simetría}: desde la
+perspectiva del núcleo da igual si quien lo invoca es un controlador REST, una
+cola de mensajes o un test unitario (son adaptadores primarios intercambiables),
+y da igual si la persistencia es PostgreSQL, otra base de datos o un doble de
+prueba en memoria (son adaptadores secundarios intercambiables). El núcleo
+solo conoce las interfaces; nunca conoce qué adaptador concreto está al otro
+lado.
+
+Esta misma idea de inversión de dependencias hacia el núcleo es el principio
+central de la \textit{Clean Architecture} de Robert C.~Martin~\cite{martin2017cleanarchitecture},
+que reformula los dos tipos de puerto de Cockburn como anillos concéntricos
+(entidades, casos de uso, adaptadores de interfaz, \textit{frameworks} y
+controladores) gobernados por la \textit{Dependency Rule}: las dependencias de
+código solo pueden apuntar hacia el interior, nunca hacia afuera. PadelCenter
+sigue esta idea de forma directa, organizando el código en tres paquetes que se
+corresponden con los conceptos de Cockburn: \texttt{domain} y
+\texttt{application} forman el núcleo hexagonal (entidades y casos de uso, que
+definen los puertos como interfaces Java); \texttt{infrastructure.inbound}
+contiene los adaptadores primarios (controladores REST); e
+\texttt{infrastructure.outbound} contiene los adaptadores secundarios
+(repositorios JPA, el adaptador de seguridad JWT). El propio patrón de mapeo en
+dos capas descrito en la sección~\ref{sec:implementacion_backend} recoge ideas
+clásicas de mapeo objeto-relacional descritas por Fowler~\cite{fowler2002peaa},
+adaptadas para mantener las entidades JPA completamente fuera del dominio.
+
+\subsection{Un ejemplo concreto: \texttt{BookingRepository}}
+
+El puerto secundario \texttt{BookingRepository} (interfaz en
+\texttt{domain.repository}) declara, entre otras, la operación que detecta
+conflictos de horario:
+
+\begin{lstlisting}[language=Java]
+public interface BookingRepository {
+    boolean existsOverlappingBooking(
+        UUID fieldId, LocalDateTime start,
+        LocalDateTime end, Long excludeId);
+    // ...
+}
+\end{lstlisting}
+
+\texttt{CreateBookingUseCase} depende únicamente de esta interfaz: ni la
+importa, ni puede importar, ningún tipo de Spring Data JPA. El adaptador
+secundario que la implementa, \texttt{BookingRepositoryImpl}, vive en
+\texttt{infrastructure.outbound} y es el único punto del sistema que conoce a
+la vez el puerto del dominio y la API de Spring Data JPA:
+
+\begin{lstlisting}[language=Java]
+@Repository
+public class BookingRepositoryImpl implements BookingRepository {
+    private final BookingJpaRepository bookingJpaRepository;
+    private final BookingPersistenceMapper mapper;
+    // delega en bookingJpaRepository y traduce
+    // entidades JPA <-> records del dominio
+}
+\end{lstlisting}
+
+En una arquitectura en capas tradicional, \texttt{CreateBookingUseCase} (o el
+equivalente \texttt{BookingService}) inyectaría directamente
+\texttt{BookingJpaRepository}, una interfaz de Spring Data: el dominio
+importaría \texttt{org.springframework\-.data\-.jpa\-.repository\-.JpaRepository} y
+quedaría acoplado a JPA en tiempo de compilación, exactamente el problema
+señalado al inicio de esta sección. Con el puerto de por medio, esa dependencia
+desaparece del dominio: Spring conecta caso de uso y adaptador en tiempo de
+\emph{ejecución} mediante inyección de dependencias, pero en tiempo de
+\emph{compilación} \texttt{application} no depende de \texttt{infrastructure}
+en ningún sentido —la regla que ArchUnit verifica automáticamente en cada
+build (sección~\ref{sec:tests_arquitectura}).
+
+Las ventajas concretas para PadelCenter, consecuencia directa de esta
+inversión, son:
 \begin{itemize}
-  \item Posibilidad de testar los casos de uso sin levantar el contexto Spring.
+  \item Posibilidad de testar los casos de uso sin levantar el contexto Spring:
+        un test sustituye \texttt{BookingRepository} por un doble de prueba
+        (Mockito), sin que el caso de uso note la diferencia.
   \item Facilidad para sustituir la base de datos o el mecanismo de autenticación
-        sin modificar el dominio.
+        sin modificar el dominio: bastaría con escribir un nuevo adaptador que
+        implemente el mismo puerto.
   \item Reglas de arquitectura verificables automáticamente con ArchUnit.
 \end{itemize}
 

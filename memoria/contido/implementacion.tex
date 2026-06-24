@@ -79,7 +79,7 @@ contaminan el dominio o los casos de uso.
 \subsection{Flyway y migraciones de base de datos}
 
 El esquema se gestiona con Flyway~\cite{flyway}. Las migraciones viven en
-{\ttfamily src/main/resources/\linebreak[0]db/migration/}:
+{\ttfamily src/\-main/\-resources/\-db/\-migration/}:
 
 \begin{itemize}
   \item \texttt{V1\_\_init\_schema.sql}: tablas \texttt{users}, \texttt{centers},
@@ -118,9 +118,9 @@ lo que nunca se aplica en el perfil \texttt{test} ni en un despliegue real.
 
 El servidor usa virtual threads de Java~21~\cite{projectloom}, activados con una única propiedad:
 
-\begin{verbatim}
+\begin{lstlisting}
 spring.threads.virtual.enabled=true
-\end{verbatim}
+\end{lstlisting}
 
 Los virtual threads permiten un modelo de concurrencia de alta densidad: como
 son baratos de crear y bloquear, el servidor puede manejar miles de peticiones

@@ -173,7 +173,33 @@ El torneo sigue un ciclo de vida estricto con seis estados:
 
 La transición \textit{close \& generate bracket} es atómica: cierra la
 inscripción y genera todos los emparejamientos iniciales en una misma operación
-({\ttfamily Close\-Registration\-And\-Generate\-Bracket\-Use\-Case}).
+({\ttfamily Close\-Registration\-And\-Generate\-Bracket\-Use\-Case}), que
+delega en \texttt{BracketGeneratorService} (servicio de dominio puro, sin
+dependencias de persistencia) la elección del algoritmo según el formato:
+
+\begin{description}
+  \item[\texttt{ROUND\_ROBIN}:] todos contra todos. Se genera un partido por
+    cada pareja de parejas distinta —equivalente a las tablas de
+    \textit{round-robin scheduling} de Berger, habituales en la programación
+    de ligas—, sin restricción sobre el número de parejas inscritas.
+  \item[\texttt{ELIMINATION}:] eliminación directa. Las parejas se mezclan
+    aleatoriamente y se emparejan para la primera ronda; las rondas siguientes
+    se crean como partidos \textit{placeholder} sin parejas asignadas, que se
+    completan progresivamente a medida que se conocen los ganadores
+    (detalle completo en el anexo~\ref{sec:anexo_bracket_generator}). Este
+    formato exige que el número de parejas confirmadas sea potencia de 2.
+  \item[\texttt{GROUPS\_AND\_ELIMINATION}:] fase de grupos de 4 parejas con
+    \textit{round robin} interno, seguida de una fase eliminatoria entre los
+    dos primeros clasificados de cada grupo.
+\end{description}
+
+Se descartó adoptar una librería de generación de cuadros de torneo existente
+porque ninguna de las candidatas evaluadas soporta de forma nativa los tres
+formatos sobre los tipos de dominio propios de PadelCenter
+(\texttt{TournamentPair}, \texttt{Match}); habría sido necesaria una capa de
+adaptación entre la librería y el dominio cuya complejidad habría superado la
+del propio algoritmo, que es deliberadamente simple y no tiene dependencias
+externas.
 
 \section{Requisitos no funcionales}
 \label{sec:requisitos_no_funcionales}

@@ -18,11 +18,11 @@ condiciones de carrera entre peticiones concurrentes. La migración
 \texttt{V4\_\_add\_booking\_overlap\_index.sql} añade un índice parcial que
 permite delegar esa comprobación en PostgreSQL:
 
-\begin{verbatim}
+\begin{lstlisting}[language=SQL]
 CREATE INDEX idx_bookings_field_time_status
     ON bookings (field_id, start_time, end_time)
     WHERE status IN (1, 2);
-\end{verbatim}
+\end{lstlisting}
 
 El índice es \textbf{parcial}: solo cubre las reservas en estado
 \texttt{PENDING} (1) o \texttt{CONFIRMED} (2), que son las únicas relevantes
@@ -39,10 +39,10 @@ ya una reserva activa que se solape con el rango horario solicitado.
 \texttt{BracketGeneratorService} es un servicio de dominio puro —sin
 dependencias de persistencia ni de Spring más allá de la anotación
 \texttt{@Service}— invocado por
-\texttt{CloseRegistrationAndGenerateBracketUseCase} al cerrar la inscripción
+\texttt{Close\-Registration\-And\-Generate\-Bracket\-Use\-Case} al cerrar la inscripción
 de un torneo. Selecciona el algoritmo según el formato de competición:
 
-\begin{verbatim}
+\begin{lstlisting}[language=Java]
 public List<Match> generate(
         Tournament tournament, List<TournamentPair> confirmedPairs) {
     return switch (tournament.format()) {
@@ -54,12 +54,12 @@ public List<Match> generate(
             generateGroupsAndElimination(tournament, confirmedPairs);
     };
 }
-\end{verbatim}
+\end{lstlisting}
 
 Para el formato \texttt{ROUND\_ROBIN} se genera un partido por cada pareja de
 parejas distintas (todos contra todos):
 
-\begin{verbatim}
+\begin{lstlisting}[language=Java]
 private List<Match> generateRoundRobin(
         Tournament t, List<TournamentPair> pairs) {
     var matches = new ArrayList<Match>();
@@ -72,7 +72,7 @@ private List<Match> generateRoundRobin(
     }
     return matches;
 }
-\end{verbatim}
+\end{lstlisting}
 
 Para el formato \texttt{ELIMINATION}, las parejas se mezclan aleatoriamente y
 se emparejan para la primera ronda; las rondas siguientes se crean como
@@ -80,7 +80,7 @@ partidos \textit{placeholder} sin parejas asignadas (\texttt{pairAId} y
 \texttt{pairBId} a \texttt{null}), que se completan progresivamente a medida
 que se conocen los ganadores de la ronda anterior:
 
-\begin{verbatim}
+\begin{lstlisting}[language=Java]
 private List<Match> generateElimination(
         Tournament t, List<TournamentPair> pairs) {
     var shuffled = new ArrayList<>(pairs);
@@ -110,11 +110,11 @@ private List<Match> generateElimination(
     }
     return matches;
 }
-\end{verbatim}
+\end{lstlisting}
 
 Esta estrategia de \textit{placeholders} evita tener que regenerar la
 estructura completa del cuadro cuando se reporta el resultado de un partido:
-\texttt{CloseRegistrationAndGenerateBracketUseCase} solo necesita localizar el
+\texttt{Close\-Registration\-And\-Generate\-Bracket\-Use\-Case} solo necesita localizar el
 partido de la ronda siguiente correspondiente y rellenar el hueco vacante con
 el identificador del ganador.
 

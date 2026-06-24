@@ -40,7 +40,7 @@ responsabilidades.
 Los tests unitarios usan Mockito~\cite{mockito} y siguen el patrón \textit{given/when/then} y la convención
 de nombres \texttt{should\{Behavior\}When\{Context\}()}. Por ejemplo:
 
-\begin{verbatim}
+\begin{lstlisting}[language=Java]
 @Test
 void shouldThrowConflictExceptionWhenBookingOverlaps() {
     // given
@@ -51,7 +51,7 @@ void shouldThrowConflictExceptionWhenBookingOverlaps() {
     assertThatThrownBy(() -> useCase.execute(command))
         .isInstanceOf(BookingConflictException.class);
 }
-\end{verbatim}
+\end{lstlisting}
 
 Cada clase de caso de uso tiene su correspondiente clase de test. Los dobles
 de prueba se crean con \texttt{@Mock} y la clase bajo test con \texttt{@InjectMocks}
@@ -128,26 +128,29 @@ ya que no es código escrito a mano.
 \hline
 \textbf{Tipo} & \textbf{Tests} & \textbf{Capas cubiertas} & \textbf{Cobertura (líneas)} \\
 \hline
-Unitarios (Mockito)          & 193 & \texttt{domain}, \texttt{application} & 85,2\% \\
-Integración (Testcontainers) & 35  & \texttt{infrastructure} + end-to-end   & 49,4\% \\
+Unitarios (Mockito)          & 193 & \texttt{domain}, \texttt{application} & 91,4\% \\
+Integración (Testcontainers) & 52  & \texttt{infrastructure} + end-to-end   & 81,1\% \\
 Arquitectura (ArchUnit)      & 5   & Reglas de capas                        & N/A    \\
 \hline
-\textbf{Total}               & \textbf{233} & \textbf{---} & \textbf{64,3\%} \\
+\textbf{Total}               & \textbf{250} & \textbf{---} & \textbf{85,3\%} \\
 \hline
 \end{tabular}}
 \caption{Resumen de tests y cobertura del backend (medida con JaCoCo, perfil \texttt{mvn clean verify}).}
 \label{tab:resumen_tests}
 \end{table}
 
-La cobertura del 85,2\% en \texttt{domain} y \texttt{application} refleja que
+La cobertura del 91,4\% en \texttt{domain} y \texttt{application} refleja que
 las capas más críticas del sistema están ampliamente verificadas mediante
-tests unitarios rápidos. La capa de infraestructura queda más rezagada
-(49,4\%): además de los adaptadores de difícil cobertura unitaria
-(configuración de Spring Security, mapeo JPA), faltan clases
-\texttt{*ControllerIT} dedicadas para los recursos de torneos, partidos y
-autenticación — actualmente solo existen para usuarios, centros, pistas y
-reservas (\texttt{UserControllerIT}, \texttt{CenterControllerIT},
-\texttt{FieldControllerIT}, \texttt{BookingControllerIT}) y para la
-configuración de seguridad (\texttt{SecurityConfigPublicEndpointsIT}). Esta
-brecha queda identificada como trabajo futuro en la
-sección~\ref{chap:conclusions}.
+tests unitarios rápidos. La capa de infraestructura alcanza el 81,1\% gracias
+a ocho clases \texttt{*ControllerIT}, una por cada controlador REST
+(\texttt{UserControllerIT}, \texttt{CenterControllerIT},
+\texttt{FieldControllerIT}, \texttt{BookingControllerIT},
+\texttt{TournamentControllerIT}, \texttt{MatchControllerIT},
+\texttt{AuthControllerIT}) más \texttt{SecurityConfigPublicEndpointsIT} para
+la configuración de seguridad. El hueco restante se concentra en
+\texttt{GlobalExceptionHandler} (50,9\%): cada \texttt{@ExceptionHandler}
+solo se cubre si algún test llega a provocar esa excepción concreta, y varias
+—por ejemplo \texttt{BookingOverlapException} o
+\texttt{PairAlreadyRegisteredException}— todavía no tienen un test de
+integración dedicado. Cerrar esa brecha por completo queda como trabajo
+futuro en la sección~\ref{chap:conclusions}.

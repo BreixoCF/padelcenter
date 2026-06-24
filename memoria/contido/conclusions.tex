@@ -51,10 +51,22 @@ datos entre tests. El uso de \texttt{@Transactional} en los tests puede enmascar
 problemas reales con las transacciones de la aplicación, por lo que se optó por
 truncar las tablas entre tests de forma explícita.
 
-\paragraph{Generación de emparejamientos} El algoritmo de generación de
-emparejamientos para torneos con número impar de participantes requirió un
-diseño cuidadoso para gestionar los \textit{bye} (participantes con pase
-automático a la siguiente ronda) de forma consistente.
+\paragraph{Emparejamientos con número de parejas no potencia de 2} El formato
+\texttt{ELIMINATION} necesita, en cada ronda, que el número de parejas se
+pueda dividir entre dos hasta llegar a la final. Con un número de parejas que
+no es potencia de 2 hacen falta \textit{byes} (pases automáticos a la
+siguiente ronda para las parejas sobrantes), lo que complica tanto el cálculo
+de quién recibe el \textit{bye} —debe repartirse de forma justa, no siempre al
+mismo cabeza de serie— como la generación de los partidos \textit{placeholder}
+de rondas posteriores. Tras valorar esa complejidad frente al beneficio real
+para un sistema de gestión de un club de pádel, se optó deliberadamente por
+\textbf{no} implementarla: \texttt{Close\-Registration\-And\-Generate\-Bracket\-Use\-Case}
+exige que el número de parejas confirmadas sea potencia de 2 para
+\texttt{ELIMINATION} y rechaza el cierre de inscripción en caso contrario
+(sección~\ref{sec:requisitos_funcionales}). Es una decisión consciente de
+simplicidad sobre generalidad, no una limitación accidental: soportar byes
+queda como posible ampliación futura si la casuística real de los clubes lo
+demanda.
 
 \section{Relación con las competencias de la titulación}
 \label{sec:competencias}
@@ -175,13 +187,18 @@ trabajo que mejorarían significativamente el producto:
     gestionar el cobro de reservas de forma automática, incluyendo reembolsos
     en caso de cancelación.
 
-  \item[Ampliar la cobertura de tests de integración:] Como se detalla en la
-    sección~\ref{sec:resumen_cobertura}, los recursos de torneos, partidos y
-    autenticación todavía no tienen una clase \texttt{*ControllerIT} dedicada.
+  \item[Cerrar la cobertura de \texttt{GlobalExceptionHandler}:] Como se
+    detalla en la sección~\ref{sec:resumen_cobertura}, cada
+    \texttt{@ExceptionHandler} solo se cubre si algún test provoca esa
+    excepción concreta; faltan tests de integración que fuercen casos como
+    \texttt{BookingOverlapException} o \texttt{PairAlreadyRegisteredException}.
     Durante el desarrollo, la validación manual de la API completa con la
     colección Postman (sección~\ref{sec:entorno_local}) detectó varios
     defectos —entre ellos, borrados lógicos que no se persistían realmente y
     una confirmación de pareja de torneo que no comprobaba a qué torneo
-    pertenecía— que unos tests de integración para esos controladores
-    habrían detectado de forma automática mucho antes.
+    pertenecía— que tests de integración para los controladores de torneos,
+    partidos y autenticación (añadidos después,
+    \texttt{TournamentControllerIT}, \texttt{MatchControllerIT} y
+    \texttt{AuthControllerIT}) habrían detectado de forma automática mucho
+    antes.
 \end{description}
