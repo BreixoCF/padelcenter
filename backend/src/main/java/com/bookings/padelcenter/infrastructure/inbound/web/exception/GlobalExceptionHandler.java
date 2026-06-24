@@ -2,6 +2,7 @@ package com.bookings.padelcenter.infrastructure.inbound.web.exception;
 
 import com.bookings.padelcenter.domain.exception.BookingAlreadyCancelledException;
 import com.bookings.padelcenter.domain.exception.BookingOverlapException;
+import com.bookings.padelcenter.domain.exception.CenterHasActiveFieldsException;
 import com.bookings.padelcenter.domain.exception.EmailAlreadyExistsException;
 import com.bookings.padelcenter.domain.exception.FieldNotAvailableException;
 import com.bookings.padelcenter.domain.exception.InvalidMatchResultException;
@@ -86,6 +87,15 @@ public class GlobalExceptionHandler {
 	public ProblemDetail handleBookingAlreadyCancelledException(BookingAlreadyCancelledException ex) {
 		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
 		problem.setTitle("Booking Already Cancelled");
+		problem.setType(URI.create("about:blank"));
+		problem.setProperty("timestamp", Instant.now());
+		return problem;
+	}
+
+	@ExceptionHandler(CenterHasActiveFieldsException.class)
+	public ProblemDetail handleCenterHasActiveFieldsException(CenterHasActiveFieldsException ex) {
+		var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+		problem.setTitle("Center Has Active Fields");
 		problem.setType(URI.create("about:blank"));
 		problem.setProperty("timestamp", Instant.now());
 		return problem;

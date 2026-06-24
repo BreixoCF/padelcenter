@@ -36,6 +36,7 @@ public class ConfirmPairUseCase implements CommandUseCase<ConfirmPairCommand, To
 		}
 
 		var pair = tournamentRepository.findPairById(command.pairId())
+				.filter(p -> p.tournamentId().equals(command.tournamentId()))
 				.orElseThrow(() -> new MatchNotFoundException(command.pairId()));
 
 		var confirmed = pair.confirm();

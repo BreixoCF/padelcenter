@@ -160,4 +160,39 @@ class CenterControllerIT extends AbstractIntegrationTest {
 						.with(adminJwt()))
 				.andExpect(status().isNotFound());
 	}
+
+	@Test
+	@DisplayName("DELETE /api/v1/centers/{id} — with active fields returns 409")
+	void deleteCenter_withActiveFields_returns409() throws Exception {
+		String centerBody = mockMvc.perform(post(CENTERS_URL)
+						.with(adminJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(VALID_CENTER_JSON))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+
+		String centerId = com.jayway.jsonpath.JsonPath.read(centerBody, "$.centerId");
+
+		mockMvc.perform(post(CENTERS_URL + "/" + centerId + "/fields")
+						.with(adminJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "name":         "Court 1",
+								  "type":         "Indoor",
+								  "pricePerHour": 25.00,
+								  "isAvailable":  true
+								}
+								"""))
+				.andExpect(status().isCreated());
+
+		mockMvc.perform(delete(CENTERS_URL + "/" + centerId)
+						.with(adminJwt()))
+				.andExpect(status().isConflict());
+
+		Integer notDeleted = jdbcTemplate.queryForObject(
+				"SELECT COUNT(*) FROM centers WHERE center_id = ?::uuid AND deleted_at IS NULL",
+				Integer.class, centerId);
+		assertEquals(1, notDeleted, "center must remain undeleted while it still has active fields");
+	}
 }

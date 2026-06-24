@@ -2,10 +2,13 @@ package com.bookings.padelcenter.application.delete;
 
 import com.bookings.padelcenter.application.command.DeleteCenterCommand;
 import com.bookings.padelcenter.application.shared.AuthenticatedUser;
+import com.bookings.padelcenter.domain.exception.CenterHasActiveFieldsException;
 import com.bookings.padelcenter.domain.exception.CenterNotFoundException;
 import com.bookings.padelcenter.domain.model.Auditable;
 import com.bookings.padelcenter.domain.model.Center;
+import com.bookings.padelcenter.domain.model.Field;
 import com.bookings.padelcenter.domain.repository.CenterRepository;
+import com.bookings.padelcenter.domain.repository.FieldRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,6 +33,9 @@ class DeleteCenterUseCaseTest {
 
 	@Mock
 	private CenterRepository centerRepository;
+
+	@Mock
+	private FieldRepository fieldRepository;
 
 	@InjectMocks
 	private DeleteCenterUseCase deleteCenterUseCase;
@@ -59,6 +66,7 @@ class DeleteCenterUseCaseTest {
 	@DisplayName("deleteCenter_existingCenter_softDeletes")
 	void deleteCenter_existingCenter_softDeletes() {
 		when(centerRepository.findById(centerId)).thenReturn(Optional.of(existingCenter));
+		when(fieldRepository.findByCenterId(centerId)).thenReturn(List.of());
 		when(centerRepository.save(any(Center.class))).thenAnswer(inv -> inv.getArgument(0));
 
 		var result = deleteCenterUseCase.execute(command);
@@ -87,6 +95,7 @@ class DeleteCenterUseCaseTest {
 	@DisplayName("deleteCenter_preservesCenterData")
 	void deleteCenter_preservesCenterData() {
 		when(centerRepository.findById(centerId)).thenReturn(Optional.of(existingCenter));
+		when(fieldRepository.findByCenterId(centerId)).thenReturn(List.of());
 		when(centerRepository.save(any(Center.class))).thenAnswer(inv -> inv.getArgument(0));
 
 		ArgumentCaptor<Center> captor = ArgumentCaptor.forClass(Center.class);
@@ -97,5 +106,21 @@ class DeleteCenterUseCaseTest {
 		assertThat(saved.name()).isEqualTo(existingCenter.name());
 		assertThat(saved.address()).isEqualTo(existingCenter.address());
 		assertThat(saved.audit().deletedBy()).isEqualTo(deletedBy);
+	}
+
+	@Test
+	@DisplayName("deleteCenter_withActiveFields_throwsCenterHasActiveFieldsException")
+	void deleteCenter_withActiveFields_throwsCenterHasActiveFieldsException() {
+		var activeField = new Field(UUID.randomUUID(), "Court 1", "Indoor",
+			java.math.BigDecimal.valueOf(25.0), true, existingCenter, Auditable.newAudit());
+
+		when(centerRepository.findById(centerId)).thenReturn(Optional.of(existingCenter));
+		when(fieldRepository.findByCenterId(centerId)).thenReturn(List.of(activeField));
+
+		assertThatThrownBy(() -> deleteCenterUseCase.execute(command))
+			.isInstanceOf(CenterHasActiveFieldsException.class)
+			.hasMessageContaining(centerId.toString());
+
+		verify(centerRepository, never()).save(any());
 	}
 }
