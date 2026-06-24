@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 public class FieldPersistenceMapper {
 
 	private final CenterPersistenceMapper centerPersistenceMapper;
+	private final AuditablePersistenceMapper auditablePersistenceMapper;
 
 	public FieldEntity toEntity(Field field) {
 		var entity = new FieldEntity();
@@ -25,6 +26,7 @@ public class FieldPersistenceMapper {
 		if (field.center() != null) {
 			entity.setCenter(centerPersistenceMapper.toEntity(field.center()));
 		}
+		auditablePersistenceMapper.mapToEntity(field.audit(), entity);
 		return entity;
 	}
 

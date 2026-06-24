@@ -84,4 +84,55 @@ class FieldControllerIT extends AbstractIntegrationTest {
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.title").isNotEmpty());
 	}
+
+	// ── DELETE /api/v1/fields/{id} ────────────────────────────────────────────
+
+	@Test
+	@DisplayName("DELETE /api/v1/fields/{id} — soft-deletes the row (not just a 204 response)")
+	void deleteField_asAdmin_persistsSoftDelete() throws Exception {
+		String centerBody = mockMvc.perform(post(CENTERS_URL)
+						.with(adminJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "name":    "Field Delete Test Center",
+								  "address": "Calle Test 2",
+								  "city":    "Madrid"
+								}
+								"""))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+
+		String centerId = JsonPath.read(centerBody, "$.centerId");
+
+		String fieldBody = mockMvc.perform(post(CENTERS_URL + "/" + centerId + "/fields")
+						.with(adminJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "name":         "Court Delete Me",
+								  "type":         "Indoor",
+								  "pricePerHour": 30.00,
+								  "isAvailable":  true
+								}
+								"""))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+
+		String fieldId = JsonPath.read(fieldBody, "$.fieldId");
+
+		mockMvc.perform(delete(FIELDS_URL + "/" + fieldId)
+						.with(adminJwt()))
+				.andExpect(status().isNoContent());
+
+		Integer deletedAtIsNull = jdbcTemplate.queryForObject(
+				"SELECT COUNT(*) FROM fields WHERE field_id = ?::uuid AND deleted_at IS NULL",
+				Integer.class, fieldId);
+		assertEquals(0, deletedAtIsNull,
+				"deleted_at must be set after DELETE — the entity should no longer be visible");
+
+		mockMvc.perform(get(FIELDS_URL + "/" + fieldId)
+						.with(adminJwt()))
+				.andExpect(status().isNotFound());
+	}
 }

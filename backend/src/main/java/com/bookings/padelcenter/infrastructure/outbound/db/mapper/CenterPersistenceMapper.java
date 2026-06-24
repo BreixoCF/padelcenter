@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 public class CenterPersistenceMapper {
 
 	private final UserPersistenceMapper userPersistenceMapper;
+	private final AuditablePersistenceMapper auditablePersistenceMapper;
 
 	public CenterEntity toEntity(Center center) {
 		var entity = new CenterEntity();
@@ -25,6 +26,7 @@ public class CenterPersistenceMapper {
 		if (center.manager() != null) {
 			entity.setManager(userPersistenceMapper.toEntity(center.manager()));
 		}
+		auditablePersistenceMapper.mapToEntity(center.audit(), entity);
 		return entity;
 	}
 

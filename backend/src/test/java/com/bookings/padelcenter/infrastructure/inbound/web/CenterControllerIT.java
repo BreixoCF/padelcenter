@@ -131,4 +131,33 @@ class CenterControllerIT extends AbstractIntegrationTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content").isArray());
 	}
+
+	// ── DELETE /api/v1/centers/{id} ───────────────────────────────────────────
+
+	@Test
+	@DisplayName("DELETE /api/v1/centers/{id} — soft-deletes the row (not just a 204 response)")
+	void deleteCenter_asAdmin_persistsSoftDelete() throws Exception {
+		String centerBody = mockMvc.perform(post(CENTERS_URL)
+						.with(adminJwt())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(VALID_CENTER_JSON))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+
+		String centerId = com.jayway.jsonpath.JsonPath.read(centerBody, "$.centerId");
+
+		mockMvc.perform(delete(CENTERS_URL + "/" + centerId)
+						.with(adminJwt()))
+				.andExpect(status().isNoContent());
+
+		Integer deletedAtIsNull = jdbcTemplate.queryForObject(
+				"SELECT COUNT(*) FROM centers WHERE center_id = ?::uuid AND deleted_at IS NULL",
+				Integer.class, centerId);
+		assertEquals(0, deletedAtIsNull,
+				"deleted_at must be set after DELETE — the entity should no longer be visible");
+
+		mockMvc.perform(get(CENTERS_URL + "/" + centerId)
+						.with(adminJwt()))
+				.andExpect(status().isNotFound());
+	}
 }
