@@ -2,221 +2,899 @@
   "info": {
     "_postman_id": "7d767f6f-ed40-4358-8d66-6d256037b2f1",
     "name": "PadelCenter",
-    "description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Scripts\" tab**\n\nAdding tests to your requests can help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/fa30ea0a-373d-4545-a668-e7b283cca343/aW1hZ2UucG5n\" width=\"2162\" height=\"1530\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "2276151",
-    "_collection_link": "https://go.postman.co/collection/2276151-7d767f6f-ed40-4358-8d66-6d256037b2f1?source=collection_link"
+    "description": "Colección generada a partir del contrato OpenAPI en backend/docs/openapi/index.yaml. Cubre las 44 operaciones expuestas por la API (Auth, Me, Users, Bookings, Centers, Fields, Tournaments, Matches). Pensada para usarse con el entorno \"PadelCenter — Local\" (http://localhost:8080).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{accessToken}}", "type": "string" }
+    ]
   },
   "item": [
     {
-      "name": "GET all users",
-      "event": [
+      "name": "Auth",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () {",
-              "    pm.response.to.have.status(200);",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:8080/users",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "users"
-          ]
-        },
-        "description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
-      },
-      "response": []
-    },
-    {
-      "name": "POST create user",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n    \"firstName\": \"Breixo\",\r\n    \"lastName\": \"Camiña Fernández\",\r\n    \"email\": \"breixocf@gmail.com\",\r\n    \"password\": \"MiPasswordSeguro123\",\r\n    \"phoneNumber\": \"600123456\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    pm.environment.set(\"accessToken\", body.accessToken);",
+                  "    if (body.user && body.user.userId) {",
+                  "        pm.environment.set(\"userId\", body.user.userId);",
+                  "    }",
+                  "}"
+                ]
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:8080/users",
-          "protocol": "http",
-          "host": [
-            "localhost"
           ],
-          "port": "8080",
-          "path": [
-            "users"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "POST create center",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n    \"name\": \"Center\",\r\n    \"address\": \"Jaume Balmes 67\",\r\n    \"city\": \"Sant Boi\",\r\n    \"phoneNumber\": \"600123456\",\r\n    \"email\":\"santboi4@example.com\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@padelcenter.local\",\n  \"password\": \"Padel2026!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Operación pública. Guarda accessToken y userId en el environment."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.environment.set(\"accessToken\", pm.response.json().accessToken);",
+                  "}"
+                ]
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:8080/centers",
-          "protocol": "http",
-          "host": [
-            "localhost"
           ],
-          "port": "8080",
-          "path": [
-            "centers"
-          ]
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "refresh"]
+            },
+            "description": "Operación pública. Usa la cookie httpOnly de refresh; no requiere body."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "logout"]
+            },
+            "description": "Operación pública."
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "POST create field",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n    \"name\":\"578\",\r\n    \"type\": \"Seco\",\r\n    \"pricePerHour\":3.0,\r\n    \"isAvailable\": true\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+      "name": "Me",
+      "item": [
+        {
+          "name": "Get my profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "me"]
             }
-          }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "http://localhost:8080/centers/7190b44f-52f7-47c2-af39-cc862f3722f3/fields",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "centers",
-            "7190b44f-52f7-47c2-af39-cc862f3722f3",
-            "fields"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "PUT update user",
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n    \"firstName\": \"Breixo\",\r\n    \"lastName\": \"Camiña\",\r\n    \"email\": \"breixo2@gmail.com\",\r\n    \"password\": \"jijajajaji\",\r\n    \"phoneNumber\": \"608654534\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+        {
+          "name": "Get my tournaments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/me/tournaments?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "me", "tournaments"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
             }
-          }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "http://localhost:8080/users/61f82a02-00e9-4ef9-85b9-0ee46ae1af7b",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "users",
-            "61f82a02-00e9-4ef9-85b9-0ee46ae1af7b"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "PATCH update roles",
-      "request": {
-        "method": "PATCH",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "[\r\n  {\r\n    \"centerId\": \"7190b44f-52f7-47c2-af39-cc862f3722f3\",\r\n    \"role\": \"ADMIN\"\r\n  }\r\n]",
-          "options": {
-            "raw": {
-              "language": "json"
+        {
+          "name": "Get my bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/me/bookings?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "me", "bookings"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" },
+                { "key": "status", "value": "CONFIRMED", "disabled": true }
+              ]
             }
-          }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "http://localhost:8080/users/61f82a02-00e9-4ef9-85b9-0ee46ae1af7b/roles",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "users",
-            "61f82a02-00e9-4ef9-85b9-0ee46ae1af7b",
-            "roles"
-          ]
+        {
+          "name": "Get my matches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/me/matches?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "me", "matches"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
-    }
-  ],
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          ""
-        ]
-      }
+      ]
     },
     {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          ""
-        ]
-      }
-    }
-  ],
-  "variable": [
-    {
-      "key": "id",
-      "value": "1"
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set(\"userId\", pm.response.json().userId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Ana\",\n  \"lastName\": \"García\",\n  \"email\": \"ana.garcia@example.com\",\n  \"password\": \"securePass123!\",\n  \"phoneNumber\": \"+34600123456\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" },
+                { "key": "sort", "value": "lastName,asc", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get user by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "{{userId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update user",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Ana\",\n  \"lastName\": \"Martínez\",\n  \"email\": \"ana.nueva@example.com\",\n  \"phoneNumber\": \"+34611234567\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "{{userId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update user roles",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  { \"centerId\": \"{{centerId}}\", \"role\": \"MANAGER\" }\n]",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "{{userId}}", "roles"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update password",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"oldSecurePass123!\",\n  \"newPassword\": \"newSecurePass456!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}/password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "{{userId}}", "password"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get user bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}/bookings?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "{{userId}}", "bookings"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" },
+                { "key": "sort", "value": "startTime,desc", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 204) {",
+                  "    pm.environment.set(\"userId\", \"a0000000-0000-0000-0000-000000000019\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "{{userId}}"]
+            },
+            "description": "Tras borrar, restaura {{userId}} al usuario semilla curado 'Irene Pascual' (sin pareja de torneo asignada), para que los pasos posteriores de la colección (p. ej. Register pair) no referencien un usuario ya eliminado."
+          },
+          "response": []
+        }
+      ]
     },
     {
-      "key": "base_url",
-      "value": "https://template.postman-echo.com"
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set(\"bookingId\", pm.response.json().bookingId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fieldId\": \"{{fieldId}}\",\n  \"startTime\": \"2025-06-15T10:00:00Z\",\n  \"endTime\": \"2025-06-15T11:00:00Z\",\n  \"totalPrice\": 25.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bookings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get booking by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings/{{bookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bookings", "{{bookingId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update booking",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startTime\": \"2025-06-15T11:00:00Z\",\n  \"endTime\": \"2025-06-15T12:00:00Z\",\n  \"totalPrice\": 30.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings/{{bookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bookings", "{{bookingId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel booking",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings/{{bookingId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bookings", "{{bookingId}}", "cancel"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Centers",
+      "item": [
+        {
+          "name": "Create center",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set(\"centerId\", pm.response.json().centerId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Padel Center Barcelona\",\n  \"address\": \"Calle Principal 123\",\n  \"city\": \"Barcelona\",\n  \"phoneNumber\": \"933123456\",\n  \"email\": \"barcelona@padelcenter.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/centers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "centers"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List centers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/centers?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "centers"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" },
+                { "key": "sort", "value": "name,asc", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get center by id",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/centers/{{centerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "centers", "{{centerId}}"]
+            },
+            "description": "Operación pública."
+          },
+          "response": []
+        },
+        {
+          "name": "List center fields",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/centers/{{centerId}}/fields?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "centers", "{{centerId}}", "fields"],
+              "query": [
+                { "key": "type", "value": "Indoor", "disabled": true },
+                { "key": "available", "value": "true", "disabled": true },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create field",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set(\"fieldId\", pm.response.json().fieldId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Court 1\",\n  \"type\": \"Indoor\",\n  \"pricePerHour\": 25.00,\n  \"isAvailable\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/centers/{{centerId}}/fields",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "centers", "{{centerId}}", "fields"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get center bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/centers/{{centerId}}/bookings?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "centers", "{{centerId}}", "bookings"],
+              "query": [
+                { "key": "date", "value": "2025-06-15", "disabled": true },
+                { "key": "startDate", "value": "2025-06-01", "disabled": true },
+                { "key": "endDate", "value": "2025-06-30", "disabled": true },
+                { "key": "fieldId", "value": "{{fieldId}}", "disabled": true },
+                { "key": "status", "value": "CONFIRMED", "disabled": true },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get tournaments by center",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/centers/{{centerId}}/tournaments?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "centers", "{{centerId}}", "tournaments"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Operación pública."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete center",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/centers/{{centerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "centers", "{{centerId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Fields",
+      "item": [
+        {
+          "name": "List fields",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/fields?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "fields"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" },
+                { "key": "sort", "value": "name,asc", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get field by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/fields/{{fieldId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "fields", "{{fieldId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update field",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Court 1\",\n  \"type\": \"Indoor\",\n  \"pricePerHour\": 25.00,\n  \"isAvailable\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/fields/{{fieldId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "fields", "{{fieldId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get field availability",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/fields/{{fieldId}}/availability?date=2025-06-20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "fields", "{{fieldId}}", "availability"],
+              "query": [{ "key": "date", "value": "2025-06-20" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update field availability",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"available\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/fields/{{fieldId}}/availability",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "fields", "{{fieldId}}", "availability"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete field",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/fields/{{fieldId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "fields", "{{fieldId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tournaments",
+      "item": [
+        {
+          "name": "Create tournament",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set(\"tournamentId\", pm.response.json().tournamentId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"centerId\": \"{{centerId}}\",\n  \"name\": \"Copa Verano 2025\",\n  \"description\": \"Torneo de verano para todos los niveles\",\n  \"format\": \"ROUND_ROBIN\",\n  \"maxPairs\": 8,\n  \"startDate\": \"2025-07-01\",\n  \"endDate\": \"2025-07-15\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tournaments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tournaments"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get tournament by id",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tournaments/{{tournamentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tournaments", "{{tournamentId}}"]
+            },
+            "description": "Operación pública."
+          },
+          "response": []
+        },
+        {
+          "name": "Open registration",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tournaments/{{tournamentId}}/registration/open",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tournaments", "{{tournamentId}}", "registration", "open"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register pair",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set(\"pairId\", pm.response.json().pairId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"player1Id\": \"{{userId}}\",\n  \"player2Id\": \"{{player2Id}}\",\n  \"teamName\": \"Los Cañoneros\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tournaments/{{tournamentId}}/pairs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tournaments", "{{tournamentId}}", "pairs"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get tournament pairs",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tournaments/{{tournamentId}}/pairs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tournaments", "{{tournamentId}}", "pairs"]
+            },
+            "description": "Operación pública. Devuelve un array plano, sin paginar."
+          },
+          "response": []
+        },
+        {
+          "name": "Confirm pair",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tournaments/{{tournamentId}}/pairs/{{pairId}}/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tournaments", "{{tournamentId}}", "pairs", "{{pairId}}", "confirm"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Close registration",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tournaments/{{tournamentId}}/registration/close",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tournaments", "{{tournamentId}}", "registration", "close"]
+            },
+            "description": "Cierra la inscripción y genera los matches del torneo."
+          },
+          "response": []
+        },
+        {
+          "name": "Get tournament matches",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tournaments/{{tournamentId}}/matches?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tournaments", "{{tournamentId}}", "matches"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Operación pública."
+          },
+          "response": []
+        },
+        {
+          "name": "Get tournament standings",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tournaments/{{tournamentId}}/standings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tournaments", "{{tournamentId}}", "standings"]
+            },
+            "description": "Operación pública. Solo aplica a torneos de formato ROUND_ROBIN. Devuelve un array plano, sin paginar."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete tournament",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tournaments/{{tournamentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tournaments", "{{tournamentId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Matches",
+      "item": [
+        {
+          "name": "Report match result",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"winnerPairId\": \"{{pairId}}\",\n  \"scoreA\": 6,\n  \"scoreB\": 3\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/result",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}", "result"]
+            },
+            "description": "El caller debe ser uno de los 4 jugadores del match."
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }
