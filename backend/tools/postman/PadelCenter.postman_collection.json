@@ -575,6 +575,20 @@
           "response": []
         },
         {
+          "name": "Delete field",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/fields/{{fieldId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "fields", "{{fieldId}}"]
+            },
+            "description": "Borra el field creado más arriba en esta misma carpeta — necesario antes de 'Delete center', que ahora devuelve 409 si el center todavía tiene fields activos."
+          },
+          "response": []
+        },
+        {
           "name": "Delete center",
           "event": [
             {
@@ -607,6 +621,69 @@
     {
       "name": "Fields",
       "item": [
+        {
+          "name": "Setup: create supporting center",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set(\"fieldsTestCenterId\", pm.response.json().centerId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fields Test Center\",\n  \"address\": \"Calle Test 1\",\n  \"city\": \"Madrid\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/centers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "centers"]
+            },
+            "description": "Center desechable, solo para tener un padre válido donde colgar el field de pruebas de esta carpeta — no toca los centers curados."
+          },
+          "response": []
+        },
+        {
+          "name": "Setup: create field",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set(\"fieldId\", pm.response.json().fieldId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Court 1\",\n  \"type\": \"Indoor\",\n  \"pricePerHour\": 25.00,\n  \"isAvailable\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/centers/{{fieldsTestCenterId}}/fields",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "centers", "{{fieldsTestCenterId}}", "fields"]
+            }
+          },
+          "response": []
+        },
         {
           "name": "List fields",
           "request": {
@@ -698,6 +775,33 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "fields", "{{fieldId}}"]
             }
+          },
+          "response": []
+        },
+        {
+          "name": "Cleanup: delete supporting center",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 204) {",
+                  "    pm.environment.set(\"fieldId\", \"c0000000-0000-0000-0000-000000000001\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/centers/{{fieldsTestCenterId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "centers", "{{fieldsTestCenterId}}"]
+            },
+            "description": "El field de esta carpeta ya está borrado, así que el center de soporte ya no tiene fields activos y se puede borrar."
           },
           "response": []
         }
