@@ -57,7 +57,9 @@ un centro y \texttt{USER} en otro. Esto se modela mediante la entidad
 \begin{itemize}
   \item \textbf{RF-06}: Un administrador puede crear un centro deportivo con
     nombre, dirección, ciudad, teléfono y correo de contacto.
-  \item \textbf{RF-07}: Un administrador puede eliminar un centro (soft delete).
+  \item \textbf{RF-07}: Un administrador puede eliminar un centro (soft delete),
+    siempre que no tenga pistas activas asociadas; en caso contrario la
+    operación se rechaza con un conflicto.
   \item \textbf{RF-08}: Cualquier usuario autenticado puede consultar el listado
     paginado de centros activos y el detalle de un centro.
 \end{itemize}

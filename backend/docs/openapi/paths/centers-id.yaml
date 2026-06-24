@@ -32,7 +32,10 @@ get:
 delete:
   operationId: deleteCenter
   summary: Delete a center (soft-delete)
-  description: Soft-deletes a padel center. Requires ADMIN role.
+  description: >
+    Soft-deletes a padel center. Requires ADMIN role. Fails with 409 if the
+    center still has active (non-deleted) fields — delete or reassign them
+    first.
   tags:
     - Centers
   security:
@@ -46,5 +49,7 @@ delete:
       $ref: '../components/responses/forbidden.yaml'
     '404':
       $ref: '../components/responses/not-found.yaml'
+    '409':
+      $ref: '../components/responses/conflict.yaml'
     '500':
       $ref: '../components/responses/server-error.yaml'

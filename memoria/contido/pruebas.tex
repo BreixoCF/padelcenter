@@ -115,7 +115,11 @@ indica exactamente qué clase incumple la regla y por qué.
 \label{sec:resumen_cobertura}
 
 La tabla~\ref{tab:resumen_tests} muestra el número de tests por tipo y la
-cobertura global del backend medida con JaCoCo.
+cobertura global del backend, medida con JaCoCo~\cite{jacoco} a partir de la
+fusión de los datos de ejecución de Surefire (unitarios) y Failsafe
+(integración) — \texttt{mvn clean verify}. El código generado a partir del
+contrato OpenAPI (DTOs e interfaces de controlador) se excluye del cálculo,
+ya que no es código escrito a mano.
 
 \begin{table}[h]
 \centering
@@ -124,20 +128,26 @@ cobertura global del backend medida con JaCoCo.
 \hline
 \textbf{Tipo} & \textbf{Tests} & \textbf{Capas cubiertas} & \textbf{Cobertura (líneas)} \\
 \hline
-Unitarios (Mockito)          & 84  & \texttt{domain}, \texttt{application} & 91\% \\
-Integración (Testcontainers) & 38  & \texttt{infrastructure} + end-to-end   & 74\% \\
-Arquitectura (ArchUnit)      & 12  & Reglas de capas                        & N/A  \\
+Unitarios (Mockito)          & 193 & \texttt{domain}, \texttt{application} & 85,2\% \\
+Integración (Testcontainers) & 35  & \texttt{infrastructure} + end-to-end   & 49,4\% \\
+Arquitectura (ArchUnit)      & 5   & Reglas de capas                        & N/A    \\
 \hline
-\textbf{Total}               & \textbf{134} & \textbf{---} & \textbf{82\%} \\
+\textbf{Total}               & \textbf{233} & \textbf{---} & \textbf{64,3\%} \\
 \hline
 \end{tabular}}
-\caption{Resumen de tests y cobertura del backend (medida con JaCoCo).}
+\caption{Resumen de tests y cobertura del backend (medida con JaCoCo, perfil \texttt{mvn clean verify}).}
 \label{tab:resumen_tests}
 \end{table}
 
-La cobertura del 91\% en \texttt{domain} y \texttt{application} refleja que las
-capas más críticas del sistema están ampliamente verificadas mediante tests
-unitarios rápidos. La capa de infraestructura alcanza el 74\%: la diferencia
-se debe a adaptadores de difícil cobertura unitaria (configuración de Spring
-Security, serialización JSON), brecha que los 38 tests de integración compensan
-al verificar el comportamiento completo HTTP→base de datos con PostgreSQL real.
+La cobertura del 85,2\% en \texttt{domain} y \texttt{application} refleja que
+las capas más críticas del sistema están ampliamente verificadas mediante
+tests unitarios rápidos. La capa de infraestructura queda más rezagada
+(49,4\%): además de los adaptadores de difícil cobertura unitaria
+(configuración de Spring Security, mapeo JPA), faltan clases
+\texttt{*ControllerIT} dedicadas para los recursos de torneos, partidos y
+autenticación — actualmente solo existen para usuarios, centros, pistas y
+reservas (\texttt{UserControllerIT}, \texttt{CenterControllerIT},
+\texttt{FieldControllerIT}, \texttt{BookingControllerIT}) y para la
+configuración de seguridad (\texttt{SecurityConfigPublicEndpointsIT}). Esta
+brecha queda identificada como trabajo futuro en la
+sección~\ref{chap:conclusions}.

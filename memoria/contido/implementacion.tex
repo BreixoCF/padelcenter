@@ -94,6 +94,26 @@ El esquema se gestiona con Flyway~\cite{flyway}. Las migraciones viven en
     \texttt{team\_name} opcional en \texttt{tournament\_pairs}.
 \end{itemize}
 
+Además de las migraciones de esquema, el perfil \texttt{local} carga una
+ubicación adicional, \texttt{src/main/resources/db/seed/}, con datos de
+prueba para desarrollo manual:
+
+\begin{itemize}
+  \item \texttt{V9\_\_seed\_curated\_data.sql}: conjunto de datos curado a
+    mano (un usuario ADMIN, 6 centros, 24 pistas, un torneo con 8 parejas
+    confirmadas, etc.) con identificadores UUID fijos, de forma que sigan
+    siendo válidos tras un \texttt{docker compose down -v} que recree la
+    base de datos desde cero.
+  \item \texttt{V10\_\_seed\_bulk\_data.sql}: volumen adicional (180
+    usuarios y \textasciitilde1000 reservas) generado con
+    \texttt{generate\_series} de PostgreSQL, para probar paginación y
+    filtros con datos realistas.
+\end{itemize}
+
+Esta ubicación solo se añade a \texttt{spring.flyway.locations} cuando el
+perfil activo es \texttt{local} (ver \texttt{application-local.yaml}), por
+lo que nunca se aplica en el perfil \texttt{test} ni en un despliegue real.
+
 \subsection{Virtual threads (Project Loom)}
 
 El servidor usa virtual threads de Java~21~\cite{projectloom}, activados con una única propiedad:
@@ -239,3 +259,16 @@ necesarios para el desarrollo local:
 El frontend se ejecuta fuera de Docker con \texttt{pnpm dev} para aprovechar
 el \textit{hot reload} de Next.js. La variable de entorno
 \texttt{NEXT\_PUBLIC\_API\_URL=http://localhost:8080} conecta ambos proyectos.
+
+\subsection{Colección Postman}
+
+\texttt{tools/postman/} incluye una colección con las 48 operaciones de la
+API, organizada por recurso, y un \textit{environment} (\texttt{PadelCenter
+— Local}) con las credenciales y los identificadores fijos de los datos
+curados de \texttt{V9}. Cada petición que crea un recurso captura su
+identificador en una variable del entorno mediante un script de test, de
+forma que la colección puede recorrerse de principio a fin sin intervención
+manual. La validación sistemática de las 48 peticiones con
+\texttt{newman}, la CLI de Postman, contra el entorno local fue precisamente
+el método que permitió detectar varios de los defectos corregidos durante
+el desarrollo (véase la sección~\ref{sec:resumen_cobertura}).

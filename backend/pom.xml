@@ -21,6 +21,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<springdoc.version>2.7.0</springdoc.version>
 		<openapi-generator.version>7.6.0</openapi-generator.version>
+		<jacoco.version>0.8.13</jacoco.version>
 	</properties>
 
 	<dependencies>
@@ -152,6 +153,7 @@
 					  Byte Buddy release is managed by Spring Boot.
 					-->
 					<argLine>
+						@{surefireArgLine}
 						-XX:+EnableDynamicAgentLoading
 						-Dnet.bytebuddy.experimental=true
 						-Dapi.version=1.43
@@ -179,6 +181,7 @@
 					</includes>
 					<reuseForks>false</reuseForks>
 					<argLine>
+						@{failsafeArgLine}
 						-XX:+EnableDynamicAgentLoading
 						-Dnet.bytebuddy.experimental=true
 						-Dapi.version=1.43
@@ -194,6 +197,74 @@
 							<goal>integration-test</goal>
 							<goal>verify</goal>
 						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!--
+			  JaCoCo instruments both Surefire (unit) and Failsafe (integration) runs
+			  via two separate javaagent properties — they execute in different
+			  forked JVMs and would otherwise overwrite each other's coverage data.
+			  "merge" combines both .exec files so the final report reflects the
+			  whole test suite, not just whichever ran last.
+			-->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>prepare-agent-unit</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<propertyName>surefireArgLine</propertyName>
+							<destFile>${project.build.directory}/jacoco-unit.exec</destFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>prepare-agent-integration</id>
+						<goals>
+							<goal>prepare-agent-integration</goal>
+						</goals>
+						<configuration>
+							<propertyName>failsafeArgLine</propertyName>
+							<destFile>${project.build.directory}/jacoco-integration.exec</destFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>merge-results</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>merge</goal>
+						</goals>
+						<configuration>
+							<fileSets>
+								<fileSet>
+									<directory>${project.build.directory}</directory>
+									<includes>
+										<include>jacoco-unit.exec</include>
+										<include>jacoco-integration.exec</include>
+									</includes>
+								</fileSet>
+							</fileSets>
+							<destFile>${project.build.directory}/jacoco-merged.exec</destFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>report-merged</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<dataFile>${project.build.directory}/jacoco-merged.exec</dataFile>
+							<outputDirectory>${project.build.directory}/site/jacoco-merged</outputDirectory>
+							<!-- Generated OpenAPI DTOs/interfaces are not hand-written code. -->
+							<excludes>
+								<exclude>com/padelcenter/infrastructure/web/generated/**</exclude>
+							</excludes>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>

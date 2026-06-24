@@ -174,4 +174,14 @@ trabajo que mejorarían significativamente el producto:
   \item[Integración de pagos:] Integración con una pasarela de pago (Stripe) para
     gestionar el cobro de reservas de forma automática, incluyendo reembolsos
     en caso de cancelación.
+
+  \item[Ampliar la cobertura de tests de integración:] Como se detalla en la
+    sección~\ref{sec:resumen_cobertura}, los recursos de torneos, partidos y
+    autenticación todavía no tienen una clase \texttt{*ControllerIT} dedicada.
+    Durante el desarrollo, la validación manual de la API completa con la
+    colección Postman (sección~\ref{sec:entorno_local}) detectó varios
+    defectos —entre ellos, borrados lógicos que no se persistían realmente y
+    una confirmación de pareja de torneo que no comprobaba a qué torneo
+    pertenecía— que unos tests de integración para esos controladores
+    habrían detectado de forma automática mucho antes.
 \end{description}
