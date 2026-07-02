@@ -1,0 +1,867 @@
+<title>Defensa TFG — PadelCenter</title>
+<style>
+  :root {
+    --paper: #efeae0;
+    --ink: #22252b;
+    --ink-soft: #5b5f63;
+    --navy: #1d3557;
+    --navy-soft: #e4e9ef;
+    --clay: #8c3b2e;
+    --clay-soft: #f1e1dc;
+    --ball: #b9c400;
+    --line: #d9d2c2;
+    --white: #fffdf8;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--ink);
+    font-family: Calibri, "Trebuchet MS", "Segoe UI", sans-serif;
+    color: var(--ink);
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  section.slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    background: var(--paper);
+    padding: 60px 88px 52px;
+    flex-direction: column;
+  }
+  section.slide.active { display: flex; }
+
+  .slide-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1.5px solid var(--line);
+    padding-bottom: 16px;
+    margin-bottom: 34px;
+  }
+  .eyebrow {
+    font-family: Consolas, "Lucida Console", monospace;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--navy);
+  }
+  .eyebrow.clay { color: var(--clay); }
+
+  h1.title {
+    font-family: Cambria, Constantia, Georgia, serif;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.18;
+    margin: 0;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+
+  .slide-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 26px;
+    min-height: 0;
+  }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: Consolas, monospace;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    padding-top: 16px;
+  }
+  .progress { width: 160px; height: 3px; background: var(--line); position: relative; flex: none; }
+  .progress .fill { position: absolute; inset: 0; width: 0; background: var(--navy); transition: width .2s ease; }
+
+  /* ---- Brand mark ---- */
+  .brand { display: inline-flex; align-items: center; gap: 12px; }
+  .brand .wordmark {
+    font-family: Cambria, Georgia, serif;
+    font-size: 20px;
+    letter-spacing: 0.01em;
+    color: var(--navy);
+  }
+  .brand .wordmark b { font-weight: 700; }
+  .brand .wordmark i { font-style: normal; font-weight: 400; color: var(--ink-soft); }
+
+  /* ---- Title slide ---- */
+  .title-slide { justify-content: center; align-items: flex-start; padding-top: 0; }
+  .title-slide .brand { margin-bottom: 46px; }
+  .title-slide .brand .wordmark { font-size: 26px; }
+  .title-slide .kicker {
+    font-family: Consolas, monospace;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--clay);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .title-slide h1 {
+    font-family: Cambria, Georgia, serif;
+    font-weight: 700;
+    font-size: 52px;
+    line-height: 1.15;
+    margin: 0 0 18px;
+    max-width: 780px;
+    text-wrap: balance;
+  }
+  .title-slide .subtitle {
+    font-size: 19px;
+    color: var(--ink-soft);
+    max-width: 640px;
+    margin-bottom: 44px;
+  }
+  .meta-grid { display: grid; grid-template-columns: repeat(2, auto); gap: 10px 48px; font-size: 16px; }
+  .meta-grid dt { font-family: Consolas, monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); margin: 0; }
+  .meta-grid dd { margin: 4px 0 0; }
+
+  /* ---- Lists / generic content ---- */
+  ul.plain { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+  ul.plain li { display: flex; gap: 18px; align-items: flex-start; }
+  ul.plain .bullet { flex: none; width: 7px; height: 7px; background: var(--navy); margin-top: 9px; }
+  ul.plain .txt strong { display: block; font-size: 20px; margin-bottom: 4px; font-family: Cambria, Georgia, serif; }
+  ul.plain .txt span { color: var(--ink-soft); font-size: 15.5px; }
+  ul.plain-balanced .txt strong { font-size: 17px; margin-bottom: 3px; }
+  ul.plain-balanced .txt span { font-size: 15.5px; line-height: 1.5; }
+
+  .two-col { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 54px; align-items: start; }
+  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
+  .four-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px 26px; }
+
+  .card {
+    background: var(--white);
+    border-left: 3px solid var(--navy);
+    border-bottom: 1px solid var(--line);
+    padding: 20px 24px;
+  }
+  .card.clay { border-left-color: var(--clay); }
+  .card h3 { margin: 0 0 8px; font-size: 17px; font-family: Cambria, Georgia, serif; }
+  .card p { margin: 0; color: var(--ink-soft); font-size: 14.5px; line-height: 1.55; }
+  .card .tag {
+    font-family: Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-bottom: 10px;
+    display: block;
+  }
+  .card.clay .tag { color: var(--clay); }
+
+  .stack-chip {
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    color: var(--navy);
+    padding: 3px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stack-chip::before { content: ""; width: 6px; height: 6px; background: var(--navy); display: inline-block; }
+  .stack-chip.clay { color: var(--clay); }
+  .stack-chip.clay::before { background: var(--clay); }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 16px; }
+
+  table.data { width: 100%; border-collapse: collapse; font-size: 15px; }
+  table.data th, table.data td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  table.data th { font-family: Consolas, monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft); font-weight: normal; }
+  table.data td.num { text-align: right; }
+  table.data tr.total td { font-weight: 700; border-top: 1.5px solid var(--ink); border-bottom: none; }
+
+  .callout {
+    border-left: 3px solid var(--clay);
+    background: var(--clay-soft);
+    padding: 14px 20px;
+    font-size: 14.5px;
+  }
+  .callout strong { display: block; margin-bottom: 3px; font-family: Cambria, Georgia, serif; font-size: 16px; }
+
+  .before-after { display: grid; grid-template-columns: 1fr auto 1fr; gap: 18px; align-items: center; }
+  .before-after .arrow { color: var(--clay); font-size: 20px; font-family: Consolas, monospace; }
+  .ba-box { border-bottom: 1px solid var(--line); padding: 12px 0; }
+  .ba-box.was { color: var(--ink-soft); }
+  .ba-box.was strong { text-decoration: line-through; color: var(--ink-soft); }
+  .ba-box.now strong { color: var(--navy); }
+  .ba-box strong { display: block; font-size: 16px; margin-bottom: 2px; font-family: Cambria, Georgia, serif; }
+  .ba-box span { font-size: 13px; color: var(--ink-soft); }
+
+  /* ---- Demo slides ---- */
+  .proc-steps { display: flex; flex-direction: column; gap: 12px; list-style: none; margin: 0; padding: 0; }
+  .proc-steps li { display: flex; gap: 16px; align-items: flex-start; }
+  .proc-steps .n {
+    font-family: Consolas, monospace;
+    color: var(--navy);
+    font-size: 13px;
+    border: 1px solid var(--navy);
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    flex: none; margin-top: 1px;
+  }
+  .proc-steps .txt strong { font-family: Cambria, Georgia, serif; font-size: 16.5px; }
+  .proc-steps .txt .badge {
+    font-family: Consolas, monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--clay);
+    border: 1px solid var(--clay);
+    padding: 1px 6px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .proc-steps .txt p { margin: 3px 0 0; color: var(--ink-soft); font-size: 13.5px; line-height: 1.42; }
+
+  .demo-steps { display: flex; flex-direction: column; gap: 14px; }
+  .demo-steps li { display: flex; gap: 16px; align-items: flex-start; }
+  .demo-steps .n {
+    font-family: Consolas, monospace;
+    color: var(--navy);
+    font-size: 13px;
+    border: 1px solid var(--navy);
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    flex: none;
+  }
+  .demo-shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .demo-shots figure { margin: 0; }
+  .demo-shots img { width: 100%; display: block; border: 1px solid var(--line); }
+  .demo-shots figcaption {
+    font-family: Consolas, monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+    text-align: center;
+  }
+
+  .step-slide { display: grid; grid-template-columns: 300px 1fr; gap: 34px; flex: 1; min-height: 0; align-items: center; }
+  .step-slide .step-copy .stepnum {
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--clay);
+    display: block;
+    margin-bottom: 10px;
+  }
+  .step-slide .step-copy h2 { font-family: Cambria, Georgia, serif; font-size: 23px; margin: 0 0 10px; line-height: 1.2; }
+  .step-slide .step-copy p { color: var(--ink-soft); font-size: 14.5px; line-height: 1.55; margin: 0; }
+  .shot-frame { border: 1px solid var(--line); background: var(--white); padding: 5px; height: 100%; display: flex; align-items: center; justify-content: center; }
+  .shot-frame img { max-width: 100%; max-height: 62vh; display: block; }
+
+  .closing { justify-content: center; align-items: center; text-align: center; }
+  .closing .brand { margin-bottom: 26px; justify-content: center; }
+  .closing h1 { font-size: 46px; }
+  .closing .subtitle { font-size: 17px; color: var(--ink-soft); margin-top: 10px; }
+
+  /* Architecture diagram */
+  .hexline { stroke: var(--navy); stroke-width: 1.4; fill: none; opacity: 0.7; }
+
+  .trace {
+    border-left: 3px solid var(--navy);
+    background: var(--white);
+    padding: 18px 22px;
+    font-size: 14px;
+  }
+  .trace .tag { font-family: Consolas, monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--navy); display: block; margin-bottom: 10px; }
+  .trace ol { margin: 0; padding: 0 0 0 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .trace li { display: flex; gap: 10px; align-items: baseline; }
+  .trace .layer { font-family: Consolas, monospace; font-size: 12px; color: var(--white); background: var(--navy); padding: 2px 7px; flex: none; }
+  .trace li:nth-child(2) .layer { background: var(--clay); }
+  .trace p { margin: 0; color: var(--ink-soft); font-size: 13.5px; line-height: 1.45; }
+  .trace code { font-size: 0.95em; }
+
+  code {
+    font-family: Consolas, monospace;
+    background: var(--navy-soft);
+    color: var(--navy);
+    padding: 1px 6px;
+    font-size: 0.92em;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    section.slide.active { animation: fade .25s ease; }
+  }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+</style>
+
+<div class="deck" id="deck">
+
+  <!-- 0 : TITLE -->
+  <section class="slide active title-slide">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 64 64">
+        <rect x="6" y="6" width="52" height="52" rx="8" fill="none" stroke="#1d3557" stroke-width="3.2"/>
+        <line x1="32" y1="6" x2="32" y2="58" stroke="#1d3557" stroke-width="2"/>
+        <line x1="6" y1="32" x2="58" y2="32" stroke="#1d3557" stroke-width="1.2" opacity="0.45"/>
+        <circle cx="44" cy="19" r="5.5" fill="#b9c400"/>
+      </svg>
+      <span class="wordmark"><b>Padel</b><i>Center</i></span>
+    </div>
+    <div class="kicker">Defensa de Trabajo de Fin de Grado</div>
+    <h1>Diseño e implementación de un servicio de gestión de reservas de pistas de pádel</h1>
+    <div class="subtitle">Grao en Enxeñaría Informática · Mención Enxeñaría do Software · Universidade da Coruña</div>
+    <dl class="meta-grid">
+      <dt>Autor</dt><dd>Breixo Camiña Fernández</dd>
+      <dt>Dirección</dt><dd>Javier Parapar López · Gilberto Pérez Vega</dd>
+      <dt>Duración de la defensa</dt><dd>20 minutos</dd>
+    </dl>
+    <div class="footer" style="position:absolute; bottom:40px; left:88px; right:88px;">
+      <span>Facultade de Informática · A Coruña</span>
+      <span>Usa &larr; &rarr; para navegar</span>
+    </div>
+  </section>
+
+  <!-- 1 : MOTIVACION -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow">01 / Motivación</div>
+      <span class="stack-chip">segundo deporte más practicado en España</span>
+    </div>
+    <div class="slide-body">
+      <h1 class="title">Los clubes de pádel gestionan reservas con hojas de cálculo, no con software pensado para ello</h1>
+      <div class="two-col">
+        <ul class="plain plain-balanced">
+          <li><span class="bullet"></span><div class="txt"><strong>Un deporte en expansión sin herramientas a la altura</strong><span>Más de 5 millones de jugadores federados en España, y la mayoría de centros dependen de sistemas manuales o de apps genéricas no pensadas para pistas, horarios y torneos.</span></div></li>
+          <li><span class="bullet"></span><div class="txt"><strong>Las alternativas existentes cubren solo una parte</strong><span>Playtomic centraliza reservas pero es un sistema cerrado con comisión por reserva; Smashapp gestiona torneos pero no reservas. Ninguna integra ambas cosas.</span></div></li>
+          <li><span class="bullet"></span><div class="txt"><strong>Motivación personal y académica</strong><span>Jugador de pádel con visión directa de esas carencias, y oportunidad de aplicar diseño de arquitecturas limpias, contract-first y pruebas automatizadas a un problema real.</span></div></li>
+        </ul>
+        <div class="card">
+          <span class="tag">PadelCenter resuelve</span>
+          <h3>Reservas + torneos, en una sola plataforma</h3>
+          <p>Gestión de centros y pistas, reservas con control de solapamiento horario, y organización de torneos con emparejamientos automáticos (round-robin, eliminación directa, grupos + eliminatoria) — todo bajo un único servicio.</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <!-- 2 : TECNOLOGIAS -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow">02 / Tecnologías y frameworks</div>
+      <span class="stack-chip">contract-first · OpenAPI</span>
+    </div>
+    <div class="slide-body">
+      <h1 class="title" style="font-size:36px;">Decisiones apoyadas en experiencia real, no solo en comparativas de blog</h1>
+      <div class="four-col">
+        <div class="card">
+          <span class="tag">Backend</span>
+          <h3>Java 21 + Spring Boot 3.4</h3>
+          <p>La baza personal aquí son los <strong>virtual threads</strong> de Project Loom: las reservas son operaciones con mucha espera de I/O (base de datos, validaciones de solapamiento), y permiten escribir ese código de forma bloqueante y simple, sin caer en programación reactiva. Primera vez aplicándolos fuera de una prueba de concepto.</p>
+        </div>
+        <div class="card">
+          <span class="tag">Frontend</span>
+          <h3>Next.js 14 + TypeScript 5</h3>
+          <p>Elegido por <strong>experiencia profesional previa</strong>: ya lo había usado en proyectos de trabajo, lo que permitió tomar decisiones de arquitectura frontend con criterio desde el primer día en lugar de aprender el framework sobre la marcha.</p>
+        </div>
+        <div class="card">
+          <span class="tag">Generación de código desde el contrato</span>
+          <h3>OpenAPI Generator Maven + Orval</h3>
+          <p>Al ser contract-first, la especificación OpenAPI también genera código: <strong>OpenAPI Generator Maven</strong> produce los DTOs e interfaces del backend, y <strong>Orval</strong> genera el cliente TypeScript y los hooks de React Query del frontend. Backend y frontend quedan sincronizados por construcción, sin boilerplate manual ni bugs de integración por contratos desalineados.</p>
+        </div>
+        <div class="card clay">
+          <span class="tag">Calidad y despliegue</span>
+          <h3>Testing + Docker Compose</h3>
+          <p>Mockito (unitarios), Testcontainers (integración con Postgres real), ArchUnit (reglas de arquitectura) y colección Postman para E2E manual. Tres servicios orquestados con Docker Compose.</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <!-- 3 : ARQUITECTURA -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow">03 / Arquitectura: hexagonal vs. microservicios</div>
+    </div>
+    <div class="slide-body">
+      <h1 class="title" style="font-size:34px;">Un monolito por dentro modular: hexagonal, no microservicios</h1>
+      <div class="two-col">
+        <div>
+          <svg width="100%" height="182" viewBox="0 0 460 182">
+            <polygon points="230,5 303.6,47.5 303.6,132.5 230,175 156.4,132.5 156.4,47.5" fill="none" stroke="#8c3b2e" stroke-width="1.6" opacity="0.75"/>
+            <polygon points="230,30 282,60 282,120 230,150 178,120 178,60" fill="none" stroke="#1d3557" stroke-width="1.6" opacity="0.8"/>
+            <polygon points="230,55 260,72.5 260,107.5 230,125 200,107.5 200,72.5" fill="none" stroke="#22252b" stroke-width="1.6"/>
+            <text x="230" y="94" text-anchor="middle" font-family="Consolas, monospace" font-size="11" fill="#22252b">domain</text>
+          </svg>
+          <div style="display:flex; gap:18px; margin-top:12px; font-family:Consolas,monospace; font-size:12px; color:var(--ink-soft); flex-wrap:wrap;">
+            <span style="display:inline-flex; align-items:center; gap:6px;"><span style="width:9px;height:9px;background:#22252b;display:inline-block;"></span>domain</span>
+            <span style="display:inline-flex; align-items:center; gap:6px;"><span style="width:9px;height:9px;background:#1d3557;display:inline-block;"></span>application</span>
+            <span style="display:inline-flex; align-items:center; gap:6px;"><span style="width:9px;height:9px;background:#8c3b2e;display:inline-block;"></span>infrastructure</span>
+          </div>
+          <p style="color:var(--ink-soft); font-size:14.5px; margin-top:4px;">La modularidad interna del hexágono es la que permitiría partir en microservicios el día que hiciera falta — sin haber pagado ese coste desde el principio.</p>
+        </div>
+        <div class="trace">
+          <span class="tag">Ejemplo real — crear una reserva</span>
+          <ol>
+            <li><span class="layer">domain</span><p><code>Booking</code> (record inmutable) y el puerto <code>BookingRepository</code>: el modelo y el contrato de persistencia, sin anotaciones JPA ni saber que existe Postgres.</p></li>
+            <li><span class="layer">application</span><p><code>CreateBookingUseCase</code> depende solo de <code>Booking</code> y del puerto: valida el solapamiento horario y orquesta la creación sin conocer JPA, HTTP ni ningún detalle de infraestructura.</p></li>
+            <li><span class="layer">infra</span><p><code>BookingController</code> (adaptador de entrada) invoca el caso de uso; <code>JpaBookingRepository</code> (adaptador de salida) <strong>implementa</strong> el puerto e internamente traduce entre <code>Booking</code> y la entidad JPA <code>BookingEntity</code>, propia de esta capa.</p></li>
+          </ol>
+          <p style="margin-top:14px; padding-top:12px; border-top:1px solid var(--line); font-size:13px;"><strong style="color:var(--navy);">Inversión de dependencias:</strong> el puerto vive en <code>domain</code> pero lo implementa <code>infrastructure</code> — la flecha de dependencia de clases apunta siempre hacia el dominio, nunca al revés. Así <code>CreateBookingUseCase</code> se testea con un <code>BookingRepository</code> falso, sin levantar Postgres ni Spring.</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <!-- 3b : MONOLITO VS MICROSERVICIOS -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow">03 / Monolito vs. microservicios — qué asumimos</div>
+    </div>
+    <div class="slide-body">
+      <h1 class="title" style="font-size:32px;">Ninguna decisión de arquitectura es gratis: esto es lo que se gana y lo que se sacrifica</h1>
+      <div class="two-col">
+        <div>
+          <h3 style="font-family:Cambria, Georgia, serif; font-size:18px; color:var(--navy); margin:0 0 14px;">Lo que ganamos con el monolito</h3>
+          <ul class="plain">
+            <li><span class="bullet"></span><div class="txt"><strong>Transacciones ACID nativas</strong><span>Comprobar que la pista está libre y crear la reserva ocurre en la misma transacción de base de datos: si dos usuarios reservan el mismo hueco a la vez, el aislamiento de la transacción y una restricción de unicidad garantizan que solo uno gane, de forma atómica. Repartido en servicios, esa misma garantía exigiría un lock distribuido o una saga con compensación — con una ventana real de doble reserva mientras se propaga la consistencia.</span></div></li>
+            <li><span class="bullet"></span><div class="txt"><strong>Despliegue y operación simples</strong><span>Un solo build, un solo contenedor: sin descubrimiento de servicios, versionado de contratos entre APIs ni observabilidad distribuida.</span></div></li>
+            <li><span class="bullet"></span><div class="txt"><strong>Fronteras de módulo aún asentándose</strong><span>Separar centros, reservas, torneos y usuarios en servicios ahora habría fijado límites que todavía estaban cambiando durante el desarrollo.</span></div></li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="font-family:Cambria, Georgia, serif; font-size:18px; color:var(--clay); margin:0 0 14px;">Lo que sacrificamos</h3>
+          <ul class="plain">
+            <li><span class="bullet" style="background:var(--clay);"></span><div class="txt"><strong>Escalado todo-o-nada</strong><span>No se puede escalar solo el módulo de torneos si recibe más carga que reservas: escala el servicio completo.</span></div></li>
+            <li><span class="bullet" style="background:var(--clay);"></span><div class="txt"><strong>Despliegues acoplados</strong><span>Un cambio en cualquier módulo obliga a reconstruir y redesplegar todo el servicio, no solo la parte afectada.</span></div></li>
+            <li><span class="bullet" style="background:var(--clay);"></span><div class="txt"><strong>Sin aislamiento de fallos</strong><span>Un fallo grave en un módulo (p. ej. una fuga de memoria) puede afectar a todos los demás al compartir el mismo proceso.</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <!-- 4 : METODOLOGIA -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow clay">04 / Metodología</div>
+    </div>
+    <div class="slide-body" style="gap:16px;">
+      <h1 class="title" style="font-size:30px;">Iterativo e incremental por módulo funcional — cada módulo repite este mismo ciclo de 5 pasos</h1>
+      <ol class="proc-steps">
+        <li><span class="n">1</span><div class="txt"><strong>Especificación OpenAPI del módulo</strong><p>Fijar antes que nada los endpoints y esquemas obliga a pensar el contrato con el frontend desde el primer momento, y desbloquea a Orval para generar el cliente aunque el backend todavía no exista.</p></div></li>
+        <li><span class="n">2</span><div class="txt"><strong>Diseño del modelo de dominio + puertos</strong><p>Se decide qué es una entidad y qué invariantes debe cumplir (p. ej. que una reserva no puede solaparse) sin pensar aún en Spring ni en JPA — separarlo del paso 3 evita mezclar reglas de negocio con detalles técnicos.</p></div></li>
+        <li><span class="n">3</span><div class="txt"><strong>Casos de uso + adaptadores de infraestructura</strong><span class="badge">el que más tiempo llevó</span><p>Cada caso de uso implica validar reglas de negocio reales (solapamiento de horarios, cupos de torneo, emparejamientos) y cablear los adaptadores HTTP/JPA que lo exponen — coherente con las 78 commits de backend frente a 20 de frontend en el sprint de abril.</p></div></li>
+        <li><span class="n">4</span><div class="txt"><strong>Tests unitarios + integración</strong><p>Se escriben justo después de cada caso de uso, no al final del módulo, para no acumular deuda de pruebas ni descubrir errores de diseño de dominio cuando ya es caro corregirlos.</p></div></li>
+        <li><span class="n">5</span><div class="txt"><strong>Frontend consumidor del módulo</strong><p>Al llegar aquí el contrato ya está estable y probado, así que el frontend consume una API que no va a cambiar bajo los pies del componente que se está construyendo.</p></div></li>
+      </ol>
+      <p style="margin:0; font-size:13.5px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:10px;"><strong style="color:var(--navy); font-family:Cambria, Georgia, serif;">Herramientas:</strong> GitHub Projects como tablero de tareas, GitHub Actions ejecutando los tests en cada commit, y la especificación OpenAPI como documento vivo del alcance — 40 endpoints, 42 casos de uso.</p>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <!-- 5 : TIEMPO Y COSTES -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow">05 / Tiempo de desarrollo y costes</div>
+    </div>
+    <div class="slide-body">
+      <div class="two-col">
+        <div>
+          <h1 class="title" style="font-size:32px; margin-bottom:20px;">Estimación a partir del historial real de commits</h1>
+          <table class="data">
+            <tr><th>Fase</th><th>Periodo</th><th class="num">Horas</th></tr>
+            <tr><td>Diseño e investigación inicial</td><td>nov 2025 – feb 2026</td><td class="num">90 h</td></tr>
+            <tr><td>Sprint intensivo backend + frontend</td><td>abril 2026</td><td class="num">120 h</td></tr>
+            <tr><td>Redacción memoria (fase 1)</td><td>mayo 2026</td><td class="num">40 h</td></tr>
+            <tr><td>Cierre, pruebas E2E, redacción final</td><td>junio 2026</td><td class="num">70 h</td></tr>
+            <tr class="total"><td colspan="2">Total</td><td class="num">320 h</td></tr>
+          </table>
+        </div>
+        <div class="card" style="align-self:center;">
+          <span class="tag">Coste estimado</span>
+          <h3 style="font-size:28px;">320 h × 22,5 €/h = 7.200 €</h3>
+          <p>Tarifa junior de mercado en España (20–25 €/h freelance), punto medio aplicado sobre el total de horas estimadas.</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <!-- 6 : DESVIACIONES -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow clay">06 / Desviaciones respecto al anteproyecto</div>
+    </div>
+    <div class="slide-body" style="gap:20px;">
+      <h1 class="title" style="font-size:30px;">Tres cambios en la ejecución respecto el anteproyecto</h1>
+      <div class="before-after">
+        <div class="ba-box was"><strong>Angular</strong><span>front-end piloto</span></div>
+        <div class="arrow">&rarr;</div>
+        <div class="ba-box now"><strong>Next.js 14</strong><span>ecosistema React + Orval</span></div>
+      </div>
+      <div class="before-after">
+        <div class="ba-box was"><strong>SCRUM, sprints fijos</strong><span>metodología prevista</span></div>
+        <div class="arrow">&rarr;</div>
+        <div class="ba-box now"><strong>Iterativo por módulo</strong><span>ciclo spec → dominio → tests → frontend</span></div>
+      </div>
+      <div class="before-after">
+        <div class="ba-box was"><strong>Jira</strong><span>gestión del proyecto</span></div>
+        <div class="arrow">&rarr;</div>
+        <div class="ba-box now"><strong>GitHub Projects</strong><span>tablero integrado en el propio repo</span></div>
+      </div>
+      <div class="callout">
+        <strong>Alcance: núcleo genérico → especializado en pádel</strong>
+        El anteproyecto planteaba un núcleo de reservas desacoplado, reutilizable para hoteles o consultorios. La implementación final se especializó directamente en pistas de pádel, sin esa capa de abstracción genérica.
+      </div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <!-- 7 : DEMO INTRO -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow">Demo</div>
+    </div>
+    <div class="slide-body" style="justify-content:center; align-items:center; text-align:center;">
+      <div class="brand" style="margin-bottom:18px; justify-content:center;">
+        <svg width="30" height="30" viewBox="0 0 64 64">
+          <rect x="6" y="6" width="52" height="52" rx="8" fill="none" stroke="#1d3557" stroke-width="3.2"/>
+          <line x1="32" y1="6" x2="32" y2="58" stroke="#1d3557" stroke-width="2"/>
+          <circle cx="44" cy="19" r="5.5" fill="#b9c400"/>
+        </svg>
+        <span class="wordmark"><b>Padel</b><i>Center</i></span>
+      </div>
+      <h1 class="title" style="font-size:38px;">Demo en vivo con Playwright</h1>
+      <p style="max-width:640px; color:var(--ink-soft); font-size:16.5px;">Tres escenarios sobre la aplicación real, ejecutando la app con Docker Compose: administración de un centro, reserva y torneo desde el punto de vista del usuario, y la simulación completa de un torneo Round Robin.</p>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <!-- DEMO 1 : ADMINISTRADOR — 8 pasos -->
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 1 / Administrador</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 1 de 8</span><h2>Iniciar sesión</h2><p>Acceso con <code>admin@padelcenter.local</code>, con rol ADMIN en los 6 centros de la plataforma.</p></div>
+      <div class="shot-frame"><img src="assets/d01-login-relleno.png" alt="Login de administrador relleno"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 1 / Administrador</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 2 de 8</span><h2>Mostrar centros</h2><p>Listado de los 6 centros de pádel gestionados por la plataforma, cada uno con sus datos de contacto.</p></div>
+      <div class="shot-frame"><img src="assets/d02-centros.png" alt="Listado de centros"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 1 / Administrador</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 3 de 8</span><h2>Panel de administración</h2><p>Vista general con accesos directos a centros, usuarios, torneos y reservas del día.</p></div>
+      <div class="shot-frame"><img src="assets/d03-panel-admin.png" alt="Panel de administración"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 1 / Administrador</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 4 de 8</span><h2>Gestión de torneos</h2><p>Listado de torneos del centro antes de crear uno nuevo.</p></div>
+      <div class="shot-frame"><img src="assets/d04-torneos-admin-lista.png" alt="Listado de torneos en el panel admin"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 1 / Administrador</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 5 de 8</span><h2>Nuevo torneo — formulario</h2><p>Centro, nombre, formato, máximo de parejas y fechas de inicio/fin.</p></div>
+      <div class="shot-frame"><img src="assets/d05-nuevo-torneo-vacio.png" alt="Diálogo de nuevo torneo vacío"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 1 / Administrador</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 6 de 8</span><h2>Configurar Round Robin</h2><p>Nombre, formato <strong>Round Robin</strong>, 8 parejas máximo y fechas ya rellenos, listo para crear.</p></div>
+      <div class="shot-frame"><img src="assets/d06-nuevo-torneo-relleno.png" alt="Diálogo de nuevo torneo relleno con formato Round Robin"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 1 / Administrador</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 7 de 8</span><h2>Torneo creado</h2><p>El torneo aparece en la tabla en estado <strong>Borrador</strong>, listo para abrir inscripción.</p></div>
+      <div class="shot-frame"><img src="assets/d07-torneo-creado.png" alt="Torneo creado con confirmación"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 1 / Administrador</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 8 de 8</span><h2>Abrir inscripción</h2><p>El estado cambia a <strong>Inscripción abierta</strong>: ya se pueden registrar parejas para competir.</p></div>
+      <div class="shot-frame"><img src="assets/d08-inscripcion-abierta.png" alt="Torneo con inscripción abierta"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <!-- DEMO 2 : USUARIO — 11 pasos -->
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 2 / Usuario</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 1 de 11</span><h2>Iniciar sesión como jugador</h2><p>Acceso con <code>ana.garcia@padelcenter.local</code>, una cuenta de jugadora habitual.</p></div>
+      <div class="shot-frame"><img src="assets/d09-login-usuario-relleno.png" alt="Login de usuario relleno"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 2 / Usuario</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 2 de 11</span><h2>Centros disponibles</h2><p>La jugadora ve el mismo listado de centros, ahora desde el lado de reserva.</p></div>
+      <div class="shot-frame"><img src="assets/d10-user-centros.png" alt="Listado de centros para el usuario"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 2 / Usuario</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 3 de 11</span><h2>Mostrar pistas</h2><p>Pistas del centro con disponibilidad y precio por hora.</p></div>
+      <div class="shot-frame"><img src="assets/d11-user-pistas.png" alt="Pistas disponibles del centro"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 2 / Usuario</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 4 de 11</span><h2>Elegir fecha y hora</h2><p>Calendario con los huecos disponibles, ocupados y seleccionados para la pista elegida.</p></div>
+      <div class="shot-frame"><img src="assets/d12-reserva-calendario.png" alt="Calendario de reserva"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 2 / Usuario</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 5 de 11</span><h2>Horario seleccionado</h2><p>Slot elegido, listo para confirmar la reserva.</p></div>
+      <div class="shot-frame"><img src="assets/d13-reserva-slot.png" alt="Horario de reserva seleccionado"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 2 / Usuario</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 6 de 11</span><h2>Reserva confirmada</h2><p>La pista queda reservada; la confirmación aparece al instante.</p></div>
+      <div class="shot-frame"><img src="assets/d14-reserva-confirmada.png" alt="Reserva confirmada"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 2 / Usuario</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 7 de 11</span><h2>Mostrar reservas</h2><p>Historial personal de reservas, con estado y opción de editar o cancelar.</p></div>
+      <div class="shot-frame"><img src="assets/d15-mis-reservas.png" alt="Historial de reservas del usuario"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 2 / Usuario</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 8 de 11</span><h2>Torneos abiertos</h2><p>Torneos del centro con inscripción abierta, formato y fechas.</p></div>
+      <div class="shot-frame"><img src="assets/d16-torneos-lista.png" alt="Listado de torneos"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 2 / Usuario</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 9 de 11</span><h2>Detalle del torneo</h2><p>El torneo creado en la Demo 1, todavía sin parejas inscritas — listo para que la jugadora se apunte.</p></div>
+      <div class="shot-frame"><img src="assets/d17-torneo-detalle.png" alt="Detalle del torneo con parejas"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 2 / Usuario</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 10 de 11</span><h2>Inscribirse con su pareja</h2><p>Nombre de equipo opcional e ID de la pareja — ambos rellenos, listo para confirmar.</p></div>
+      <div class="shot-frame"><img src="assets/d18-inscribirse-relleno.png" alt="Formulario de inscripción a torneo relleno"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow">Demo 2 / Usuario</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 11 de 11</span><h2>Inscripción confirmada</h2><p>La pareja queda registrada en el torneo, pendiente de confirmación por el otro jugador.</p></div>
+      <div class="shot-frame"><img src="assets/d19-inscripcion-confirmada.png" alt="Inscripción a torneo confirmada"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <!-- DEMO 3 : SIMULACIÓN DE TORNEO COMPLETO — 6 pasos -->
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow clay">Demo 3 / Simulación de un torneo completo</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 1 de 6</span><h2>Torneo listo para arrancar</h2><p>4 parejas confirmadas en el Torneo Demo Defensa TFG — entre ellas, <strong>Los Cañoneros Demo</strong>, el equipo de Ana inscrito en la Demo 2.</p></div>
+      <div class="shot-frame"><img src="assets/d20-parejas-confirmadas.png" alt="4 parejas confirmadas, incluida Los Cañoneros Demo"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow clay">Demo 3 / Simulación de un torneo completo</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 2 de 6</span><h2>Cerrar inscripción</h2><p>Al cerrar la inscripción, el sistema genera automáticamente los 6 partidos de la liguilla (round-robin entre las 4 parejas).</p></div>
+      <div class="shot-frame"><img src="assets/d21-partidos-generados.png" alt="Partidos generados tras cerrar inscripción"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow clay">Demo 3 / Simulación de un torneo completo</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 3 de 6</span><h2>Reportar resultado</h2><p>Formulario vacío para el primer partido: Los Cañoneros Demo (el equipo de Ana) contra Los Rayos.</p></div>
+      <div class="shot-frame"><img src="assets/d22-resultado-vacio.png" alt="Diálogo de reportar resultado vacío"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow clay">Demo 3 / Simulación de un torneo completo</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 4 de 6</span><h2>Marcador relleno</h2><p>Los Cañoneros Demo ganan 2-0: ganador y marcador ya seleccionados, listo para confirmar.</p></div>
+      <div class="shot-frame"><img src="assets/d23-resultado-relleno.png" alt="Diálogo de resultado relleno"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow clay">Demo 3 / Simulación de un torneo completo</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 5 de 6</span><h2>Resultado registrado</h2><p>El marcador 2—0 ya aparece en el listado. Se repite este paso para los 5 partidos restantes de la liguilla.</p></div>
+      <div class="shot-frame"><img src="assets/d24-partidos-completados-parcial.png" alt="Resultado registrado, confirmación"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-head"><div class="eyebrow clay">Demo 3 / Simulación de un torneo completo</div></div>
+    <div class="step-slide">
+      <div class="step-copy"><span class="stepnum">Paso 6 de 6</span><h2>Clasificación final</h2><p><strong>Los Cañoneros Demo</strong> — el equipo de Ana — termina líder de la liguilla: 3 victorias, 0 derrotas y +5 de diferencia de sets.</p></div>
+      <div class="shot-frame"><img src="assets/d25-clasificacion.png" alt="Clasificación final del torneo"></div>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <!-- DIFICULTADES A : TÉCNICAS -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow clay">Dificultades del desarrollo / Técnicas</div>
+    </div>
+    <div class="slide-body">
+      <h1 class="title">Toma de decisiones funcionales</h1>
+      <ul class="plain">
+        <li><span class="bullet"></span><div class="txt"><strong>Generación de brackets</strong><span>En eliminación directa, a partir de la ronda 2 no sé todavía qué pareja juega ahí: depende de quién gane el partido anterior. Hay que dejar esos huecos vacíos y rellenarlos cuando se cierra la ronda de antes. Por eso el número de parejas tiene que ser potencia de 2 — si no, sobran huecos que no se pueden resolver.</span></div></li>
+        <li><span class="bullet"></span><div class="txt"><strong>Concurrencia en reservas</strong><span>Si dos personas reservan la misma pista a la misma hora, solo una se la puede quedar. Lo resolví metiendo la comprobación de solapamiento y la creación de la reserva en la misma transacción, con una restricción de unicidad detrás.</span></div></li>
+      </ul>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <!-- DIFICULTADES B : PROCESO Y APRENDIZAJE -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow clay">Dificultades del desarrollo / Proceso y aprendizaje</div>
+    </div>
+    <div class="slide-body">
+      <h1 class="title">Toma de decisiones humanas</h1>
+      <ul class="plain">
+        <li><span class="bullet"></span><div class="txt"><strong>Diseñar el contrato antes de tener nada</strong><span>Tuve que decidir cómo iba a ser cada endpoint antes de tener escrito ni el backend ni el frontend. Cualquier cambio en la especificación, después, se nota en los dos lados a la vez.</span></div></li>
+        <li><span class="bullet"></span><div class="txt"><strong>Backend y frontend, sin nadie más</strong><span>No había nadie que repartiera qué se hacía primero. Iba decidiendo sobre la marcha cuándo tocaba avanzar el backend y cuándo el frontend, para que uno no se quedara esperando al otro.</span></div></li>
+        <li><span class="bullet"></span><div class="txt"><strong>Scrum no encajaba en solitario</strong><span>Las reuniones y ceremonias de Scrum están pensadas para varias personas. Trabajando solo no tenían mucho sentido, así que las cambié por un ciclo que repetía en cada módulo: especificar, dominio, casos de uso, tests, frontend.</span></div></li>
+        <li><span class="bullet"></span><div class="txt"><strong>Compaginar trabajo y proyecto</strong><span>Entre noviembre y febrero avancé poco porque lo compaginaba con el trabajo. En abril tuve más tiempo libre y ahí metí el grueso del desarrollo — se ve clarísimo en el historial de commits.</span></div></li>
+      </ul>
+    </div>
+    <div class="footer"><span>PadelCenter — TFG</span><div class="progress" id="progress"></div><span id="pagenum"></span></div>
+  </section>
+
+  <!-- 11 : CLOSING -->
+  <section class="slide closing">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 64 64">
+        <rect x="6" y="6" width="52" height="52" rx="8" fill="none" stroke="#1d3557" stroke-width="3.2"/>
+        <line x1="32" y1="6" x2="32" y2="58" stroke="#1d3557" stroke-width="2"/>
+        <line x1="6" y1="32" x2="58" y2="32" stroke="#1d3557" stroke-width="1.2" opacity="0.45"/>
+        <circle cx="44" cy="19" r="5.5" fill="#b9c400"/>
+      </svg>
+      <span class="wordmark"><b>Padel</b><i>Center</i></span>
+    </div>
+    <h1 class="title">Preguntas y sugerencias</h1>
+    <div class="subtitle">Gracias por su atención — Breixo Camiña Fernández</div>
+    <div class="footer" style="position:absolute; bottom:40px; left:88px; right:88px;">
+      <span>PadelCenter — TFG</span>
+      <span>Universidade da Coruña · 2026</span>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('section.slide'));
+  let idx = 0;
+
+  function renderProgress() {
+    slides.forEach((s, i) => {
+      const bar = s.querySelector('#progress');
+      const num = s.querySelector('#pagenum');
+      if (bar) {
+        const pct = slides.length > 1 ? (i / (slides.length - 1)) * 100 : 100;
+        bar.innerHTML = `<div class="fill" style="width:${pct}%"></div>`;
+      }
+      if (num) num.textContent = (i + 1) + ' / ' + slides.length;
+    });
+  }
+
+  function show(n) {
+    idx = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { show(idx + 1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { show(idx - 1); e.preventDefault(); }
+    if (e.key === 'Home') show(0);
+    if (e.key === 'End') show(slides.length - 1);
+  });
+
+  document.getElementById('deck').addEventListener('click', (e) => {
+    const rect = document.getElementById('deck').getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    if (clickX > rect.width / 2) show(idx + 1); else show(idx - 1);
+  });
+
+  renderProgress();
+  show(0);
+</script>
