@@ -4,9 +4,10 @@
 \lettrine{E}{ste} anexo recoge fragmentos de código e implementación que no
 resultan imprescindibles para seguir el cuerpo principal de la memoria, pero
 que ilustran con detalle dos decisiones técnicas mencionadas en los
-capítulos~\ref{chap:diseno} y~\ref{chap:implementacion}: la detección de
+capítulos~\ref{chap:diseno} y~\ref{chap:implementacion} —la detección de
 solapamiento de reservas a nivel de base de datos y el algoritmo de
-generación de emparejamientos de torneos.
+generación de emparejamientos de torneos— además de un recorrido guiado por
+la gestión completa de un torneo.
 
 \section{Migración V4 — Índice de solapamiento de reservas}
 \label{sec:anexo_migracion_v4}
@@ -122,3 +123,105 @@ El formato \texttt{GROUPS\_AND\_ELIMINATION} combina ambas estrategias:
 reparte las parejas en grupos de cuatro y aplica \textit{round robin} dentro
 de cada grupo, seguido de una fase eliminatoria con \textit{placeholders} para
 los dos primeros clasificados de cada grupo.
+
+\section{Caso de uso guiado: gestión completa de un torneo}
+\label{sec:anexo_gestion_torneo}
+
+Esta sección recorre, mediante capturas reales de la aplicación, el ciclo de
+vida completo de un torneo en formato \texttt{ROUND\_ROBIN}: su creación por
+parte de un administrador, la inscripción de las parejas participantes y el
+desarrollo del torneo hasta obtener la clasificación final. El detalle
+funcional de cada paso —los requisitos que satisface y las reglas de negocio
+que aplica— se describe en las secciones~\ref{sec:requisitos_funcionales}
+y~\ref{sec:ciclo_torneo}; aquí se documenta únicamente el recorrido de
+principio a fin sobre la interfaz.
+
+\subsection{Creación del torneo}
+
+Desde el panel de administración, el administrador crea un torneo indicando
+el centro, el nombre, el formato de competición (\texttt{ROUND\_ROBIN} en
+este caso), el número máximo de parejas y las fechas de inicio y fin
+(figura~\ref{fig:anexo_torneo_creacion}). Al confirmarse, el torneo queda
+registrado en estado \texttt{DRAFT} (figura~\ref{fig:anexo_torneo_creado}),
+sin ser todavía visible para las inscripciones.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{imaxes/torneo-demo/d06-nuevo-torneo-relleno.png}
+\caption{Formulario de creación de un torneo, con formato Round Robin y 8 parejas máximo.}
+\label{fig:anexo_torneo_creacion}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{imaxes/torneo-demo/d07-torneo-creado.png}
+\caption{Torneo creado en estado \texttt{DRAFT}, pendiente de abrir inscripción.}
+\label{fig:anexo_torneo_creado}
+\end{figure}
+
+Una vez creado, el administrador abre el período de inscripción
+(figura~\ref{fig:anexo_torneo_inscripcion_abierta}), momento en el que el
+torneo pasa a estado \texttt{REGISTRATION\_OPEN} y los jugadores ya pueden
+apuntarse.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{imaxes/torneo-demo/d08-inscripcion-abierta.png}
+\caption{Torneo con inscripción abierta, listo para recibir parejas.}
+\label{fig:anexo_torneo_inscripcion_abierta}
+\end{figure}
+
+\subsection{Inscripción de parejas}
+
+Con la inscripción abierta, un jugador se apunta al torneo formando pareja
+con otro usuario. Al confirmarse la inscripción
+(figura~\ref{fig:anexo_torneo_inscripcion_confirmada}), la pareja queda
+registrada en estado \texttt{PENDING}, a la espera de que el segundo miembro
+la confirme; este proceso se repite hasta completar las parejas necesarias
+para cerrar la inscripción.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{imaxes/torneo-demo/d19-inscripcion-confirmada.png}
+\caption{Inscripción de una pareja confirmada en el torneo.}
+\label{fig:anexo_torneo_inscripcion_confirmada}
+\end{figure}
+
+\subsection{Desarrollo del torneo}
+
+Con las cuatro parejas confirmadas, el administrador cierra la inscripción.
+El sistema genera automáticamente, en una única operación atómica, los seis
+partidos de la liguilla Round Robin entre todas las parejas
+(figura~\ref{fig:anexo_torneo_partidos_generados}), y el torneo pasa a
+estado \texttt{IN\_PROGRESS}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{imaxes/torneo-demo/d21-partidos-generados.png}
+\caption{Partidos generados automáticamente al cerrar la inscripción.}
+\label{fig:anexo_torneo_partidos_generados}
+\end{figure}
+
+A medida que se disputan los partidos, el administrador o el manager del
+centro registran el resultado de cada uno —ganador y marcador—
+(figura~\ref{fig:anexo_torneo_resultado}). Este paso se repite para los seis
+partidos de la liguilla.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{imaxes/torneo-demo/d23-resultado-relleno.png}
+\caption{Registro del resultado de un partido de la liguilla.}
+\label{fig:anexo_torneo_resultado}
+\end{figure}
+
+Con todos los resultados registrados, el sistema calcula y expone la
+clasificación final en tiempo real (figura~\ref{fig:anexo_torneo_clasificacion}),
+determinada por el número de victorias y la diferencia de sets, dando por
+completado el ciclo de vida del torneo.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{imaxes/torneo-demo/d25-clasificacion.png}
+\caption{Clasificación final de la liguilla Round Robin.}
+\label{fig:anexo_torneo_clasificacion}
+\end{figure}
